@@ -72,6 +72,21 @@ export function getSampleToday(today: DateKey): {
       ),
     },
     {
+      // Weekly goal met earlier this week and not done today: dimmed below the list
+      // (on a Monday there is no earlier day, so it just shows as not done)
+      id: "s7",
+      name: "Call a friend",
+      description: "Catch up properly, no texting.",
+      icon: "📞",
+      color: "emerald",
+      categoryName: "social",
+      targets: [weekly(1, since)],
+      completions: [
+        ...pastWeeks(thisMonday, 6, 1),
+        ...run(thisMonday, 1).filter((c) => c.date < today),
+      ],
+    },
+    {
       // In progress: 10 of 20 minutes today, a 1 day streak from yesterday
       id: "s3",
       name: "Read 20 minutes",
