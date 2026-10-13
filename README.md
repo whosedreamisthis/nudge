@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nudge
 
-## Getting Started
+A simple, colourful habit tracker. Check habits off each day, watch your streaks grow, and get short AI-written feedback on how the week went.
 
-First, run the development server:
+> **Status:** early development. Project setup is done; the features below are planned, in the order listed in [context/features/](context/features/README.md).
+
+## Planned features
+
+- **Today:** tap a habit to complete it, with a daily progress ring, streaks, and a 14-week consistency heatmap
+- **Flexible habits:** daily or N days per week, plus multi-step habits with a progress bar (e.g. 2500/3000 ml of water)
+- **Habits catalog:** browse and search 70 built-in habits across 7 categories, or create your own
+- **Progress:** weekly grid, a small insights tab, and an AI weekly report
+- **Journal:** daily entries with a browsable history
+- **Focus:** a timer for meditation or any habit
+- **Demo:** a temporary demo account, deleted after 12 hours
+
+See [context/project-overview.md](context/project-overview.md) for the full overview.
+
+## Tech stack
+
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Neon (PostgreSQL) · Prisma 7 · Clerk · Gemini API · Upstash Redis · Zustand · Vitest
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Environment variables go in `.env.local` (not `.env`). See `.env.example` for the keys.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command         | What it does               |
+| --------------- | -------------------------- |
+| `npm run dev`   | Start the dev server       |
+| `npm run build` | Production build           |
+| `npm test`      | Run Vitest unit tests      |
+| `npm run lint`  | Run ESLint                 |
 
-## Learn More
+## Project docs
 
-To learn more about Next.js, take a look at the following resources:
+- [context/project-overview.md](context/project-overview.md): product, data model, architecture
+- [context/features/](context/features/README.md): small, ordered feature specs
+- [context/coding-standards.md](context/coding-standards.md): conventions (server actions in `actions/`, hooks in `hooks/`)
+- [context/current-feature.md](context/current-feature.md): the feature in progress and the list of completed ones
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Schema changes always go through Prisma migrations (`prisma migrate dev`), never `prisma db push`.

@@ -321,7 +321,7 @@ npx prisma migrate deploy
 - Should the Journal be linked to the "Journal" habit, so saving an entry completes it?
 - What are questions 2 and 3 of the AI Habit Suggestions wizard?
 - Should suggestions be limited to the system-habit catalog, or can the AI invent new habits? (Currently assumed: AI can invent them.)
-- The mockup shows a **dark theme**. Is dark mode supported at launch (the other mockups are light)?
+- **Light mode is the default** and the only theme at launch; the app ignores the OS dark setting. A dark theme (as in the AI Habit Suggestions mockup) can be added later as an opt-in setting.
 - Do habits have **reminders / notifications**?
 - Should past days be editable (back-filling a missed check-in)?
 - Monetization: free vs paid (e.g. AI reports as a paid feature)?
