@@ -265,9 +265,9 @@ Settings is a modal, not a route.
 
 ## 8. UI / UX
 
-- **Colourful by design:** the app should feel playful and bright, not grey and clinical. Colour carries meaning rather than decoration.
+- **Colourful but calm:** the app should feel friendly and bright without being loud or clinical. Colour carries meaning rather than decoration.
   - Palette: sky blue (`#D6E0E2`) page background, cloud white (`#FEFCF6`) cards, midnight (`#162A2C`) text and forest green as the main accent. Dark mode uses midnight surfaces with cream text and a sky blue accent. All text pairs are checked for 4.5:1 contrast in `lib/theme.test.ts`.
-  - **Category colours:** each category has its own colour (e.g. health = blue, fitness = red, learning = indigo, mindfulness = pink, productivity = amber, sleep = purple, social = teal), used on tags, icon backgrounds and any category chips.
+  - **Category colours:** each category has its own muted colour (e.g. health = blue, fitness = red, learning = indigo, mindfulness = pink, productivity = amber, sleep = purple, social = teal), used on tags, icon backgrounds and any category chips. They are mid-tones chosen to stay visible against the card in both light and dark mode.
   - **Habit colours:** each habit uses its chosen colour for its icon tile, progress bar, and weekly-grid cells.
   - **Stat tiles** get distinct tinted icon backgrounds (purple, orange, amber, green), as in the Today mockup.
   - Celebratory moments (completing all habits, a new best streak) use confetti or a colour burst.
