@@ -1,23 +1,18 @@
-# Current Feature: Weekly & Off-Day Habits
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Weekly habits (target 1–6) appear on Today every day and can be checked on any day
-- Once the week's target is met, the habit moves to a dimmed "goal met" group below the list, still tappable for a bonus day
-- Off-day habits are excluded from the daily ring and "x of y complete"
-- Show weekly progress on the row (e.g. "2/3 this week")
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Uses the streak helpers from the streaks logic feature.
-- Week starts Monday.
-- The header ring (`TodayHabits.tsx`) currently counts every habit, weekly ones included: this feature fixes that.
-- "2/3 this week" already shows on weekly rows (`progress.week`); keep it working with the new grouping.
-- No weekday picker: a weekly habit can be done on any N days of the week.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -32,3 +27,4 @@ In Progress
 - **Today Page: Habit List:** `/today` greeting, habit rows with streaks, complete and in-progress looks, hover actions menu and empty state (`app/(app)/today/`, `components/today/`, `lib/db/today.ts`).
 - **Today Stat Tiles:** Active-streaks and best-streak tiles (with the best habit's icon) above the list, plus fill-style habit cards (`components/today/StatTiles.tsx`, `lib/stats.ts`, `lib/db/today.ts`).
 - **Toggle Completion:** Tap anywhere on a habit card to complete, step up or clear it, with optimistic updates, a header completion ring, a celebration burst and a midnight refresh (`actions/habits.ts`, `components/today/`).
+- **Weekly & Off-Day Habits:** Weekly habits whose goal is met move to a dimmed "Goal met this week" group, and the header ring skips unfinished weekly habits (`lib/week-goal.ts`, `components/today/TodayHabits.tsx`).
