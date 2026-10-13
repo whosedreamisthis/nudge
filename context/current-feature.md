@@ -1,20 +1,18 @@
-# Current Feature: Habit Actions Menu
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- `…` menu on each Today habit row with Edit, Archive, and Delete
-- Edit reuses the New Habit modal, prefilled
-- Archive sets `archivedAt` and removes the habit from Today and stats
-- Delete asks for confirmation and removes the habit and its completions, for **custom habits only**
+<!-- Goals and requirements -->
 
 ## Notes
 
-- The delete action must reject habits with a `systemHabitId` on the server, not just hide the menu item.
-- Editing the target applies from the current week forward (new `HabitTarget` row).
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -32,3 +30,4 @@ In Progress
 - **Weekly & Off-Day Habits:** Weekly habits whose goal is met move to a dimmed "Goal met this week" group, and the header ring skips unfinished weekly habits (`lib/week-goal.ts`, `components/today/TodayHabits.tsx`).
 - **New Habit Modal:** "New Habit" modal on the Habits page creates custom habits with a first target (`components/habits/`, `actions/habits.ts`, `lib/habit-form.ts`).
 - **Habits Catalog Page:** `/habits` lists system habits not yet added, with URL-param search and category filter, grouped by category; Add opens the prefilled modal (`components/habits/Catalog*.tsx`, `lib/catalog.ts`, `lib/db/catalog.ts`).
+- **Habit Actions Menu:** Today row menu with Edit (reuses the modal, new target from this week), Archive, and Delete with confirmation for custom habits only (`components/today/HabitMenu.tsx`, `actions/habits.ts`, `lib/targets.ts`).
