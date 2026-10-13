@@ -1,21 +1,18 @@
-# Current Feature: New Habit Modal
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- "New Habit" modal with: name, description, category, frequency (Daily / Weekly), target days per week (1–7), icon picker, colour picker
-- Choosing 7 days shows the "Daily habit selected" hint
-- Create a custom habit (no `systemHabitId`) and a first `HabitTarget`
-- Open the modal from the Habits page; use Zustand for modal state
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Zod validation on the server, scoped by `userId`.
-- Icon set and 9 colours are in the mockup (`context/research`).
-- Daily goal fields are added by the multi-step feature.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -31,3 +28,4 @@ In Progress
 - **Today Stat Tiles:** Active-streaks and best-streak tiles (with the best habit's icon) above the list, plus fill-style habit cards (`components/today/StatTiles.tsx`, `lib/stats.ts`, `lib/db/today.ts`).
 - **Toggle Completion:** Tap anywhere on a habit card to complete, step up or clear it, with optimistic updates, a header completion ring, a celebration burst and a midnight refresh (`actions/habits.ts`, `components/today/`).
 - **Weekly & Off-Day Habits:** Weekly habits whose goal is met move to a dimmed "Goal met this week" group, and the header ring skips unfinished weekly habits (`lib/week-goal.ts`, `components/today/TodayHabits.tsx`).
+- **New Habit Modal:** "New Habit" modal on the Habits page creates custom habits with a first target (`components/habits/`, `actions/habits.ts`, `lib/habit-form.ts`).
