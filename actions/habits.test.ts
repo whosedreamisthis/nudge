@@ -1,26 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getSessionUser, findFirst, findUnique, upsert, remove, revalidatePath } = vi.hoisted(
-  () => ({
-    getSessionUser: vi.fn(),
-    findFirst: vi.fn(),
-    findUnique: vi.fn(),
-    upsert: vi.fn(),
-    remove: vi.fn(),
-    revalidatePath: vi.fn(),
-  }),
-);
+const {
+  getSessionUser,
+  findFirst,
+  findUnique,
+  upsert,
+  remove,
+  revalidatePath,
+  findCategory,
+  createHabitRow,
+} = vi.hoisted(() => ({
+  getSessionUser: vi.fn(),
+  findFirst: vi.fn(),
+  findUnique: vi.fn(),
+  upsert: vi.fn(),
+  remove: vi.fn(),
+  revalidatePath: vi.fn(),
+  findCategory: vi.fn(),
+  createHabitRow: vi.fn(),
+}));
 
 vi.mock("@/lib/session", () => ({ getSessionUser }));
 vi.mock("next/cache", () => ({ revalidatePath }));
 vi.mock("@/lib/db", () => ({
   prisma: {
-    habit: { findFirst },
+    habit: { findFirst, create: createHabitRow },
     habitCompletion: { findUnique, upsert, delete: remove },
+    category: { findUnique: findCategory },
   },
 }));
 
-import { advanceHabit } from "./habits";
+import { advanceHabit, createHabit } from "./habits";
 
 // 2026-10-14 03:00 in Auckland is still 2026-10-13 in UTC: the local day must win
 const NOW = new Date("2026-10-13T14:00:00Z");
@@ -122,6 +132,94 @@ describe("advanceHabit", () => {
     expect(await advanceHabit({ habitId: "h1" })).toEqual({
       success: false,
       error: "Could not save, try again",
+    });
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+});
+
+describe("createHabit", () => {
+  const input = {
+    name: "Read",
+    description: "10 pages",
+    categoryId: "c1",
+    frequency: "WEEKLY" as const,
+    targetDaysPerWeek: 3,
+    icon: "📚" as const,
+    color: "sky" as const,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    getSessionUser.mockResolvedValue({ id: "u1", timezone: "Pacific/Auckland" });
+    findCategory.mockResolvedValue({ id: "c1" });
+    createHabitRow.mockResolvedValue({ id: "h9" });
+  });
+
+  it("creates a custom habit with its first target, starting on the user's local Monday", async () => {
+    const result = await createHabit(input);
+
+    expect(result).toEqual({ success: true, data: { id: "h9" } });
+    // Wednesday 2026-10-14 in Auckland: that week starts on Monday the 12th
+    expect(createHabitRow).toHaveBeenCalledWith({
+      data: {
+        name: "Read",
+        description: "10 pages",
+        categoryId: "c1",
+        icon: "📚",
+        color: "sky",
+        userId: "u1",
+        targets: {
+          create: {
+            frequency: "WEEKLY",
+            targetDaysPerWeek: 3,
+            effectiveFrom: new Date("2026-10-12T00:00:00.000Z"),
+          },
+        },
+      },
+      select: { id: true },
+    });
+    expect(createHabitRow.mock.calls[0][0].data).not.toHaveProperty("systemHabitId");
+    expect(revalidatePath).toHaveBeenCalledWith("/today");
+    expect(revalidatePath).toHaveBeenCalledWith("/habits");
+  });
+
+  it("always stores a daily habit as seven days", async () => {
+    await createHabit({ ...input, frequency: "DAILY", targetDaysPerWeek: 2 });
+
+    const target = createHabitRow.mock.calls[0][0].data.targets.create;
+    expect(target).toMatchObject({ frequency: "DAILY", targetDaysPerWeek: 7 });
+  });
+
+  it("rejects invalid input with the first message, before checking the session", async () => {
+    expect(await createHabit({ ...input, name: " " })).toEqual({
+      success: false,
+      error: "Give your habit a name",
+    });
+    expect(getSessionUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects a signed-out user", async () => {
+    getSessionUser.mockResolvedValue(null);
+
+    expect(await createHabit(input)).toEqual({ success: false, error: "Not signed in" });
+    expect(createHabitRow).not.toHaveBeenCalled();
+  });
+
+  it("rejects a category that does not exist", async () => {
+    findCategory.mockResolvedValue(null);
+
+    expect(await createHabit(input)).toEqual({ success: false, error: "Category not found" });
+    expect(createHabitRow).not.toHaveBeenCalled();
+  });
+
+  it("reports a failed write without revalidating", async () => {
+    createHabitRow.mockRejectedValue(new Error("db down"));
+
+    expect(await createHabit(input)).toEqual({
+      success: false,
+      error: "Could not create the habit, try again",
     });
     expect(revalidatePath).not.toHaveBeenCalled();
   });

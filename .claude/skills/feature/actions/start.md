@@ -4,5 +4,5 @@
 2. If empty, error: "Run /feature load first"
 3. Set Status to "In Progress"
 4. Create and checkout the feature branch (derive name from H1 heading)
-5. Implement the goals, then run `npm test`, lint and `npm run build`
+5. Implement the goals, then write Vitest tests for the new server actions and utilities (as in `test.md`), then run `npm test`, lint and `npm run build`
 6. End with a short summary
