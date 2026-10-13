@@ -1,19 +1,18 @@
-# Current Feature: Archived Habits
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Archived tab on `/habits` listing the user's archived habits
-- Restore clears `archivedAt` and returns the habit to Today
-- Delete is available for archived custom habits only (with confirmation)
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Archived habits keep their history but are hidden from Today and stats.
-- The tab shows a count.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -32,3 +31,4 @@ In Progress
 - **New Habit Modal:** "New Habit" modal on the Habits page creates custom habits with a first target (`components/habits/`, `actions/habits.ts`, `lib/habit-form.ts`).
 - **Habits Catalog Page:** `/habits` lists system habits not yet added, with URL-param search and category filter, grouped by category; Add opens the prefilled modal (`components/habits/Catalog*.tsx`, `lib/catalog.ts`, `lib/db/catalog.ts`).
 - **Habit Actions Menu:** Today row menu with Edit (reuses the modal, new target from this week), Archive, and Delete with confirmation for custom habits only (`components/today/HabitMenu.tsx`, `actions/habits.ts`, `lib/targets.ts`).
+- **Archived Habits:** Archived tab on `/habits` with a count, Restore (also clears today's completion) and Delete for custom habits; Browse offers Restore for archived catalog habits (`components/habits/Archived*.tsx`, `lib/db/archived.ts`, `actions/habits.ts`).
