@@ -1,22 +1,18 @@
-# Current Feature: Today Page: Habit List
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- `/today` greeting with the current date
-- List the user's active habits as rows: icon, name, category tag, description, current streak
-- Empty state with a link to the Habits page
-- Read-only: no completion toggling yet
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Server component; data via a query in `lib/db/`, scoped by `userId`.
-- Streak display: "13d" for daily, "12w" for weekly.
-- Pale yellow row background and a check button come with the toggle feature (the completed look now uses the green completion colour from the theme).
-- Build order (agreed with the user): UI first with realistic sample data typed like the database models, so streaks and states can be seen in the browser; then replace the sample data with the real query.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -28,3 +24,4 @@ In Progress
 - **App Shell & Navigation:** `app/(app)/` layout with a bottom tab bar on phones, a left sidebar from `md` up, `PageHeader`, and placeholder pages (`components/shared/`).
 - **Palette & Dark Mode:** Sky blue / cloud white / forest green / midnight theme in light and dark (follows the OS, switch comes with Settings), checked by `lib/theme.test.ts` (`app/globals.css`, `components/shared/ThemeProvider.tsx`).
 - **Dates & Streaks Logic:** Pure Monday-week date helpers and strict day/week streaks with per-week target history (`lib/dates.ts`, `lib/streaks.ts`).
+- **Today Page: Habit List:** `/today` greeting, habit rows with streaks, complete and in-progress looks, hover actions menu and empty state (`app/(app)/today/`, `components/today/`, `lib/db/today.ts`).
