@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+}
+
+model User {
+  id             String   @id @default(cuid())
+  clerkId        String   @unique
+  timezone       String   @default("UTC")
+  isDemo         Boolean  @default(false)
+  demoExpiresAt  DateTime?
+  createdAt      DateTime @default(now())
+
+  habits      Habit[]
+  completions HabitCompletion[]
+
+  @@index([demoExpiresAt])
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+  icon String?
+
+  systemHabits SystemHabit[]
+  habits       Habit[]
+}
+
+// Built-in catalog that users can add from.
+model SystemHabit {
+  id                      String    @id @default(cuid())
+  name                    String
+  description             String
+  icon                    String
+  categoryId              String
+  defaultFrequency        Frequency @default(DAILY)
+  defaultTargetDaysPerWeek Int      @default(7)
+  defaultDailyGoal        Int?
+  defaultUnit             String?
+  defaultStepSize         Int?
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  habits   Habit[]
+
+  @@unique([categoryId, name])
+}
+
+model Habit {
+  id            String    @id @default(cuid())
+  userId        String
+  // null = custom habit; set = added from the system catalog (cannot be deleted)
+  systemHabitId String?
+  name          String
+  description   String    @default("")
+  icon          String
+  color         String
+  categoryId    String
+  // Multi-step habits: complete when HabitCompletion.amount >= dailyGoal (null = simple check)
+  dailyGoal     Int?
+  unit          String?
+  stepSize      Int?
+  archivedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  systemHabit SystemHabit?      @relation(fields: [systemHabitId], references: [id], onDelete: SetNull)
+  category    Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  targets     HabitTarget[]
+  completions HabitCompletion[]
+
+  @@index([userId, archivedAt])
+}
+
+// Frequency history: the newest row with effectiveFrom <= a given week applies.
+model HabitTarget {
+  id                String    @id @default(cuid())
+  habitId           String
+  frequency         Frequency
+  // 1-7; 7 means a daily habit
+  targetDaysPerWeek Int
+  // User-local date of the week start this target applies from
+  effectiveFrom     DateTime  @db.Date
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@index([habitId, effectiveFrom])
+}
+
+model HabitCompletion {
+  id      String   @id @default(cuid())
+  habitId String
+  userId  String
+  // User-local calendar day
+  date    DateTime @db.Date
+  amount  Int      @default(1)
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([userId, date])
+}

@@ -152,6 +152,7 @@ Not designed yet. Candidates: profile, theme, notification/reminder preferences,
 - The connection URL **does not go in `schema.prisma`**; it lives in `prisma.config.ts`.
 - Generator is `prisma-client` with an explicit `output` path; import from the generated path, not `@prisma/client`.
 - A **driver adapter is required** — for Neon, `@prisma/adapter-neon`.
+- Keep `prisma` and `@prisma/client` on the same 7.x version (7.10.0 installed). npm's `latest` tag for `prisma` currently points at an 8.0 release candidate, so install with `npm install -D prisma@7.10.0`.
 - Two env vars: a **pooled** URL for the app and a **direct (unpooled)** URL for CLI/migrations.
 
 ### Environment variables
@@ -198,7 +199,7 @@ CRON_SECRET=                # protects the demo cleanup job
 
 ### Authentication (Clerk)
 
-- **Sign-in / sign-up:** Clerk's prebuilt components on `/sign-in` and `/register`. Email plus Google social login are suggested for launch (to be confirmed in the Clerk dashboard).
+- **Sign-in / sign-up:** Clerk's prebuilt components on `/sign-in` and `/register`, living in the `app/(auth)/` route group. Email plus Google social login are suggested for launch (to be confirmed in the Clerk dashboard).
 - **Provider:** the root layout wraps the app in `<ClerkProvider>` from `@clerk/nextjs`.
 - **Route protection:** `clerkMiddleware()` in `proxy.ts` (Next.js 16 renamed `middleware.ts` to `proxy.ts`; confirm against `node_modules/next/dist/docs/`). `/today`, `/habits`, `/progress`, `/journal` and `/focus` call `auth.protect()`; `/sign-in`, `/register` and `/api/webhooks/*` stay public. Signed-in users hitting `/sign-in` are redirected to `/today`.
 - **Server-side identity:** server components and Server Actions read the user with `auth()` (`const { userId } = await auth()`). A single `getSessionUser()` helper in `lib/session.ts` turns the Clerk `userId` into our `User` row so every query is scoped to it. Never accept a user ID from the client.

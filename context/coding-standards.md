@@ -51,6 +51,7 @@ Example v4 configuration:
 
 - Components: `components/[feature]/ComponentName.tsx`
 - Pages: `app/[route]/page.tsx`
+- Auth pages (sign-in, register): in the `app/(auth)/` route group
 - Server Actions: `actions/[feature].ts` (all server actions live in `actions/`, never inside components or pages)
 - Custom hooks: `hooks/useX.ts` (all custom hooks live in `hooks/`, never inside component files)
 - Types: `types/[feature].ts`
