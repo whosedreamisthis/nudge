@@ -266,13 +266,13 @@ Settings is a modal, not a route.
 ## 8. UI / UX
 
 - **Colourful by design:** the app should feel playful and bright, not grey and clinical. Colour carries meaning rather than decoration.
-  - Warm gradient background (yellow → peach → soft green), white rounded cards, amber/orange as the main accent.
+  - Lavender-based palette: a soft lavender → lilac → periwinkle gradient background, white rounded cards, and violet (`#6d4bc4`) as the main accent.
   - **Category colours:** each category has its own colour (e.g. health = blue, fitness = red, learning = indigo, mindfulness = pink, productivity = amber, sleep = purple, social = teal), used on tags, icon backgrounds and any category chips.
   - **Habit colours:** each habit uses its chosen colour for its icon tile, progress bar, and weekly-grid cells.
   - **Stat tiles** get distinct tinted icon backgrounds (purple, orange, amber, green), as in the Today mockup.
   - Celebratory moments (completing all habits, a new best streak) use confetti or a colour burst.
   - Keep contrast accessible (text on tinted backgrounds meets WCAG AA) and never rely on colour alone to show state; completed rows also change their check icon.
-- Primary actions use an amber gradient button (e.g. "New Habit", "Regenerate report").
+- Primary actions use a lavender-to-violet gradient button (e.g. "New Habit", "Regenerate report").
 - Completed habit rows get a pale yellow background and a filled orange check; incomplete rows are white with an outlined check.
 - Each habit has its own colour, used in the weekly grid.
 - Heatmap uses a 5-step scale from grey to dark orange.

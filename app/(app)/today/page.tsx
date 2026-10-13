@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { TimezoneSync } from "@/components/shared/TimezoneSync";
 
 export default async function TodayPage() {
@@ -6,10 +7,9 @@ export default async function TodayPage() {
   await auth.protect();
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-2 px-4 py-8">
+    <>
       <TimezoneSync />
-      <h1 className="text-3xl font-bold">Today</h1>
-      <p className="text-muted-foreground">Your habits will show up here.</p>
-    </main>
+      <PageHeader title="Today" subtitle="Your habits will show up here." />
+    </>
   );
 }
