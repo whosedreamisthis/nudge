@@ -1,18 +1,20 @@
-# Current Feature
-
-<!-- Feature name and short description -->
+# Current Feature: Palette & Dark Mode
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Re-theme the app on the sky blue / cloud white / forest green / midnight palette
+- Add a dark theme that follows the OS setting, with `next-themes` and the `.dark` class
+- Complete habits use one colour for every habit; each habit keeps its own colour for its tile and bar
+- Contrast of every text pair checked by a test
 
 ## Notes
 
-<!-- Any extra notes -->
+- The manual theme switch lives in Settings (feature 27), not the navbar.
+- Habit and category colours are muted mid-tones that read against the card in both themes.
 
 ## Completed Features
 

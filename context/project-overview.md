@@ -266,16 +266,16 @@ Settings is a modal, not a route.
 ## 8. UI / UX
 
 - **Colourful by design:** the app should feel playful and bright, not grey and clinical. Colour carries meaning rather than decoration.
-  - Lavender-based palette: a soft lavender → lilac → periwinkle gradient background, white rounded cards, and violet (`#6d4bc4`) as the main accent.
+  - Palette: sky blue (`#D6E0E2`) page background, cloud white (`#FEFCF6`) cards, midnight (`#162A2C`) text and forest green as the main accent. Dark mode uses midnight surfaces with cream text and a sky blue accent. All text pairs are checked for 4.5:1 contrast in `lib/theme.test.ts`.
   - **Category colours:** each category has its own colour (e.g. health = blue, fitness = red, learning = indigo, mindfulness = pink, productivity = amber, sleep = purple, social = teal), used on tags, icon backgrounds and any category chips.
   - **Habit colours:** each habit uses its chosen colour for its icon tile, progress bar, and weekly-grid cells.
   - **Stat tiles** get distinct tinted icon backgrounds (purple, orange, amber, green), as in the Today mockup.
   - Celebratory moments (completing all habits, a new best streak) use confetti or a colour burst.
   - Keep contrast accessible (text on tinted backgrounds meets WCAG AA) and never rely on colour alone to show state; completed rows also change their check icon.
-- Primary actions use a lavender-to-violet gradient button (e.g. "New Habit", "Regenerate report").
-- Completed habit rows get a pale yellow background and a filled orange check; incomplete rows are white with an outlined check.
+- Primary actions use a forest green gradient button (e.g. "New Habit", "Regenerate report").
+- A habit has its own colour (icon tile, progress bar, weekly-grid cells), but completion uses one colour for every habit: completed rows get a light green wash and a filled check with a tick; incomplete rows are plain cards with an outlined check.
 - Each habit has its own colour, used in the weekly grid.
-- Heatmap uses a 5-step scale from grey to dark orange.
+- Heatmap uses a 5-step scale from sky blue to forest green (a lighter sky blue to midnight in dark mode).
 - Mobile-first layout; the designs are phone-width.
 - Reference mockups: `context/research/image*.png`.
 
@@ -322,7 +322,7 @@ npx prisma migrate deploy
 - Should the Journal be linked to the "Journal" habit, so saving an entry completes it?
 - What are questions 2 and 3 of the AI Habit Suggestions wizard?
 - Should suggestions be limited to the system-habit catalog, or can the AI invent new habits? (Currently assumed: AI can invent them.)
-- **Light mode is the default** and the only theme at launch; the app ignores the OS dark setting. A dark theme (as in the AI Habit Suggestions mockup) can be added later as an opt-in setting.
+- **Theme:** light and dark are both available. The app follows the OS setting by default, and the manual switch lives in the Settings modal (feature 27).
 - Do habits have **reminders / notifications**?
 - Should past days be editable (back-filling a missed check-in)?
 - Monetization: free vs paid (e.g. AI reports as a paid feature)?

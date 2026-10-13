@@ -12,8 +12,8 @@ export function Logo({ className }: LogoProps) {
     >
       <defs>
         <linearGradient id="nudge-logo-gradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#a78bfa" />
-          <stop offset="1" stopColor="#6d4bc4" />
+          <stop offset="0" stopColor="#7a8d72" />
+          <stop offset="1" stopColor="#46543f" />
         </linearGradient>
       </defs>
       <rect width="64" height="64" rx="16" fill="url(#nudge-logo-gradient)" />

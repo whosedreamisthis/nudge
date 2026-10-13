@@ -10,4 +10,5 @@
 ## Notes
 
 - Not designed yet; keep it minimal.
-- Reminders, theme, and data export are out of scope until decided.
+- Add a theme setting (System / Light / Dark) using `useTheme()` from `next-themes`; the `ThemeProvider` is already in the root layout.
+- Reminders and data export are out of scope until decided.
