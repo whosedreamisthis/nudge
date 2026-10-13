@@ -52,7 +52,7 @@ export async function advanceHabit(
   return { success: true, data: { amount } };
 }
 
-// Creates a custom habit (no system habit) with its first target, effective from this week
+// Creates a habit, custom or linked to a catalog habit, with its first target, effective from this week
 export async function createHabit(
   input: CreateHabitInput,
 ): Promise<ActionResult<{ id: string }>> {
@@ -64,17 +64,38 @@ export async function createHabit(
   const user = await getSessionUser();
   if (!user) return { success: false, error: "Not signed in" };
 
-  const { frequency, targetDaysPerWeek, ...fields } = parsed.data;
+  const { frequency, targetDaysPerWeek, systemHabitId, ...fields } = parsed.data;
   const category = await prisma.category.findUnique({
     where: { id: fields.categoryId },
     select: { id: true },
   });
   if (!category) return { success: false, error: "Category not found" };
 
+  // A catalog habit brings its own goal; the client never sets it
+  let goal: { dailyGoal: number | null; unit: string | null; stepSize: number | null } | null = null;
+  if (systemHabitId) {
+    const system = await prisma.systemHabit.findUnique({
+      where: { id: systemHabitId },
+      select: { defaultDailyGoal: true, defaultUnit: true, defaultStepSize: true },
+    });
+    if (!system) return { success: false, error: "Habit not found" };
+    const added = await prisma.habit.findFirst({
+      where: { userId: user.id, systemHabitId, archivedAt: null },
+      select: { id: true },
+    });
+    if (added) return { success: false, error: "You already added this habit" };
+    goal = {
+      dailyGoal: system.defaultDailyGoal,
+      unit: system.defaultUnit,
+      stepSize: system.defaultStepSize,
+    };
+  }
+
   try {
     const habit = await prisma.habit.create({
       data: {
         ...fields,
+        ...(systemHabitId && { systemHabitId, ...goal }),
         userId: user.id,
         targets: {
           create: {

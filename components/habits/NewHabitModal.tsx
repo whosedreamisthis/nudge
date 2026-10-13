@@ -55,15 +55,20 @@ function NewHabitForm({
   categories: CategoryOption[];
   onDone: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
-  const [frequency, setFrequency] = useState<"DAILY" | "WEEKLY">("DAILY");
-  const [days, setDays] = useState(7);
-  const [icon, setIcon] = useState<(typeof HABIT_ICONS)[number]>(HABIT_ICONS[0]);
+  const prefill = useNewHabitModal((state) => state.prefill);
+  const [name, setName] = useState(prefill?.name ?? "");
+  const [description, setDescription] = useState(prefill?.description ?? "");
+  const [categoryId, setCategoryId] = useState(prefill?.categoryId ?? categories[0]?.id ?? "");
+  const [frequency, setFrequency] = useState<"DAILY" | "WEEKLY">(prefill?.frequency ?? "DAILY");
+  const [days, setDays] = useState(prefill?.targetDaysPerWeek ?? 7);
+  const [icon, setIcon] = useState<string>(prefill?.icon ?? HABIT_ICONS[0]);
   const [color, setColor] = useState<HabitColor>("indigo");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // A catalog icon outside the picker's choices still has to be selectable
+  const icons: readonly string[] = HABIT_ICONS.includes(icon as never)
+    ? HABIT_ICONS
+    : [icon, ...HABIT_ICONS];
 
   function chooseFrequency(next: "DAILY" | "WEEKLY") {
     setFrequency(next);
@@ -88,6 +93,7 @@ function NewHabitForm({
         targetDaysPerWeek: days,
         icon,
         color,
+        ...(prefill && { systemHabitId: prefill.systemHabitId }),
       });
       if (result.success) onDone();
       else setError(result.error);
@@ -98,9 +104,13 @@ function NewHabitForm({
     <form onSubmit={submit} className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <Dialog.Title className="text-xl font-bold">New Habit</Dialog.Title>
+          <Dialog.Title className="text-xl font-bold">
+            {prefill ? "Add Habit" : "New Habit"}
+          </Dialog.Title>
           <Dialog.Description className="text-sm text-muted-foreground">
-            Create your own habit to track.
+            {prefill
+              ? "Adjust it if you like, then add it to your habits."
+              : "Create your own habit to track."}
           </Dialog.Description>
         </div>
         <Dialog.Close
@@ -197,7 +207,7 @@ function NewHabitForm({
       <fieldset className="flex flex-col gap-1.5">
         <legend className={cn(LABEL_CLASS, "mb-1.5")}>Icon</legend>
         <div className="grid grid-cols-10 gap-1">
-          {HABIT_ICONS.map((option) => (
+          {icons.map((option) => (
             <button
               key={option}
               type="button"
@@ -244,7 +254,7 @@ function NewHabitForm({
       <div className="flex justify-end gap-2">
         <Dialog.Close render={<Button variant="outline" type="button" />}>Cancel</Dialog.Close>
         <Button type="submit" disabled={pending || !name.trim()}>
-          {pending ? "Creating…" : "Create habit"}
+          {pending ? (prefill ? "Adding…" : "Creating…") : prefill ? "Add habit" : "Create habit"}
         </Button>
       </div>
     </form>

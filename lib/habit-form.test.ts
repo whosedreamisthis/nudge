@@ -42,8 +42,8 @@ describe("createHabitSchema", () => {
     expect(createHabitSchema.safeParse({ ...valid, targetDaysPerWeek: 7 }).success).toBe(true);
   });
 
-  it("rejects an icon, colour or frequency outside the pickers", () => {
-    expect(createHabitSchema.safeParse({ ...valid, icon: "🦄" }).success).toBe(false);
+  it("rejects an empty icon, or a colour or frequency outside the pickers", () => {
+    expect(createHabitSchema.safeParse({ ...valid, icon: " " }).success).toBe(false);
     expect(createHabitSchema.safeParse({ ...valid, color: "orange" }).success).toBe(false);
     expect(createHabitSchema.safeParse({ ...valid, frequency: "MONTHLY" }).success).toBe(false);
   });

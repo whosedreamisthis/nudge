@@ -13,8 +13,11 @@ export const createHabitSchema = z.object({
   categoryId: z.string().min(1, "Pick a category"),
   frequency: z.enum(["DAILY", "WEEKLY"]),
   targetDaysPerWeek: z.number().int().min(1).max(7),
-  icon: z.enum(HABIT_ICONS),
+  // Catalog habits bring icons beyond the picker's choices
+  icon: z.string().trim().min(1).max(16),
   color: z.enum(HABIT_COLORS),
+  // Set when added from the catalog; the goal and unit are copied from it on the server
+  systemHabitId: z.string().min(1).optional(),
 });
 
 export type CreateHabitInput = z.input<typeof createHabitSchema>;

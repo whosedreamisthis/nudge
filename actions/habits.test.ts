@@ -9,7 +9,9 @@ const {
   revalidatePath,
   findCategory,
   createHabitRow,
+  findSystemHabit,
 } = vi.hoisted(() => ({
+  findSystemHabit: vi.fn(),
   getSessionUser: vi.fn(),
   findFirst: vi.fn(),
   findUnique: vi.fn(),
@@ -27,6 +29,7 @@ vi.mock("@/lib/db", () => ({
     habit: { findFirst, create: createHabitRow },
     habitCompletion: { findUnique, upsert, delete: remove },
     category: { findUnique: findCategory },
+    systemHabit: { findUnique: findSystemHabit },
   },
 }));
 
@@ -205,6 +208,57 @@ describe("createHabit", () => {
 
     expect(await createHabit(input)).toEqual({ success: false, error: "Not signed in" });
     expect(createHabitRow).not.toHaveBeenCalled();
+  });
+
+  describe("from the catalog", () => {
+    const catalogInput = { ...input, icon: "🥤", systemHabitId: "s1" };
+
+    beforeEach(() => {
+      findSystemHabit.mockResolvedValue({
+        defaultDailyGoal: 2000,
+        defaultUnit: "ml",
+        defaultStepSize: 250,
+      });
+      findFirst.mockResolvedValue(null);
+    });
+
+    it("links the system habit and copies its goal from the database, not the client", async () => {
+      const result = await createHabit({
+        ...catalogInput,
+        dailyGoal: 1,
+      } as typeof catalogInput);
+
+      expect(result).toEqual({ success: true, data: { id: "h9" } });
+      expect(createHabitRow.mock.calls[0][0].data).toMatchObject({
+        icon: "🥤",
+        systemHabitId: "s1",
+        dailyGoal: 2000,
+        unit: "ml",
+        stepSize: 250,
+      });
+    });
+
+    it("rejects a system habit that does not exist", async () => {
+      findSystemHabit.mockResolvedValue(null);
+
+      expect(await createHabit(catalogInput)).toEqual({ success: false, error: "Habit not found" });
+      expect(createHabitRow).not.toHaveBeenCalled();
+    });
+
+    it("rejects a habit the user already has", async () => {
+      findFirst.mockResolvedValue({ id: "h1" });
+
+      expect(await createHabit(catalogInput)).toEqual({
+        success: false,
+        error: "You already added this habit",
+      });
+      expect(findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: "u1", systemHabitId: "s1", archivedAt: null },
+        }),
+      );
+      expect(createHabitRow).not.toHaveBeenCalled();
+    });
   });
 
   it("rejects a category that does not exist", async () => {

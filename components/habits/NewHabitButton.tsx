@@ -8,7 +8,7 @@ export function NewHabitButton() {
   const openModal = useNewHabitModal((state) => state.openModal);
 
   return (
-    <Button onClick={openModal}>
+    <Button onClick={() => openModal()}>
       <Plus aria-hidden />
       New Habit
     </Button>
