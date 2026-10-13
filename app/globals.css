@@ -47,6 +47,11 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
+  /* Completed habits: one colour for every habit, whatever its own colour is */
+  --color-complete: var(--complete);
+  --color-complete-foreground: var(--complete-foreground);
+  --color-complete-tint: var(--complete-tint);
+
   --color-cat-health: var(--cat-health);
   --color-cat-fitness: var(--cat-fitness);
   --color-cat-learning: var(--cat-learning);
@@ -73,111 +78,132 @@
   --color-tint-pink: var(--tint-pink);
 }
 
+/*
+ * Palette: sky blue #D6E0E2, cloud white #FEFCF6, forest green, midnight #162A2C.
+ * Colours are plain hex so lib/theme.test.ts can check their contrast.
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #6d4bc4;
-  --primary-foreground: #ffffff;
-  --secondary: #ede7fb;
-  --secondary-foreground: #4c3a8a;
-  --muted: #f1edfa;
-  --muted-foreground: #5f5879;
-  --accent: #ede7fb;
-  --accent-foreground: #4c3a8a;
+  /* Page and surfaces */
+  --background: #d6e0e2;
+  --foreground: #162a2c;
+  --card: #fefcf6;
+  --card-foreground: #162a2c;
+  --popover: #fefcf6;
+  --popover-foreground: #162a2c;
+
+  /* Accent */
+  --primary: #55634f;
+  --primary-foreground: #fefcf6;
+  --secondary: #e8eeef;
+  --secondary-foreground: #162a2c;
+  --muted: #e8eeef;
+  --muted-foreground: #5c5c5b;
+  --accent: #e8eeef;
+  --accent-foreground: #162a2c;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e2d9f4;
-  --input: #e2d9f4;
-  --ring: #a78bfa;
-  --chart-1: #8b5cf6;
-  --chart-2: #0ea5e9;
-  --chart-3: #10b981;
-  --chart-4: #ec4899;
-  --chart-5: #6366f1;
+  --border: #bccace;
+  --input: #bccace;
+  --ring: #55634f;
   --radius: 1rem;
 
+  /* A habit counts as done: filled check and a light wash on the row */
+  --complete: #55634f;
+  --complete-foreground: #fefcf6;
+  --complete-tint: #e4eadf;
+
+  --chart-1: #55634f;
+  --chart-2: #4a97b8;
+  --chart-3: #b28828;
+  --chart-4: #c27a9a;
+  --chart-5: #5b6fb5;
+
   /* Brand */
-  --brand-gradient: linear-gradient(135deg, #a78bfa, #6d4bc4);
-  --page-gradient: linear-gradient(
-    135deg,
-    #f3ecff 0%,
-    #e9defc 45%,
-    #efe6fb 70%,
-    #e1ecfd 100%
-  );
+  --brand-gradient: linear-gradient(135deg, #5e6c58, #162a2c);
+  --page-gradient: linear-gradient(135deg, #d6e0e2 0%, #dfe8e9 55%, #eef2f0 100%);
 
-  /* One colour per category */
-  --cat-health: #0ea5e9;
-  --cat-fitness: #ef4444;
-  --cat-learning: #6366f1;
-  --cat-mindfulness: #ec4899;
-  --cat-productivity: #f59e0b;
-  --cat-sleep: #8b5cf6;
-  --cat-social: #14b8a6;
+  /* One colour per category (also the 9 habit colours): each reads against the card in both themes */
+  --cat-health: #4a97b8;
+  --cat-fitness: #c65d4f;
+  --cat-learning: #5b6fb5;
+  --cat-mindfulness: #c27a9a;
+  --cat-productivity: #b28828;
+  --cat-sleep: #8069ab;
+  --cat-social: #3f9a86;
 
-  /* The 9 habit colours (habit colour picker) */
-  --habit-indigo: #6366f1;
-  --habit-sky: #0ea5e9;
-  --habit-emerald: #10b981;
-  --habit-amber: #f59e0b;
-  --habit-red: #ef4444;
-  --habit-pink: #ec4899;
-  --habit-violet: #8b5cf6;
-  --habit-teal: #14b8a6;
-  --habit-lime: #84cc16;
+  --habit-indigo: #5b6fb5;
+  --habit-sky: #4a97b8;
+  --habit-emerald: #4e9f6b;
+  --habit-amber: #b28828;
+  --habit-red: #c65d4f;
+  --habit-pink: #c27a9a;
+  --habit-violet: #8069ab;
+  --habit-teal: #3f9a86;
+  --habit-lime: #82983e;
 
   /* Tinted tile backgrounds (stat tiles, icon tiles) */
-  --tint-purple: #ede9fe;
-  --tint-orange: #ffedd5;
-  --tint-amber: #fef3c7;
-  --tint-green: #d1fae5;
-  --tint-blue: #dbeafe;
-  --tint-pink: #fce7f3;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --tint-purple: #e4e0ee;
+  --tint-orange: #f3e2d4;
+  --tint-amber: #f2e8cb;
+  --tint-green: #dce9d5;
+  --tint-blue: #d6e6ee;
+  --tint-pink: #f0dee5;
+
+  --sidebar: #fefcf6;
+  --sidebar-foreground: #162a2c;
+  --sidebar-primary: #55634f;
+  --sidebar-primary-foreground: #fefcf6;
+  --sidebar-accent: #e8eeef;
+  --sidebar-accent-foreground: #162a2c;
+  --sidebar-border: #bccace;
+  --sidebar-ring: #55634f;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #0e1d1f;
+  --foreground: #f4efe6;
+  --card: #162a2c;
+  --card-foreground: #f4efe6;
+  --popover: #162a2c;
+  --popover-foreground: #f4efe6;
+
+  /* Forest green is too dark to stand out on midnight, so the accent flips to sky blue */
+  --primary: #d6e0e2;
+  --primary-foreground: #162a2c;
+  --secondary: #1f3a3d;
+  --secondary-foreground: #f4efe6;
+  --muted: #1b3235;
+  --muted-foreground: #a9b4b3;
+  --accent: #1f3a3d;
+  --accent-foreground: #f4efe6;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: #2a4548;
+  --input: #2f4c4f;
+  --ring: #8fa3a5;
+
+  --complete: #d6e0e2;
+  --complete-foreground: #162a2c;
+  --complete-tint: #1d3a3c;
+
+  --chart-1: #d6e0e2;
+
+  --brand-gradient: linear-gradient(135deg, #d6e0e2, #8fa3a5);
+  --page-gradient: linear-gradient(135deg, #0e1d1f 0%, #112326 55%, #162a2c 100%);
+
+  --tint-purple: #2b2744;
+  --tint-orange: #3a2b21;
+  --tint-amber: #372f18;
+  --tint-green: #1b3a2b;
+  --tint-blue: #17343f;
+  --tint-pink: #3a2530;
+
+  --sidebar: #162a2c;
+  --sidebar-foreground: #f4efe6;
+  --sidebar-primary: #d6e0e2;
+  --sidebar-primary-foreground: #162a2c;
+  --sidebar-accent: #1f3a3d;
+  --sidebar-accent-foreground: #f4efe6;
+  --sidebar-border: #2a4548;
+  --sidebar-ring: #8fa3a5;
 }
 
 @layer base {
@@ -192,6 +218,5 @@
   }
   html {
     @apply font-sans;
-    color-scheme: light;
   }
 }

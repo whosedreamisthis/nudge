@@ -13,7 +13,7 @@ export function Sidebar() {
   return (
     <nav
       aria-label="Main"
-      className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 border-r border-white/60 bg-white/40 p-4 md:block"
+      className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 border-r border-border bg-card/50 p-4 md:block"
     >
       <ul className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
@@ -26,8 +26,8 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-muted-foreground hover:bg-white/60 hover:text-foreground",
+                    ? "bg-card text-primary shadow-sm"
+                    : "text-muted-foreground hover:bg-card/70 hover:text-foreground",
                 )}
               >
                 <Icon className="size-5" aria-hidden />

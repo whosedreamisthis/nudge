@@ -11,7 +11,7 @@ async function UserMenu() {
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/60 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-border bg-card/70 backdrop-blur">
       <nav className="flex h-14 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <Logo className="size-8" />
