@@ -1,8 +1,8 @@
 import { config } from "dotenv";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
-// Prisma's CLI doesn't read .env.local on its own
-config({ path: ".env.local" });
+// Prisma's CLI doesn't read .env.local on its own (on Vercel the variables come from the dashboard)
+config({ path: ".env.local", quiet: true });
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -10,7 +10,8 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    // Direct (unpooled) connection for migrations
-    url: env("DATABASE_URL_UNPOOLED"),
+    // Direct (unpooled) connection for migrations. `prisma generate` doesn't connect,
+    // so it must not fail on a build machine where this isn't set.
+    url: process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL ?? "",
   },
 });

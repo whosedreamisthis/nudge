@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Navbar } from "@/components/shared/Navbar";
 import "./globals.css";
 
@@ -17,8 +19,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <Navbar />
-        {children}
+        <ClerkProvider appearance={{ variables: { colorPrimary: "#d97706" } }}>
+          <Navbar />
+          {/* Pages read the session at request time, so they stream inside this boundary */}
+          <Suspense fallback={null}>{children}</Suspense>
+        </ClerkProvider>
       </body>
     </html>
   );
