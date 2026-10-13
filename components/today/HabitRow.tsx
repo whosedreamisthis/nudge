@@ -11,6 +11,8 @@ import type { TodayHabit } from "@/types/habits";
 interface HabitRowProps {
   habit: TodayHabit;
   onTap: () => void;
+  // A weekly habit whose goal is met: shown dimmed below the list, still tappable for a bonus day
+  dimmed?: boolean;
 }
 
 const BURST_COLORS = ["bg-habit-amber", "bg-cat-fitness", "bg-habit-sky", "bg-complete"];
@@ -49,7 +51,7 @@ function Celebration() {
   );
 }
 
-export function HabitRow({ habit, onTap }: HabitRowProps) {
+export function HabitRow({ habit, onTap, dimmed = false }: HabitRowProps) {
   const { streak, progress } = habit;
   // Replays the burst each time the habit goes from not done to done (state adjusted during render)
   const [wasComplete, setWasComplete] = useState(progress.complete);
@@ -67,7 +69,8 @@ export function HabitRow({ habit, onTap }: HabitRowProps) {
     <li
       className={cn(
         "group relative flex items-center gap-3 rounded-xl p-3 text-card-foreground shadow-sm ring-1",
-        "bg-card",
+        "bg-card transition-opacity duration-300",
+        dimmed && "opacity-60",
         progress.complete ? "ring-complete/30" : "ring-border",
       )}
     >
@@ -121,6 +124,7 @@ export function HabitRow({ habit, onTap }: HabitRowProps) {
 
         {progress.week && (
           <p className="mt-1 text-xs text-muted-foreground tabular-nums">
+            {progress.week.done >= progress.week.target && "Goal met · "}
             {progress.week.done}/{progress.week.target} this week
           </p>
         )}

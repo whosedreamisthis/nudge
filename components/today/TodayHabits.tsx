@@ -7,6 +7,7 @@ import { HabitRow } from "@/components/today/HabitRow";
 import { StatTiles } from "@/components/today/StatTiles";
 import { advanceProgress } from "@/lib/progress";
 import type { TodayStats } from "@/lib/stats";
+import { getRingCounts, splitOffDay } from "@/lib/week-goal";
 import type { TodayHabit } from "@/types/habits";
 
 interface TodayHabitsProps {
@@ -51,13 +52,29 @@ export function TodayHabits({ habits, stats, header, sample = false }: TodayHabi
     });
   }
 
-  const done = shown.filter((habit) => habit.progress.complete).length;
+  const { done, total } = getRingCounts(shown);
+  const { active, offDay } = splitOffDay(shown);
+
+  // One flat keyed array, so a habit keeps its row (and its celebration) as it moves between groups
+  const rows = [
+    ...active.map((habit) => <HabitRow key={habit.id} habit={habit} onTap={() => tap(habit.id)} />),
+    ...(offDay.length > 0
+      ? [
+          <li key="off-day-heading" className="mt-2">
+            <h2 className="text-sm font-medium text-muted-foreground">Goal met this week</h2>
+          </li>,
+        ]
+      : []),
+    ...offDay.map((habit) => (
+      <HabitRow key={habit.id} habit={habit} dimmed onTap={() => tap(habit.id)} />
+    )),
+  ];
 
   return (
     <>
       <div className="flex items-start justify-between gap-4">
         {header}
-        <CompletionRing done={done} total={shown.length} />
+        <CompletionRing done={done} total={total} />
       </div>
 
       <StatTiles stats={stats} />
@@ -69,9 +86,7 @@ export function TodayHabits({ habits, stats, header, sample = false }: TodayHabi
       )}
 
       <ul aria-label="Today's habits" className="flex flex-col gap-3">
-        {shown.map((habit) => (
-          <HabitRow key={habit.id} habit={habit} onTap={() => tap(habit.id)} />
-        ))}
+        {rows}
       </ul>
     </>
   );
