@@ -7,16 +7,16 @@ import { cn } from "@/lib/utils";
 const ITEM_CLASS =
   "flex cursor-default items-center gap-2 rounded-md px-2.5 py-1.5 text-sm outline-none select-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted";
 
-// Actions menu at the top right of a habit row, centred over the completion circle (the row's
-// 12px padding + half the 32px circle = 28px from the right edge). The ellipsis shows on hover and keyboard focus
-// (and always on touch screens, which can't hover). The actions arrive with the habit actions feature.
+// Actions menu in the bottom right of a habit row, under the completion circle. The ellipsis shows on hover and
+// keyboard focus (and always on touch screens, which can't hover). The actions arrive with the
+// habit actions feature.
 export function HabitMenu({ habitName }: { habitName: string }) {
   return (
     <Menu.Root>
       <Menu.Trigger
         aria-label={`Actions for ${habitName}`}
         className={cn(
-          "absolute top-1 right-4 z-10 flex size-6 items-center justify-center rounded-md text-muted-foreground outline-none transition-opacity",
+          "flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-opacity",
           "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring data-popup-open:opacity-100",
           "hover:bg-muted hover:text-foreground [@media(hover:none)]:opacity-100",
         )}

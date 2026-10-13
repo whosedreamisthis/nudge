@@ -1,11 +1,16 @@
 import { prisma } from "@/lib/db";
 import { fromDbDate, type DateKey } from "@/lib/dates";
 import { getTodayProgress } from "@/lib/progress";
-import { getStreak } from "@/lib/streaks";
+import { getTodayStats, type StatsEntry, type TodayStats } from "@/lib/stats";
+import { getStreak, type StreakInput } from "@/lib/streaks";
 import type { TodayHabit } from "@/types/habits";
 
-// The user's active habits with their current streaks and today's progress, oldest first
-export async function getTodayHabits(userId: string, today: DateKey): Promise<TodayHabit[]> {
+// The user's active habits with their current streaks and today's progress (oldest first),
+// plus the summary tiles, all from one query
+export async function getToday(
+  userId: string,
+  today: DateKey,
+): Promise<{ habits: TodayHabit[]; stats: TodayStats }> {
   const habits = await prisma.habit.findMany({
     where: { userId, archivedAt: null },
     orderBy: { createdAt: "asc" },
@@ -16,9 +21,13 @@ export async function getTodayHabits(userId: string, today: DateKey): Promise<To
     },
   });
 
-  return habits.map((habit) => {
-    const history = {
-      completions: habit.completions.map((c) => ({ date: fromDbDate(c.date), amount: c.amount })),
+  const entries: StatsEntry[] = [];
+  const rows = habits.map((habit) => {
+    const history: StreakInput = {
+      completions: habit.completions.map((c) => ({
+        date: fromDbDate(c.date),
+        amount: c.amount,
+      })),
       dailyGoal: habit.dailyGoal,
       targets: habit.targets.map((t) => ({
         frequency: t.frequency,
@@ -27,6 +36,8 @@ export async function getTodayHabits(userId: string, today: DateKey): Promise<To
       })),
       today,
     };
+
+    entries.push({ name: habit.name, icon: habit.icon, history });
 
     return {
       id: habit.id,
@@ -40,4 +51,6 @@ export async function getTodayHabits(userId: string, today: DateKey): Promise<To
       progress: getTodayProgress(history),
     };
   });
+
+  return { habits: rows, stats: getTodayStats(entries) };
 }

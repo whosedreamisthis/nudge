@@ -13,17 +13,17 @@ const TILE_CLASSES: Record<HabitColor, string> = {
   lime: "bg-habit-lime/15",
 };
 
-// Fill colour of a native <progress> bar (WebKit and Firefox style it through different pseudo-elements)
-const PROGRESS_CLASSES: Record<HabitColor, string> = {
-  indigo: "[&::-webkit-progress-value]:bg-habit-indigo [&::-moz-progress-bar]:bg-habit-indigo",
-  sky: "[&::-webkit-progress-value]:bg-habit-sky [&::-moz-progress-bar]:bg-habit-sky",
-  emerald: "[&::-webkit-progress-value]:bg-habit-emerald [&::-moz-progress-bar]:bg-habit-emerald",
-  amber: "[&::-webkit-progress-value]:bg-habit-amber [&::-moz-progress-bar]:bg-habit-amber",
-  red: "[&::-webkit-progress-value]:bg-habit-red [&::-moz-progress-bar]:bg-habit-red",
-  pink: "[&::-webkit-progress-value]:bg-habit-pink [&::-moz-progress-bar]:bg-habit-pink",
-  violet: "[&::-webkit-progress-value]:bg-habit-violet [&::-moz-progress-bar]:bg-habit-violet",
-  teal: "[&::-webkit-progress-value]:bg-habit-teal [&::-moz-progress-bar]:bg-habit-teal",
-  lime: "[&::-webkit-progress-value]:bg-habit-lime [&::-moz-progress-bar]:bg-habit-lime",
+// Progress fill that covers a habit card from the left
+const FILL_CLASSES: Record<HabitColor, string> = {
+  indigo: "bg-habit-indigo/25",
+  sky: "bg-habit-sky/25",
+  emerald: "bg-habit-emerald/25",
+  amber: "bg-habit-amber/25",
+  red: "bg-habit-red/25",
+  pink: "bg-habit-pink/25",
+  violet: "bg-habit-violet/25",
+  teal: "bg-habit-teal/25",
+  lime: "bg-habit-lime/25",
 };
 
 const CATEGORY_TAG_CLASSES: Record<string, string> = {
@@ -45,8 +45,8 @@ export function habitTileClass(color: string) {
   return TILE_CLASSES[isHabitColor(color) ? color : "indigo"];
 }
 
-export function habitProgressClass(color: string) {
-  return PROGRESS_CLASSES[isHabitColor(color) ? color : "indigo"];
+export function habitFillClass(color: string) {
+  return FILL_CLASSES[isHabitColor(color) ? color : "indigo"];
 }
 
 export function categoryTagClass(categoryName: string) {
