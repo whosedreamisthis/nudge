@@ -59,3 +59,13 @@ export function fromDbDate(date: Date): DateKey {
 export function toDbDate(key: DateKey): Date {
   return new Date(`${key}T00:00:00.000Z`);
 }
+
+// "Tuesday, October 13" for a day
+export function formatLongDate(key: DateKey): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(toMs(key)));
+}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addDays,
   daysBetween,
+  formatLongDate,
   fromDbDate,
   toDateKey,
   toDbDate,
@@ -95,6 +96,13 @@ describe("weekDays", () => {
       "2026-10-17",
       "2026-10-18",
     ]);
+  });
+});
+
+describe("formatLongDate", () => {
+  it("writes the weekday, month and day", () => {
+    expect(formatLongDate("2026-10-13")).toBe("Tuesday, October 13");
+    expect(formatLongDate("2027-01-01")).toBe("Friday, January 1");
   });
 });
 

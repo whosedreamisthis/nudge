@@ -103,6 +103,16 @@ function weekStreak(days: Set<DateKey>, targets: StreakTarget[], today: DateKey)
   return { unit: "week", current: run, best };
 }
 
+// "13d" for a day streak, "12w" for a week streak
+export function formatStreak({ unit, current }: Pick<Streak, "unit" | "current">) {
+  return `${current}${unit === "day" ? "d" : "w"}`;
+}
+
+// Spoken form for screen readers: "13 day streak"
+export function describeStreak({ unit, current }: Pick<Streak, "unit" | "current">) {
+  return `${current} ${unit} streak`;
+}
+
 // Day streak for daily habits and week streak for weekly ones, by the target in effect this week
 export function getStreak({ completions, dailyGoal, targets, today }: StreakInput): Streak {
   const days = completedDays(completions, dailyGoal);

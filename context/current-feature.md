@@ -1,18 +1,22 @@
-# Current Feature
-
-<!-- Feature name and short description -->
+# Current Feature: Today Page: Habit List
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- `/today` greeting with the current date
+- List the user's active habits as rows: icon, name, category tag, description, current streak
+- Empty state with a link to the Habits page
+- Read-only: no completion toggling yet
 
 ## Notes
 
-<!-- Any extra notes -->
+- Server component; data via a query in `lib/db/`, scoped by `userId`.
+- Streak display: "13d" for daily, "12w" for weekly.
+- Pale yellow row background and a check button come with the toggle feature (the completed look now uses the green completion colour from the theme).
+- Build order (agreed with the user): UI first with realistic sample data typed like the database models, so streaks and states can be seen in the browser; then replace the sample data with the real query.
 
 ## Completed Features
 

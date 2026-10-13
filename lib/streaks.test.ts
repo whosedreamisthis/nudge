@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { addDays } from "@/lib/dates";
 import {
   completedDays,
+  describeStreak,
+  formatStreak,
   getStreak,
   isDayComplete,
   isWeekComplete,
@@ -36,6 +38,19 @@ describe("isDayComplete", () => {
     expect(isDayComplete(2500, 3000)).toBe(false);
     expect(isDayComplete(3000, 3000)).toBe(true);
     expect(isDayComplete(3500, 3000)).toBe(true);
+  });
+});
+
+describe("formatStreak", () => {
+  it("shows days as d and weeks as w", () => {
+    expect(formatStreak({ unit: "day", current: 13 })).toBe("13d");
+    expect(formatStreak({ unit: "week", current: 12 })).toBe("12w");
+    expect(formatStreak({ unit: "day", current: 0 })).toBe("0d");
+  });
+
+  it("has a spoken form for screen readers", () => {
+    expect(describeStreak({ unit: "day", current: 13 })).toBe("13 day streak");
+    expect(describeStreak({ unit: "week", current: 12 })).toBe("12 week streak");
   });
 });
 
