@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { todayKey, toDbDate } from "@/lib/dates";
+import { todayKey, toDbDate, weekStart } from "@/lib/dates";
+import { createHabitSchema, type CreateHabitInput } from "@/lib/habit-form";
 import { getSessionUser } from "@/lib/session";
 import { advanceAmount } from "@/lib/progress";
 import type { ActionResult } from "@/types/actions";
@@ -49,4 +50,46 @@ export async function advanceHabit(
 
   revalidatePath("/today");
   return { success: true, data: { amount } };
+}
+
+// Creates a custom habit (no system habit) with its first target, effective from this week
+export async function createHabit(
+  input: CreateHabitInput,
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = createHabitSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid habit" };
+  }
+
+  const user = await getSessionUser();
+  if (!user) return { success: false, error: "Not signed in" };
+
+  const { frequency, targetDaysPerWeek, ...fields } = parsed.data;
+  const category = await prisma.category.findUnique({
+    where: { id: fields.categoryId },
+    select: { id: true },
+  });
+  if (!category) return { success: false, error: "Category not found" };
+
+  try {
+    const habit = await prisma.habit.create({
+      data: {
+        ...fields,
+        userId: user.id,
+        targets: {
+          create: {
+            frequency,
+            targetDaysPerWeek: frequency === "DAILY" ? 7 : targetDaysPerWeek,
+            effectiveFrom: toDbDate(weekStart(todayKey(user.timezone))),
+          },
+        },
+      },
+      select: { id: true },
+    });
+    revalidatePath("/today");
+    revalidatePath("/habits");
+    return { success: true, data: { id: habit.id } };
+  } catch {
+    return { success: false, error: "Could not create the habit, try again" };
+  }
 }
