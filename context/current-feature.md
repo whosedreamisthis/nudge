@@ -1,20 +1,18 @@
-# Current Feature: App Shell & Navigation
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Shared layout for signed-in pages with the gradient background
-- Bottom navigation: Dashboard (`/today`), Habits, Progress, with the active item highlighted
-- Reusable `PageHeader` (title + subtitle)
-- Placeholder pages for `/habits` and `/progress`
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Journal and Focus nav items are added by their own features.
-- Mobile-first; on wide screens centre the content in a max-width column.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -23,3 +21,4 @@ In Progress
 - **Clerk Authentication:** ClerkProvider, sign-in/register pages in `app/(auth)/`, and `proxy.ts` redirects plus page-level `auth.protect()` for the app routes.
 - **User Sync:** Clerk webhook upserts/deletes `User` rows, `getSessionUser()` maps sessions to users, and the browser timezone is captured (`app/api/webhooks/clerk/route.ts`, `lib/session.ts`, `actions/user.ts`).
 - **Seed Catalog:** Idempotent seed of 7 categories and 70 system habits, some with daily goals, run via `npm run db:seed` (`prisma/seed.ts`, `prisma/seed-data.ts`).
+- **App Shell & Navigation:** `app/(app)/` layout with a bottom tab bar on phones, a left sidebar from `md` up, `PageHeader`, placeholder pages, and a lavender theme (`components/shared/`, `app/globals.css`).
