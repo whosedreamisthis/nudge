@@ -23,7 +23,7 @@ function Tile({ label, badge, tint, value, caption }: TileProps) {
         </span>
         {label}
       </dt>
-      <dd className="flex flex-col">
+      <dd className="flex flex-col items-center text-center">
         <span className="text-4xl leading-none font-bold tabular-nums">{value}</span>
         <span className="mt-1.5 truncate text-sm text-foreground/75">{caption}</span>
       </dd>
@@ -46,9 +46,17 @@ export function StatTiles({ stats }: { stats: TodayStats }) {
       <Tile
         label="Best streak"
         tint="bg-tint-amber"
-        badge={bestStreak ? bestStreak.icon : <Trophy className="size-5 text-habit-amber" />}
+        badge={<Trophy className="size-5 text-habit-amber" />}
         value={bestStreak ? formatStreak({ unit: bestStreak.unit, current: bestStreak.best }) : "0"}
-        caption={bestStreak ? bestStreak.name : "Complete a habit to start one"}
+        caption={
+          bestStreak ? (
+            <>
+              <span aria-hidden>{bestStreak.icon}</span> {bestStreak.name}
+            </>
+          ) : (
+            "Complete a habit to start one"
+          )
+        }
       />
     </dl>
   );
