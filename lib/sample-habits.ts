@@ -1,5 +1,6 @@
 import { addDays, weekStart, type DateKey } from "@/lib/dates";
 import { getTodayProgress } from "@/lib/progress";
+import { getTodayStats, type TodayStats } from "@/lib/stats";
 import { getStreak, type Completion, type StreakTarget } from "@/lib/streaks";
 import type { TodayHabit } from "@/types/habits";
 
@@ -37,7 +38,10 @@ interface SampleHabit {
   completions: Completion[];
 }
 
-export function getSampleTodayHabits(today: DateKey): TodayHabit[] {
+export function getSampleToday(today: DateKey): {
+  habits: TodayHabit[];
+  stats: TodayStats;
+} {
   const since = weekStart(addDays(today, -120));
   const thisMonday = weekStart(today);
 
@@ -118,8 +122,19 @@ export function getSampleTodayHabits(today: DateKey): TodayHabit[] {
     },
   ];
 
-  return habits.map(({ goal, targets, completions, ...habit }) => {
-    const history = { completions, dailyGoal: goal?.amount ?? null, targets, today };
+  const entries = habits.map(({ name, icon, goal, targets, completions }) => ({
+    name,
+    icon,
+    history: { completions, dailyGoal: goal?.amount ?? null, targets, today },
+  }));
+
+  const rows = habits.map(({ goal, targets, completions, ...habit }) => {
+    const history = {
+      completions,
+      dailyGoal: goal?.amount ?? null,
+      targets,
+      today,
+    };
     return {
       ...habit,
       unit: goal?.unit ?? null,
@@ -127,4 +142,6 @@ export function getSampleTodayHabits(today: DateKey): TodayHabit[] {
       progress: getTodayProgress(history),
     };
   });
+
+  return { habits: rows, stats: getTodayStats(entries) };
 }

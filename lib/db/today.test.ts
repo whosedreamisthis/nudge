@@ -4,7 +4,7 @@ const { findMany } = vi.hoisted(() => ({ findMany: vi.fn() }));
 
 vi.mock("@/lib/db", () => ({ prisma: { habit: { findMany } } }));
 
-import { getTodayHabits } from "./today";
+import { getToday } from "./today";
 
 const day = (key: string) => new Date(`${key}T00:00:00.000Z`);
 
@@ -24,13 +24,13 @@ const habitRow = (overrides = {}) => ({
   ...overrides,
 });
 
-describe("getTodayHabits", () => {
+describe("getToday", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("asks only for the user's own active habits", async () => {
     findMany.mockResolvedValue([]);
 
-    await getTodayHabits("u1", "2026-10-13");
+    await getToday("u1", "2026-10-13");
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: { userId: "u1", archivedAt: null } }),
@@ -40,13 +40,15 @@ describe("getTodayHabits", () => {
   it("returns an empty list when the user has no habits", async () => {
     findMany.mockResolvedValue([]);
 
-    expect(await getTodayHabits("u1", "2026-10-13")).toEqual([]);
+    expect((await getToday("u1", "2026-10-13")).habits).toEqual([]);
   });
 
   it("maps a habit to a row with its category and current streak", async () => {
     findMany.mockResolvedValue([habitRow()]);
 
-    const [row] = await getTodayHabits("u1", "2026-10-13");
+    const {
+      habits: [row],
+    } = await getToday("u1", "2026-10-13");
 
     expect(row).toMatchObject({
       id: "h1",
@@ -67,7 +69,9 @@ describe("getTodayHabits", () => {
       }),
     ]);
 
-    const [row] = await getTodayHabits("u1", "2026-10-13");
+    const {
+      habits: [row],
+    } = await getToday("u1", "2026-10-13");
 
     expect(row.unit).toBe("ml");
     expect(row.progress).toEqual({ amount: 1500, goal: 2000, complete: false, week: null });
@@ -84,7 +88,9 @@ describe("getTodayHabits", () => {
       }),
     ]);
 
-    const [row] = await getTodayHabits("u1", "2026-10-13");
+    const {
+      habits: [row],
+    } = await getToday("u1", "2026-10-13");
 
     expect(row.streak).toEqual({ unit: "week", current: 1, best: 1 });
   });
@@ -100,7 +106,9 @@ describe("getTodayHabits", () => {
       }),
     ]);
 
-    const [row] = await getTodayHabits("u1", "2026-10-13");
+    const {
+      habits: [row],
+    } = await getToday("u1", "2026-10-13");
 
     expect(row.streak.current).toBe(1);
   });

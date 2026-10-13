@@ -1,18 +1,18 @@
-# Current Feature
-
-<!-- Feature name and short description -->
+# Current Feature: Today Stat Tiles
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Two tiles on Today: active streaks, and best streak with the icon of the habit that holds it
+- Values come from the streak helpers and completion queries
 
 ## Notes
 
-<!-- Any extra notes -->
+- Keep the query to a single loader function.
+- Archived habits are excluded.
 
 ## Completed Features
 

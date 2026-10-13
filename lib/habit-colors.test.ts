@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { categoryTagClass, habitProgressClass, habitTileClass } from "@/lib/habit-colors";
+import { categoryTagClass, habitFillClass, habitTileClass } from "@/lib/habit-colors";
 import { HABIT_COLORS } from "@/types/habits";
 
 describe("habitTileClass", () => {
@@ -14,16 +14,15 @@ describe("habitTileClass", () => {
   });
 });
 
-describe("habitProgressClass", () => {
-  it("colours the progress fill in each habit colour for both browser engines", () => {
+describe("habitFillClass", () => {
+  it("tints the card fill in each habit colour", () => {
     for (const color of HABIT_COLORS) {
-      expect(habitProgressClass(color)).toContain(`[&::-webkit-progress-value]:bg-habit-${color}`);
-      expect(habitProgressClass(color)).toContain(`[&::-moz-progress-bar]:bg-habit-${color}`);
+      expect(habitFillClass(color)).toBe(`bg-habit-${color}/25`);
     }
   });
 
   it("falls back to indigo for an unknown colour", () => {
-    expect(habitProgressClass("chartreuse")).toContain("bg-habit-indigo");
+    expect(habitFillClass("chartreuse")).toContain("bg-habit-indigo");
   });
 });
 
