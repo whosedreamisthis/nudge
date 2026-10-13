@@ -24,6 +24,8 @@ export interface TodayHabit {
   color: string;
   // Unit of a multi-step habit's goal ("ml", "min"), null for a simple check
   unit: string | null;
+  // How much one tap adds to a multi-step habit, null when a tap completes it
+  stepSize: number | null;
   categoryName: string;
   streak: Streak;
   progress: TodayProgress;

@@ -220,3 +220,32 @@
     @apply font-sans;
   }
 }
+
+/* Burst of dots and a ring from a habit's completion circle when it is completed */
+@keyframes celebrate-dot {
+  from {
+    transform: rotate(var(--angle)) translateY(-8px) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: rotate(var(--angle)) translateY(-30px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+@keyframes celebrate-ring {
+  from {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebrate-burst {
+    display: none;
+  }
+}

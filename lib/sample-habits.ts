@@ -33,7 +33,7 @@ interface SampleHabit {
   icon: string;
   color: string;
   categoryName: string;
-  goal?: { amount: number; unit: string };
+  goal?: { amount: number; unit: string; step: number };
   targets: StreakTarget[];
   completions: Completion[];
 }
@@ -54,7 +54,7 @@ export function getSampleToday(today: DateKey): {
       icon: "💧",
       color: "sky",
       categoryName: "health",
-      goal: { amount: 2000, unit: "ml" },
+      goal: { amount: 2000, unit: "ml", step: 250 },
       targets: [daily(since)],
       completions: run(addDays(today, -12), 13, 2000),
     },
@@ -79,7 +79,7 @@ export function getSampleToday(today: DateKey): {
       icon: "📚",
       color: "violet",
       categoryName: "learning",
-      goal: { amount: 20, unit: "min" },
+      goal: { amount: 20, unit: "min", step: 5 },
       targets: [daily(since)],
       completions: [
         { date: addDays(today, -1), amount: 20 },
@@ -105,7 +105,7 @@ export function getSampleToday(today: DateKey): {
       icon: "🧘",
       color: "teal",
       categoryName: "mindfulness",
-      goal: { amount: 10, unit: "min" },
+      goal: { amount: 10, unit: "min", step: 5 },
       targets: [daily(since)],
       completions: run(addDays(today, -3), 4, 10),
     },
@@ -138,6 +138,7 @@ export function getSampleToday(today: DateKey): {
     return {
       ...habit,
       unit: goal?.unit ?? null,
+      stepSize: goal?.step ?? null,
       streak: getStreak(history),
       progress: getTodayProgress(history),
     };
