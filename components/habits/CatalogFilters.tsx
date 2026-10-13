@@ -41,7 +41,7 @@ export function CatalogFilters({
   }, [text]);
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row">
+    <div className="flex gap-2">
       <input
         type="search"
         value={text}
@@ -49,13 +49,13 @@ export function CatalogFilters({
         maxLength={60}
         aria-label="Search habits"
         placeholder="Search habits"
-        className={`${FIELD_CLASS} flex-1`}
+        className={`${FIELD_CLASS} min-w-0 flex-1`}
       />
       <select
         value={category}
         onChange={(e) => update({ q: latest.current.q, category: e.target.value })}
         aria-label="Filter by category"
-        className={FIELD_CLASS}
+        className={`${FIELD_CLASS} w-36 shrink-0 sm:w-auto`}
       >
         <option value="">All categories</option>
         {categories.map((option) => (

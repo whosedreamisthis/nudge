@@ -1,12 +1,15 @@
 import { connection } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { ArchivedList } from "@/components/habits/ArchivedList";
 import { CatalogFilters } from "@/components/habits/CatalogFilters";
 import { CatalogList } from "@/components/habits/CatalogList";
+import { HabitsTabs } from "@/components/habits/HabitsTabs";
 import { NewHabitButton } from "@/components/habits/NewHabitButton";
 import { NewHabitModal } from "@/components/habits/NewHabitModal";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { parseCatalogParams } from "@/lib/catalog";
 import { prisma } from "@/lib/db";
+import { countArchivedHabits, getArchivedHabits } from "@/lib/db/archived";
 import { getCatalogHabits } from "@/lib/db/catalog";
 import { getSessionUser } from "@/lib/session";
 
@@ -21,24 +24,36 @@ export default async function HabitsPage({
   // Real access check; the proxy redirect is only an optimization
   await auth.protect();
 
-  const filters = parseCatalogParams(await searchParams);
+  const params = await searchParams;
+  const archivedTab = params.tab === "archived";
+  const filters = parseCatalogParams(params);
+  // No user row yet (webhook still pending) means nothing added and nothing archived
   const user = await getSessionUser();
+  const userId = user?.id ?? "";
 
-  const [categories, habits] = await Promise.all([
+  const [categories, archivedCount, archived, catalog] = await Promise.all([
     prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    // No user row yet (webhook still pending) means nothing added, so show the whole catalog
-    getCatalogHabits(user?.id ?? "", filters),
+    countArchivedHabits(userId),
+    archivedTab ? getArchivedHabits(userId) : [],
+    archivedTab ? [] : getCatalogHabits(userId, filters),
   ]);
 
   return (
     <>
       <div className="flex items-start justify-between gap-4">
-        <PageHeader title="Habits" subtitle="Browse the catalog and add habits." />
+        <PageHeader title="Habits" subtitle="Browse the catalog and manage your habits." />
         <NewHabitButton />
       </div>
       <div className="mt-4 flex flex-col gap-4">
-        <CatalogFilters categories={categories} q={filters.q} category={filters.category} />
-        <CatalogList habits={habits} filtered={Boolean(filters.q || filters.category)} />
+        <HabitsTabs active={archivedTab ? "archived" : "browse"} archivedCount={archivedCount} />
+        {archivedTab ? (
+          <ArchivedList habits={archived} />
+        ) : (
+          <>
+            <CatalogFilters categories={categories} q={filters.q} category={filters.category} />
+            <CatalogList habits={catalog} filtered={Boolean(filters.q || filters.category)} />
+          </>
+        )}
       </div>
       <NewHabitModal categories={categories} />
     </>

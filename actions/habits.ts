@@ -246,3 +246,47 @@ export async function deleteHabit(
   revalidatePath("/habits");
   return { success: true, data: { id: habit.id } };
 }
+
+// Puts an archived habit back on Today with all its history
+export async function restoreHabit(
+  input: z.input<typeof habitIdSchema>,
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = habitIdSchema.safeParse(input);
+  if (!parsed.success) return { success: false, error: "Invalid habit" };
+
+  const user = await getSessionUser();
+  if (!user) return { success: false, error: "Not signed in" };
+
+  const habit = await prisma.habit.findFirst({
+    where: { id: parsed.data.habitId, userId: user.id, archivedAt: { not: null } },
+    select: { id: true, systemHabitId: true },
+  });
+  if (!habit) return { success: false, error: "Habit not found" };
+
+  // A catalog habit added again while this one was archived: two active copies would be a duplicate
+  if (habit.systemHabitId) {
+    const active = await prisma.habit.findFirst({
+      where: { userId: user.id, systemHabitId: habit.systemHabitId, archivedAt: null },
+      select: { id: true },
+    });
+    if (active) return { success: false, error: "You already have this habit" };
+  }
+
+  try {
+    // Today's completion goes in the same write, so the habit comes back as not done.
+    // Earlier days stay: the history is the point of archiving instead of deleting.
+    await prisma.habit.update({
+      where: { id: habit.id },
+      data: {
+        archivedAt: null,
+        completions: { deleteMany: { date: toDbDate(todayKey(user.timezone)) } },
+      },
+    });
+  } catch {
+    return { success: false, error: "Could not restore the habit, try again" };
+  }
+
+  revalidatePath("/today");
+  revalidatePath("/habits");
+  return { success: true, data: { id: habit.id } };
+}

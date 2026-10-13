@@ -1,11 +1,10 @@
 "use client";
 
-import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { Menu } from "@base-ui/react/menu";
 import { Archive, Ellipsis, Pencil, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { archiveHabit, deleteHabit } from "@/actions/habits";
-import { Button } from "@/components/ui/button";
+import { DeleteHabitDialog } from "@/components/habits/DeleteHabitDialog";
 import { useNewHabitModal } from "@/lib/new-habit-store";
 import { cn } from "@/lib/utils";
 import type { HabitColor, TodayHabit } from "@/types/habits";
@@ -95,26 +94,13 @@ export function HabitMenu({ habit, disabled = false, onError }: HabitMenuProps) 
         </Menu.Portal>
       </Menu.Root>
 
-      <AlertDialog.Root open={confirmingDelete} onOpenChange={setConfirmingDelete}>
-        <AlertDialog.Portal>
-          <AlertDialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
-          <AlertDialog.Popup className="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-popover p-5 text-popover-foreground shadow-xl ring-1 ring-border">
-            <AlertDialog.Title className="text-lg font-bold">Delete {habit.name}?</AlertDialog.Title>
-            <AlertDialog.Description className="mt-1 text-sm text-muted-foreground">
-              This removes the habit and all of its history. It can&apos;t be undone. To keep the
-              history, archive it instead.
-            </AlertDialog.Description>
-            <div className="mt-4 flex justify-end gap-2">
-              <AlertDialog.Close render={<Button variant="outline" type="button" />}>
-                Cancel
-              </AlertDialog.Close>
-              <Button variant="destructive" onClick={remove} disabled={pending}>
-                {pending ? "Deleting…" : "Delete"}
-              </Button>
-            </div>
-          </AlertDialog.Popup>
-        </AlertDialog.Portal>
-      </AlertDialog.Root>
+      <DeleteHabitDialog
+        habitName={habit.name}
+        open={confirmingDelete}
+        onOpenChange={setConfirmingDelete}
+        onConfirm={remove}
+        pending={pending}
+      />
     </>
   );
 }

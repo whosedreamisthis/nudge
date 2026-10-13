@@ -31,4 +31,14 @@ describe("getCatalogHabits", () => {
       ],
     });
   });
+
+  it("also loads the user's archived copy, so Browse can offer Restore", async () => {
+    await getCatalogHabits("u1", { q: "", category: "" });
+
+    expect(findMany.mock.calls[0][0].select.habits).toEqual({
+      where: { userId: "u1", archivedAt: { not: null } },
+      select: { id: true },
+      take: 1,
+    });
+  });
 });
