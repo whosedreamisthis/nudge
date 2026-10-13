@@ -59,7 +59,9 @@ export function CatalogList({ habits, filtered }: { habits: CatalogHabit[]; filt
                       {frequencyLabel(habit.defaultFrequency, habit.defaultTargetDaysPerWeek)}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{habit.description}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    {habit.description}
+                  </p>
                 </div>
                 <AddHabitButton
                   prefill={{

@@ -57,7 +57,15 @@ export function TodayHabits({ habits, stats, header, sample = false }: TodayHabi
 
   // One flat keyed array, so a habit keeps its row (and its celebration) as it moves between groups
   const rows = [
-    ...active.map((habit) => <HabitRow key={habit.id} habit={habit} onTap={() => tap(habit.id)} />),
+    ...active.map((habit) => (
+      <HabitRow
+        key={habit.id}
+        habit={habit}
+        readOnly={sample}
+        onError={setError}
+        onTap={() => tap(habit.id)}
+      />
+    )),
     ...(offDay.length > 0
       ? [
           <li key="off-day-heading" className="mt-2">
@@ -66,7 +74,14 @@ export function TodayHabits({ habits, stats, header, sample = false }: TodayHabi
         ]
       : []),
     ...offDay.map((habit) => (
-      <HabitRow key={habit.id} habit={habit} dimmed onTap={() => tap(habit.id)} />
+      <HabitRow
+        key={habit.id}
+        habit={habit}
+        dimmed
+        readOnly={sample}
+        onError={setError}
+        onTap={() => tap(habit.id)}
+      />
     )),
   ];
 

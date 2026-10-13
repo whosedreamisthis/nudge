@@ -1,7 +1,7 @@
 import { addDays, weekStart, type DateKey } from "@/lib/dates";
 import { getTodayProgress } from "@/lib/progress";
 import { getTodayStats, type TodayStats } from "@/lib/stats";
-import { getStreak, type Completion, type StreakTarget } from "@/lib/streaks";
+import { getStreak, targetForWeek, type Completion, type StreakTarget } from "@/lib/streaks";
 import type { TodayHabit } from "@/types/habits";
 
 // Development-only rows for looking at the Today page before habits can be added.
@@ -150,8 +150,14 @@ export function getSampleToday(today: DateKey): {
       targets,
       today,
     };
+    const target = targetForWeek(targets, thisMonday);
     return {
       ...habit,
+      // Sample habits are not in the database, so their actions are switched off
+      categoryId: "",
+      isCustom: false,
+      frequency: target?.frequency ?? "DAILY",
+      targetDaysPerWeek: target?.targetDaysPerWeek ?? 7,
       unit: goal?.unit ?? null,
       stepSize: goal?.step ?? null,
       streak: getStreak(history),

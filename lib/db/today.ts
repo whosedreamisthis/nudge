@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db";
-import { fromDbDate, type DateKey } from "@/lib/dates";
+import { fromDbDate, weekStart, type DateKey } from "@/lib/dates";
 import { getTodayProgress } from "@/lib/progress";
 import { getTodayStats, type StatsEntry, type TodayStats } from "@/lib/stats";
-import { getStreak, type StreakInput } from "@/lib/streaks";
+import { getStreak, targetForWeek, type StreakInput } from "@/lib/streaks";
 import type { TodayHabit } from "@/types/habits";
 
 // The user's active habits with their current streaks and today's progress (oldest first),
@@ -38,6 +38,7 @@ export async function getToday(
     };
 
     entries.push({ name: habit.name, icon: habit.icon, history });
+    const target = targetForWeek(history.targets, weekStart(today));
 
     return {
       id: habit.id,
@@ -48,6 +49,10 @@ export async function getToday(
       unit: habit.unit,
       stepSize: habit.stepSize,
       categoryName: habit.category.name,
+      categoryId: habit.categoryId,
+      isCustom: habit.systemHabitId === null,
+      frequency: target?.frequency ?? "DAILY",
+      targetDaysPerWeek: target?.targetDaysPerWeek ?? 7,
       streak: getStreak(history),
       progress: getTodayProgress(history),
     };

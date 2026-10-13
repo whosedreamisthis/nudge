@@ -3,7 +3,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { useState, useTransition } from "react";
-import { createHabit } from "@/actions/habits";
+import { createHabit, updateHabit } from "@/actions/habits";
 import { Button } from "@/components/ui/button";
 import { HABIT_ICONS, isDailyTarget } from "@/lib/habit-form";
 import { habitTileClass } from "@/lib/habit-colors";
@@ -26,6 +26,27 @@ const SWATCH_CLASSES: Record<HabitColor, string> = {
   violet: "bg-habit-violet",
   teal: "bg-habit-teal",
   lime: "bg-habit-lime",
+};
+
+const COPY = {
+  create: {
+    title: "New Habit",
+    description: "Create your own habit to track.",
+    submit: "Create habit",
+    pending: "Creating…",
+  },
+  add: {
+    title: "Add Habit",
+    description: "Adjust it if you like, then add it to your habits.",
+    submit: "Add habit",
+    pending: "Adding…",
+  },
+  edit: {
+    title: "Edit Habit",
+    description: "A new target applies from this week; earlier weeks keep theirs.",
+    submit: "Save changes",
+    pending: "Saving…",
+  },
 };
 
 const FIELD_CLASS =
@@ -62,7 +83,9 @@ function NewHabitForm({
   const [frequency, setFrequency] = useState<"DAILY" | "WEEKLY">(prefill?.frequency ?? "DAILY");
   const [days, setDays] = useState(prefill?.targetDaysPerWeek ?? 7);
   const [icon, setIcon] = useState<string>(prefill?.icon ?? HABIT_ICONS[0]);
-  const [color, setColor] = useState<HabitColor>("indigo");
+  const [color, setColor] = useState<HabitColor>(prefill?.color ?? "indigo");
+  const editingId = prefill?.habitId;
+  const copy = editingId ? COPY.edit : prefill ? COPY.add : COPY.create;
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   // A catalog icon outside the picker's choices still has to be selectable
@@ -85,7 +108,7 @@ function NewHabitForm({
     event.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await createHabit({
+      const fields = {
         name,
         description,
         categoryId,
@@ -93,8 +116,13 @@ function NewHabitForm({
         targetDaysPerWeek: days,
         icon,
         color,
-        ...(prefill && { systemHabitId: prefill.systemHabitId }),
-      });
+      };
+      const result = editingId
+        ? await updateHabit({ ...fields, habitId: editingId })
+        : await createHabit({
+            ...fields,
+            ...(prefill?.systemHabitId && { systemHabitId: prefill.systemHabitId }),
+          });
       if (result.success) onDone();
       else setError(result.error);
     });
@@ -104,13 +132,9 @@ function NewHabitForm({
     <form onSubmit={submit} className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <Dialog.Title className="text-xl font-bold">
-            {prefill ? "Add Habit" : "New Habit"}
-          </Dialog.Title>
+          <Dialog.Title className="text-xl font-bold">{copy.title}</Dialog.Title>
           <Dialog.Description className="text-sm text-muted-foreground">
-            {prefill
-              ? "Adjust it if you like, then add it to your habits."
-              : "Create your own habit to track."}
+            {copy.description}
           </Dialog.Description>
         </div>
         <Dialog.Close
@@ -254,7 +278,7 @@ function NewHabitForm({
       <div className="flex justify-end gap-2">
         <Dialog.Close render={<Button variant="outline" type="button" />}>Cancel</Dialog.Close>
         <Button type="submit" disabled={pending || !name.trim()}>
-          {pending ? (prefill ? "Adding…" : "Creating…") : prefill ? "Add habit" : "Create habit"}
+          {pending ? copy.pending : copy.submit}
         </Button>
       </div>
     </form>

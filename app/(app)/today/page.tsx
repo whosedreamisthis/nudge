@@ -1,11 +1,13 @@
 import { connection } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { NewHabitModal } from "@/components/habits/NewHabitModal";
 import { DayRollover } from "@/components/today/DayRollover";
 import { EmptyHabits } from "@/components/today/EmptyHabits";
 import { TodayHabits } from "@/components/today/TodayHabits";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TimezoneSync } from "@/components/shared/TimezoneSync";
 import { formatLongDate, todayKey } from "@/lib/dates";
+import { prisma } from "@/lib/db";
 import { getToday } from "@/lib/db/today";
 import { getSampleToday } from "@/lib/sample-habits";
 import { getSessionUser } from "@/lib/session";
@@ -27,7 +29,11 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
   const today = todayKey(user.timezone);
   // /today?sample=1 fills the page with made-up habits, in development only
   const useSample = process.env.NODE_ENV !== "production" && params.sample === "1";
-  const { habits, stats } = useSample ? getSampleToday(today) : await getToday(user.id, today);
+  const [{ habits, stats }, categories] = await Promise.all([
+    useSample ? getSampleToday(today) : getToday(user.id, today),
+    // For the edit form, which reuses the New Habit modal
+    prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
 
   const header = {
     title: `Hey ${clerkUser?.firstName ?? "Friend"}`,
@@ -38,6 +44,7 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
     <>
       <TimezoneSync />
       <DayRollover today={today} timezone={user.timezone} />
+      <NewHabitModal categories={categories} />
       {habits.length === 0 ? (
         <>
           <PageHeader {...header} />

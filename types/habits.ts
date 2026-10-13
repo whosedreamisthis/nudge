@@ -27,6 +27,12 @@ export interface TodayHabit {
   // How much one tap adds to a multi-step habit, null when a tap completes it
   stepSize: number | null;
   categoryName: string;
+  categoryId: string;
+  // No system habit behind it: only these can be deleted
+  isCustom: boolean;
+  // The target in force this week, for the edit form
+  frequency: "DAILY" | "WEEKLY";
+  targetDaysPerWeek: number;
   streak: Streak;
   progress: TodayProgress;
 }

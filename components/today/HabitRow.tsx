@@ -13,6 +13,9 @@ interface HabitRowProps {
   onTap: () => void;
   // A weekly habit whose goal is met: shown dimmed below the list, still tappable for a bonus day
   dimmed?: boolean;
+  // Made-up habits are not in the database, so their menu actions are switched off
+  readOnly?: boolean;
+  onError: (message: string) => void;
 }
 
 const BURST_COLORS = ["bg-habit-amber", "bg-cat-fitness", "bg-habit-sky", "bg-complete"];
@@ -51,7 +54,7 @@ function Celebration() {
   );
 }
 
-export function HabitRow({ habit, onTap, dimmed = false }: HabitRowProps) {
+export function HabitRow({ habit, onTap, dimmed = false, readOnly = false, onError }: HabitRowProps) {
   const { streak, progress } = habit;
   // Replays the burst each time the habit goes from not done to done (state adjusted during render)
   const [wasComplete, setWasComplete] = useState(progress.complete);
@@ -168,7 +171,7 @@ export function HabitRow({ habit, onTap, dimmed = false }: HabitRowProps) {
 
         {/* Above the card-wide tap target */}
         <div className="relative z-10">
-          <HabitMenu habitName={habit.name} />
+          <HabitMenu habit={habit} disabled={readOnly} onError={onError} />
         </div>
       </div>
     </li>
