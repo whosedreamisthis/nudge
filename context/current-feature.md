@@ -1,18 +1,18 @@
-# Current Feature: Today Stat Tiles
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Two tiles on Today: active streaks, and best streak with the icon of the habit that holds it
-- Values come from the streak helpers and completion queries
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Keep the query to a single loader function.
-- Archived habits are excluded.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -25,3 +25,4 @@ In Progress
 - **Palette & Dark Mode:** Sky blue / cloud white / forest green / midnight theme in light and dark (follows the OS, switch comes with Settings), checked by `lib/theme.test.ts` (`app/globals.css`, `components/shared/ThemeProvider.tsx`).
 - **Dates & Streaks Logic:** Pure Monday-week date helpers and strict day/week streaks with per-week target history (`lib/dates.ts`, `lib/streaks.ts`).
 - **Today Page: Habit List:** `/today` greeting, habit rows with streaks, complete and in-progress looks, hover actions menu and empty state (`app/(app)/today/`, `components/today/`, `lib/db/today.ts`).
+- **Today Stat Tiles:** Active-streaks and best-streak tiles (with the best habit's icon) above the list, plus fill-style habit cards (`components/today/StatTiles.tsx`, `lib/stats.ts`, `lib/db/today.ts`).
