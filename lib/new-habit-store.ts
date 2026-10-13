@@ -1,8 +1,12 @@
 import { create } from "zustand";
+import type { HabitColor } from "@/types/habits";
 
 // Starting values when the modal is opened from the catalog instead of from scratch
+// (a catalog habit to add, or with habitId an existing habit to edit)
 export interface HabitPrefill {
-  systemHabitId: string;
+  habitId?: string;
+  systemHabitId?: string;
+  color?: HabitColor;
   name: string;
   description: string;
   icon: string;

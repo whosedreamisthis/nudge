@@ -15,6 +15,8 @@ const habitRow = (overrides = {}) => ({
   icon: "💧",
   color: "sky",
   dailyGoal: null,
+  categoryId: "c1",
+  systemHabitId: null,
   category: { name: "health" },
   targets: [{ frequency: "DAILY", targetDaysPerWeek: 7, effectiveFrom: day("2026-10-05") }],
   completions: [
@@ -56,8 +58,30 @@ describe("getToday", () => {
       icon: "💧",
       color: "sky",
       categoryName: "health",
+      categoryId: "c1",
+      isCustom: true,
+      frequency: "DAILY",
+      targetDaysPerWeek: 7,
       streak: { unit: "day", current: 2, best: 2 },
     });
+  });
+
+  it("marks a catalog habit as not custom, with its current weekly target", async () => {
+    findMany.mockResolvedValue([
+      habitRow({
+        systemHabitId: "s1",
+        targets: [
+          { frequency: "DAILY", targetDaysPerWeek: 7, effectiveFrom: day("2026-09-28") },
+          { frequency: "WEEKLY", targetDaysPerWeek: 3, effectiveFrom: day("2026-10-12") },
+        ],
+      }),
+    ]);
+
+    const {
+      habits: [row],
+    } = await getToday("u1", "2026-10-13");
+
+    expect(row).toMatchObject({ isCustom: false, frequency: "WEEKLY", targetDaysPerWeek: 3 });
   });
 
   it("reports today's progress for the row", async () => {

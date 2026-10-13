@@ -3,20 +3,26 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { todayKey, toDbDate, weekStart } from "@/lib/dates";
-import { createHabitSchema, type CreateHabitInput } from "@/lib/habit-form";
+import { fromDbDate, todayKey, toDbDate, weekStart } from "@/lib/dates";
+import {
+  createHabitSchema,
+  updateHabitSchema,
+  type CreateHabitInput,
+  type UpdateHabitInput,
+} from "@/lib/habit-form";
+import { planTargetChange } from "@/lib/targets";
 import { getSessionUser } from "@/lib/session";
 import { advanceAmount } from "@/lib/progress";
 import type { ActionResult } from "@/types/actions";
 
-const advanceSchema = z.object({ habitId: z.string().min(1) });
+const habitIdSchema = z.object({ habitId: z.string().min(1) });
 
 // One tap on a habit for the user's local today. A simple habit flips between done and not done;
 // a habit with a daily goal moves up by its step size, and a tap on a finished day clears it.
 export async function advanceHabit(
-  input: z.input<typeof advanceSchema>,
+  input: z.input<typeof habitIdSchema>,
 ): Promise<ActionResult<{ amount: number }>> {
-  const parsed = advanceSchema.safeParse(input);
+  const parsed = habitIdSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: "Invalid habit" };
 
   const user = await getSessionUser();
@@ -113,4 +119,130 @@ export async function createHabit(
   } catch {
     return { success: false, error: "Could not create the habit, try again" };
   }
+}
+
+// Edits a habit's details. A changed target starts this week, so past weeks keep the target they had.
+export async function updateHabit(
+  input: UpdateHabitInput,
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = updateHabitSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid habit" };
+  }
+
+  const user = await getSessionUser();
+  if (!user) return { success: false, error: "Not signed in" };
+
+  const { habitId, frequency, targetDaysPerWeek, ...fields } = parsed.data;
+  const habit = await prisma.habit.findFirst({
+    where: { id: habitId, userId: user.id, archivedAt: null },
+    select: {
+      id: true,
+      targets: {
+        select: { id: true, frequency: true, targetDaysPerWeek: true, effectiveFrom: true },
+      },
+    },
+  });
+  if (!habit) return { success: false, error: "Habit not found" };
+
+  const category = await prisma.category.findUnique({
+    where: { id: fields.categoryId },
+    select: { id: true },
+  });
+  if (!category) return { success: false, error: "Category not found" };
+
+  const days = frequency === "DAILY" ? 7 : targetDaysPerWeek;
+  const week = weekStart(todayKey(user.timezone));
+  const change = planTargetChange(
+    habit.targets.map((t) => ({ ...t, effectiveFrom: fromDbDate(t.effectiveFrom) })),
+    week,
+    { frequency, targetDaysPerWeek: days },
+  );
+
+  try {
+    await prisma.habit.update({
+      where: { id: habit.id },
+      data: {
+        ...fields,
+        ...(change.type === "create" && {
+          targets: {
+            create: { frequency, targetDaysPerWeek: days, effectiveFrom: toDbDate(week) },
+          },
+        }),
+        ...(change.type === "update" && {
+          targets: {
+            update: {
+              where: { id: change.id },
+              data: { frequency, targetDaysPerWeek: days },
+            },
+          },
+        }),
+      },
+    });
+  } catch {
+    return { success: false, error: "Could not save the habit, try again" };
+  }
+
+  revalidatePath("/today");
+  revalidatePath("/habits");
+  return { success: true, data: { id: habit.id } };
+}
+
+// Hides the habit from Today and stats; its history stays
+export async function archiveHabit(
+  input: z.input<typeof habitIdSchema>,
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = habitIdSchema.safeParse(input);
+  if (!parsed.success) return { success: false, error: "Invalid habit" };
+
+  const user = await getSessionUser();
+  if (!user) return { success: false, error: "Not signed in" };
+
+  try {
+    const { count } = await prisma.habit.updateMany({
+      where: { id: parsed.data.habitId, userId: user.id, archivedAt: null },
+      data: { archivedAt: new Date() },
+    });
+    if (count === 0) return { success: false, error: "Habit not found" };
+  } catch {
+    return { success: false, error: "Could not archive the habit, try again" };
+  }
+
+  revalidatePath("/today");
+  revalidatePath("/habits");
+  return { success: true, data: { id: parsed.data.habitId } };
+}
+
+// Removes a custom habit with its completions and targets. Catalog habits can only be archived,
+// so this is checked here and not only by hiding the menu item.
+export async function deleteHabit(
+  input: z.input<typeof habitIdSchema>,
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = habitIdSchema.safeParse(input);
+  if (!parsed.success) return { success: false, error: "Invalid habit" };
+
+  const user = await getSessionUser();
+  if (!user) return { success: false, error: "Not signed in" };
+
+  const habit = await prisma.habit.findFirst({
+    where: { id: parsed.data.habitId, userId: user.id },
+    select: { id: true, systemHabitId: true },
+  });
+  if (!habit) return { success: false, error: "Habit not found" };
+  if (habit.systemHabitId) {
+    return { success: false, error: "Catalog habits can't be deleted, archive it instead" };
+  }
+
+  try {
+    // The guard on systemHabitId repeats the check above in the same statement
+    await prisma.habit.deleteMany({
+      where: { id: habit.id, userId: user.id, systemHabitId: null },
+    });
+  } catch {
+    return { success: false, error: "Could not delete the habit, try again" };
+  }
+
+  revalidatePath("/today");
+  revalidatePath("/habits");
+  return { success: true, data: { id: habit.id } };
 }

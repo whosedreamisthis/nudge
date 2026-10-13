@@ -22,6 +22,13 @@ export const createHabitSchema = z.object({
 
 export type CreateHabitInput = z.input<typeof createHabitSchema>;
 
+// Editing sends the same fields; the link to a system habit never changes
+export const updateHabitSchema = createHabitSchema
+  .omit({ systemHabitId: true })
+  .extend({ habitId: z.string().min(1) });
+
+export type UpdateHabitInput = z.input<typeof updateHabitSchema>;
+
 // A daily habit means all seven days; a weekly habit needs fewer
 export function isDailyTarget(frequency: "DAILY" | "WEEKLY", days: number) {
   return frequency === "DAILY" || days === 7;
