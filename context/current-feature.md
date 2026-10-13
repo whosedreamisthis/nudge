@@ -1,22 +1,18 @@
-# Current Feature: Toggle Completion
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Tapping a habit toggles it complete / incomplete for today
-- Completed rows: pale yellow background and filled orange check; incomplete: white with an outlined check
-- Optimistic UI update, then a Server Action
-- Circular completion ring with "x of y complete" in the Today header
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Server Action validates with Zod, scopes by `userId`, and returns `{ success, data, error }`.
-- Creates or deletes the `HabitCompletion` for the user's local today.
-- Vitest tests for the action.
-- The spec's yellow/orange colours predate the palette change: use the existing completion tokens (`complete`, `complete-tint`) instead.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -30,3 +26,4 @@ In Progress
 - **Dates & Streaks Logic:** Pure Monday-week date helpers and strict day/week streaks with per-week target history (`lib/dates.ts`, `lib/streaks.ts`).
 - **Today Page: Habit List:** `/today` greeting, habit rows with streaks, complete and in-progress looks, hover actions menu and empty state (`app/(app)/today/`, `components/today/`, `lib/db/today.ts`).
 - **Today Stat Tiles:** Active-streaks and best-streak tiles (with the best habit's icon) above the list, plus fill-style habit cards (`components/today/StatTiles.tsx`, `lib/stats.ts`, `lib/db/today.ts`).
+- **Toggle Completion:** Tap anywhere on a habit card to complete, step up or clear it, with optimistic updates, a header completion ring, a celebration burst and a midnight refresh (`actions/habits.ts`, `components/today/`).
