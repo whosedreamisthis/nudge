@@ -1,20 +1,18 @@
-# Current Feature: Palette & Dark Mode
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Re-theme the app on the sky blue / cloud white / forest green / midnight palette
-- Add a dark theme that follows the OS setting, with `next-themes` and the `.dark` class
-- Complete habits use one colour for every habit; each habit keeps its own colour for its tile and bar
-- Contrast of every text pair checked by a test
+<!-- Goals and requirements -->
 
 ## Notes
 
-- The manual theme switch lives in Settings (feature 27), not the navbar.
-- Habit and category colours are muted mid-tones that read against the card in both themes.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -23,4 +21,5 @@ In Progress
 - **Clerk Authentication:** ClerkProvider, sign-in/register pages in `app/(auth)/`, and `proxy.ts` redirects plus page-level `auth.protect()` for the app routes.
 - **User Sync:** Clerk webhook upserts/deletes `User` rows, `getSessionUser()` maps sessions to users, and the browser timezone is captured (`app/api/webhooks/clerk/route.ts`, `lib/session.ts`, `actions/user.ts`).
 - **Seed Catalog:** Idempotent seed of 7 categories and 70 system habits, some with daily goals, run via `npm run db:seed` (`prisma/seed.ts`, `prisma/seed-data.ts`).
-- **App Shell & Navigation:** `app/(app)/` layout with a bottom tab bar on phones, a left sidebar from `md` up, `PageHeader`, placeholder pages, and a lavender theme (`components/shared/`, `app/globals.css`).
+- **App Shell & Navigation:** `app/(app)/` layout with a bottom tab bar on phones, a left sidebar from `md` up, `PageHeader`, and placeholder pages (`components/shared/`).
+- **Palette & Dark Mode:** Sky blue / cloud white / forest green / midnight theme in light and dark (follows the OS, switch comes with Settings), checked by `lib/theme.test.ts` (`app/globals.css`, `components/shared/ThemeProvider.tsx`).
