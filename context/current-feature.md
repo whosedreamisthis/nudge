@@ -1,21 +1,18 @@
-# Current Feature: Habits Catalog Page
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- `/habits` Browse tab listing system habits the user hasn't added yet
-- Search by text (name and description) plus category filter, combinable
-- Each row: icon, name, category and frequency tags, description, **Add** button
-- Add opens the New Habit modal prefilled, then creates a habit linked to the system habit
-- "New Habit" button for custom habits
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Keep search and category in URL search params so the page stays a server component.
-- Habits already added are excluded.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -32,3 +29,4 @@ In Progress
 - **Toggle Completion:** Tap anywhere on a habit card to complete, step up or clear it, with optimistic updates, a header completion ring, a celebration burst and a midnight refresh (`actions/habits.ts`, `components/today/`).
 - **Weekly & Off-Day Habits:** Weekly habits whose goal is met move to a dimmed "Goal met this week" group, and the header ring skips unfinished weekly habits (`lib/week-goal.ts`, `components/today/TodayHabits.tsx`).
 - **New Habit Modal:** "New Habit" modal on the Habits page creates custom habits with a first target (`components/habits/`, `actions/habits.ts`, `lib/habit-form.ts`).
+- **Habits Catalog Page:** `/habits` lists system habits not yet added, with URL-param search and category filter, grouped by category; Add opens the prefilled modal (`components/habits/Catalog*.tsx`, `lib/catalog.ts`, `lib/db/catalog.ts`).
