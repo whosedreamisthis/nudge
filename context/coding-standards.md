@@ -18,12 +18,11 @@
 
 - Server components by default
 - Only use `'use client'` when needed (interactivity, hooks, browser APIs)
-- Use Server Actions for form submissions and simple mutations
-- Use API routes when you need:
-  - Webhooks (Stripe, GitHub, etc.)
-  - File uploads with progress tracking
-  - Long-running operations
-  - Specific HTTP status codes or headers
+- Use Server Actions for form submissions, mutations, and data loading from client components
+- **Don't use API routes if a Server Action can do the job.** Use an API route only when something external calls it or it needs raw HTTP control:
+  - Webhooks (e.g. Clerk)
+  - Scheduled jobs / cron endpoints
+  - Specific HTTP status codes or headers that matter to the caller
   - Endpoints for future mobile/CLI clients
   - Third-party integrations
 - Otherwise, fetch data directly in server components
@@ -52,7 +51,8 @@ Example v4 configuration:
 
 - Components: `components/[feature]/ComponentName.tsx`
 - Pages: `app/[route]/page.tsx`
-- Server Actions: `actions/[feature].ts`
+- Server Actions: `actions/[feature].ts` (all server actions live in `actions/`, never inside components or pages)
+- Custom hooks: `hooks/useX.ts` (all custom hooks live in `hooks/`, never inside component files)
 - Types: `types/[feature].ts`
 - Lib/Utils: `lib/[utility].ts`
 

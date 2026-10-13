@@ -296,6 +296,8 @@ npx prisma migrate deploy
 
 - All data access is scoped by `userId` — never trust client-supplied ownership.
 - Validate all input on the server with Zod.
+- **File locations:** all server actions go in `actions/[feature].ts` (e.g. `actions/habits.ts`, `actions/journal.ts`) and all custom hooks go in `hooks/useX.ts` (e.g. `hooks/useOptimisticToggle.ts`). Don't define either inside component or page files.
+- **Prefer Server Actions over API routes.** The only API routes in this app are `/api/webhooks/clerk` (called by Clerk) and `/api/cron/cleanup-demos` (called by a scheduler). Everything else, including demo creation, goes through a Server Action.
 - Use **Zustand** for shared client state; server data comes from server components and Server Actions.
 - Use Neon branches for dev/preview databases.
 - Unit test server actions and utilities with Vitest; tests mock the database.

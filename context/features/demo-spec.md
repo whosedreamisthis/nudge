@@ -9,7 +9,7 @@ Depends on: `03-clerk-auth`, `04-user-sync`, `05-seed-catalog`, and the Today / 
 ## Goals
 
 - **Try demo** button on the landing and sign-in / register pages
-- On press (server action or route handler):
+- On press (Server Action `startDemo()`):
   1. **IP lookup:** look the caller's IP up in Redis. If it maps to a live demo, mint a Clerk sign-in token for that demo user, sign the visitor in, and redirect to `/today`. No new Clerk user is created.
   2. **Cookie fallback:** if the IP has no live demo but the visitor has a valid, unexpired resume cookie (e.g. their IP changed), sign them back into that demo.
   3. Otherwise claim the IP slot, then create a Clerk user through the Backend API (generated unique email/username, no real credentials, `publicMetadata: { isDemo: true, demoExpiresAt }`).
@@ -41,7 +41,7 @@ AI features are limited for demo users: regenerate-report and habit suggestions 
 - The TTL equals the demo lifetime, so the slot frees itself. The cleanup job also deletes the key, and a failed creation deletes it immediately.
 - `NX` makes the claim race-safe: if two presses race, the loser deletes the Clerk user and DB rows it just created and signs into the winner's demo.
 - Lookup is a plain `GET`: a hit means resume, a miss means create.
-- **Fail closed:** if Upstash is unreachable, block new demos (HTTP 503, "Demos are temporarily unavailable, please try again shortly") to protect the Clerk user quota. Cookie resume still works.
+- **Fail closed:** if Upstash is unreachable, block new demos (the action returns an error: "Demos are temporarily unavailable, please try again shortly") to protect the Clerk user quota. Cookie resume still works.
 - **Accepted trade-off:** everyone behind a shared IP (office, school, mobile carrier) lands in the same demo and can see each other's changes. Demo data is throwaway.
 
 ## Data (needs a migration via `prisma migrate dev`)
@@ -58,8 +58,8 @@ AI features are limited for demo users: regenerate-report and habit suggestions 
 
 ## Routes
 
-- `POST /api/demo` (or a server action): create or resume a demo
-- `GET /api/cron/cleanup-demos`: expiry job
+- Server Action `startDemo()` in `actions/demo.ts`: create or resume a demo (no API route; it sets the resume cookie, signs the visitor in and redirects)
+- `GET /api/cron/cleanup-demos`: expiry job (an API route because a scheduler calls it)
 
 ## Env vars
 
@@ -81,7 +81,7 @@ AI features are limited for demo users: regenerate-report and habit suggestions 
 - Once a demo expires, the same IP can create a new one.
 - After 12 hours the Clerk user and DB rows are gone, and the demo session and cookie no longer work.
 - The cleanup job removes expired demos and orphans, and retries a failed Clerk delete on the next run.
-- If Upstash is down, new demos return 503 and no Clerk user is created; cookie resume still works.
+- If Upstash is down, new demos return the unavailable error and no Clerk user is created; cookie resume still works.
 - If any creation step fails midway, partially created Clerk and DB data is cleaned up.
 - Seeding, IP-claim handling and cleanup have Vitest tests (database, Clerk and Upstash mocked).
 
