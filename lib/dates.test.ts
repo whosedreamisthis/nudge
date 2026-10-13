@@ -9,6 +9,7 @@ import {
   todayKey,
   weekDays,
   weekStart,
+  msUntilNextDay,
 } from "@/lib/dates";
 
 describe("toDateKey", () => {
@@ -110,5 +111,20 @@ describe("database dates", () => {
   it("round-trips a day through a UTC-midnight Date", () => {
     expect(toDbDate("2026-10-13").toISOString()).toBe("2026-10-13T00:00:00.000Z");
     expect(fromDbDate(toDbDate("2026-10-13"))).toBe("2026-10-13");
+  });
+});
+
+describe("msUntilNextDay", () => {
+  it("counts down to local midnight, not UTC midnight", () => {
+    // 22:30 UTC is 11:30 the next morning in Auckland (UTC+13 in October), 12.5h to its midnight
+    expect(msUntilNextDay("Pacific/Auckland", new Date("2026-10-13T22:30:00Z"))).toBe(
+      12.5 * 3_600_000,
+    );
+    expect(msUntilNextDay("UTC", new Date("2026-10-13T22:30:00Z"))).toBe(1.5 * 3_600_000);
+  });
+
+  it("is a full day at local midnight and just under it a moment later", () => {
+    expect(msUntilNextDay("UTC", new Date("2026-10-13T00:00:00Z"))).toBe(86_400_000);
+    expect(msUntilNextDay("UTC", new Date("2026-10-13T00:00:00.250Z"))).toBe(86_399_750);
   });
 });

@@ -1,8 +1,8 @@
 import { connection } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { DayRollover } from "@/components/today/DayRollover";
 import { EmptyHabits } from "@/components/today/EmptyHabits";
-import { HabitRow } from "@/components/today/HabitRow";
-import { StatTiles } from "@/components/today/StatTiles";
+import { TodayHabits } from "@/components/today/TodayHabits";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TimezoneSync } from "@/components/shared/TimezoneSync";
 import { formatLongDate, todayKey } from "@/lib/dates";
@@ -29,25 +29,28 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
   const useSample = process.env.NODE_ENV !== "production" && params.sample === "1";
   const { habits, stats } = useSample ? getSampleToday(today) : await getToday(user.id, today);
 
+  const header = {
+    title: `Hey ${clerkUser?.firstName ?? "Friend"}`,
+    subtitle: formatLongDate(today),
+  };
+
   return (
     <>
       <TimezoneSync />
-      <PageHeader
-        title={`Hey ${clerkUser?.firstName ?? "Friend"}`}
-        subtitle={formatLongDate(today)}
-      />
-
+      <DayRollover today={today} timezone={user.timezone} />
       {habits.length === 0 ? (
-        <EmptyHabits />
-      ) : (
         <>
-          <StatTiles stats={stats} />
-          <ul aria-label="Today's habits" className="flex flex-col gap-3">
-            {habits.map((habit) => (
-              <HabitRow key={habit.id} habit={habit} />
-            ))}
-          </ul>
+          <PageHeader {...header} />
+          <EmptyHabits />
         </>
+      ) : (
+        <TodayHabits
+          key={today}
+          habits={habits}
+          stats={stats}
+          header={<PageHeader {...header} />}
+          sample={useSample}
+        />
       )}
     </>
   );

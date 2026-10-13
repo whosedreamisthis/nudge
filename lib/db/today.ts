@@ -46,6 +46,7 @@ export async function getToday(
       icon: habit.icon,
       color: habit.color,
       unit: habit.unit,
+      stepSize: habit.stepSize,
       categoryName: habit.category.name,
       streak: getStreak(history),
       progress: getTodayProgress(history),

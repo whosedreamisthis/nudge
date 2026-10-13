@@ -30,6 +30,21 @@ export function todayKey(timeZone: string, now: Date = new Date()): DateKey {
   return toDateKey(now, timeZone);
 }
 
+// Milliseconds from an instant to the next local midnight in the timezone. Based on the local
+// clock reading, so on a daylight-saving day it can be an hour off: callers re-check when it fires.
+export function msUntilNextDay(timeZone: string, now: Date = new Date()): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  }).formatToParts(now);
+  const part = (type: string) => Number(parts.find((p) => p.type === type)!.value);
+  const elapsed = ((part("hour") * 60 + part("minute")) * 60 + part("second")) * 1000;
+  return MS_PER_DAY - elapsed - now.getMilliseconds();
+}
+
 export function addDays(key: DateKey, days: number): DateKey {
   return fromMs(toMs(key) + days * MS_PER_DAY);
 }
