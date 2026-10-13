@@ -314,8 +314,8 @@ npx prisma migrate deploy
 - Can progress go **above** the goal (e.g. 3500/3000 ml)? Assumed yes, with the bar capped at 100%.
 - Should some system habits ship with a daily goal (water, meditation minutes, steps)? Assumed yes in the seed data.
 - Does the Focus timer add its minutes to a linked habit's daily goal (e.g. 25 of 35 min)?
-- Does the week start on Monday or Sunday (the weekly grid starts Monday)?
-- How are streaks handled for skipped days: strict, or allow a grace day?
+- **Decided:** weeks start on Monday (the weekly grid, weekly targets and weekly streaks all use Mon-Sun).
+- **Decided:** streaks are strict for now: one missed day resets a daily streak to 0 (today stays open until the day ends). A grace day can be added later in the streak logic.
 - Which **categories** ship at launch, and how big is the system-habit catalog?
 - **Navigation:** the mockups have a 3-item bottom bar (Dashboard, Habits, Progress). With Journal and Focus that's 5 items; is that acceptable, or should one of them live inside another page?
 - Should a Focus session linked to a habit auto-complete it, or ask for confirmation first?
