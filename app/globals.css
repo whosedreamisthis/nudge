@@ -80,19 +80,19 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #d97706;
+  --primary: #6d4bc4;
   --primary-foreground: #ffffff;
-  --secondary: #fef3c7;
-  --secondary-foreground: #92400e;
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
-  --accent: #fef3c7;
-  --accent-foreground: #92400e;
+  --secondary: #ede7fb;
+  --secondary-foreground: #4c3a8a;
+  --muted: #f1edfa;
+  --muted-foreground: #5f5879;
+  --accent: #ede7fb;
+  --accent-foreground: #4c3a8a;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #f1e6d0;
-  --input: #f1e6d0;
-  --ring: #f59e0b;
-  --chart-1: #f59e0b;
+  --border: #e2d9f4;
+  --input: #e2d9f4;
+  --ring: #a78bfa;
+  --chart-1: #8b5cf6;
   --chart-2: #0ea5e9;
   --chart-3: #10b981;
   --chart-4: #ec4899;
@@ -100,13 +100,13 @@
   --radius: 1rem;
 
   /* Brand */
-  --amber-gradient: linear-gradient(135deg, #fbbf24, #b45309);
+  --brand-gradient: linear-gradient(135deg, #a78bfa, #6d4bc4);
   --page-gradient: linear-gradient(
     135deg,
-    #fff4c2 0%,
-    #ffdfd1 45%,
-    #ffe9d6 70%,
-    #e3f5e1 100%
+    #f3ecff 0%,
+    #e9defc 45%,
+    #efe6fb 70%,
+    #e1ecfd 100%
   );
 
   /* One colour per category */

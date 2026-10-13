@@ -19,7 +19,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <ClerkProvider appearance={{ variables: { colorPrimary: "#d97706" } }}>
+        <ClerkProvider appearance={{ variables: { colorPrimary: "#6d4bc4" } }}>
           <Navbar />
           {/* Pages read the session at request time, so they stream inside this boundary */}
           <Suspense fallback={null}>{children}</Suspense>
