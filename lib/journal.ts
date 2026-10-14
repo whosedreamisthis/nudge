@@ -14,29 +14,25 @@ export const MOODS = [
   { value: 5, emoji: "😄", label: "Great" },
 ] as const;
 
-// A real calendar day written as YYYY-MM-DD
-export function isDateKey(value: string): value is DateKey {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const date = toDbDate(value);
-  // An impossible day is an Invalid Date, or rolls over into the next month
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
-}
-
 export const saveEntrySchema = z.object({
+  // Left out for a new entry; the action creates it and returns the id
+  id: z.string().min(1).optional(),
   content: z.string().max(MAX_ENTRY_LENGTH, "That entry is too long"),
   mood: z.number().int().min(1).max(5).nullable(),
-  // The day being edited; today when left out
-  date: z
-    .string()
-    .refine(isDateKey, "That isn't a valid date")
-    .optional(),
 });
 
 export type SaveEntryInput = z.input<typeof saveEntrySchema>;
 
-export const deleteEntrySchema = z.object({
-  date: z.string().refine(isDateKey, "That isn't a valid date"),
-});
+export const deleteEntrySchema = z.object({ id: z.string().min(1) });
+
+// "8:41 PM" for when an entry was written, in the user's timezone
+export function formatEntryTime(createdAt: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(createdAt);
+}
 
 export interface HistoryFilters {
   q: string;

@@ -2,30 +2,43 @@ import { prisma } from "@/lib/db";
 import { fromDbDate, toDbDate, type DateKey } from "@/lib/dates";
 import { monthRange, type HistoryFilters } from "@/lib/journal";
 
-// The user's entry for a local day, or null when nothing is written yet
-export function getEntry(userId: string, day: DateKey) {
-  return prisma.journalEntry.findUnique({
-    where: { userId_date: { userId, date: toDbDate(day) } },
-    select: { content: true, mood: true },
+// Entries cleared down to nothing stay in the table but are not worth showing
+const NOT_EMPTY = { OR: [{ content: { not: "" } }, { mood: { not: null } }] };
+
+// The day's entries, newest first
+export function getEntriesForDay(userId: string, day: DateKey) {
+  return prisma.journalEntry.findMany({
+    where: { userId, date: toDbDate(day), ...NOT_EMPTY },
+    select: { id: true, content: true, mood: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
   });
 }
 
+// One of the user's entries, or null when it doesn't exist or belongs to someone else
+export async function getEntryById(userId: string, id: string) {
+  const entry = await prisma.journalEntry.findFirst({
+    where: { id, userId },
+    select: { id: true, date: true, content: true, mood: true, createdAt: true },
+  });
+  return entry && { ...entry, date: fromDbDate(entry.date) };
+}
+
 // Past entries, newest first, narrowed by the History filters. One extra row is read to know
-// whether "Show more" has anything to show. Entries that were cleared to nothing are skipped.
+// whether "Show more" has anything to show.
 export async function getHistory(userId: string, { q, month, mood, limit }: HistoryFilters) {
   const range = month ? monthRange(month) : null;
   const rows = await prisma.journalEntry.findMany({
     where: {
       userId,
       AND: [
-        { OR: [{ content: { not: "" } }, { mood: { not: null } }] },
+        NOT_EMPTY,
         ...(q ? [{ content: { contains: q, mode: "insensitive" as const } }] : []),
       ],
       ...(mood && { mood }),
       ...(range && { date: { gte: toDbDate(range.from), lt: toDbDate(range.to) } }),
     },
-    select: { date: true, content: true, mood: true },
-    orderBy: { date: "desc" },
+    select: { id: true, date: true, content: true, mood: true, createdAt: true },
+    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     take: limit + 1,
   });
 

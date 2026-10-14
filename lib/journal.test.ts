@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   HISTORY_PAGE_SIZE,
   MAX_ENTRY_LENGTH,
+  formatEntryTime,
   formatShortDate,
   groupByMonth,
-  isDateKey,
   monthLabel,
   monthRange,
   parseHistoryParams,
@@ -29,27 +29,18 @@ describe("saveEntrySchema", () => {
     expect(saveEntrySchema.safeParse({ content, mood: null }).success).toBe(false);
   });
 
-  it("accepts a real date and rejects a bad one", () => {
-    expect(saveEntrySchema.safeParse({ content: "", mood: null, date: "2026-02-28" }).success).toBe(
-      true,
-    );
-    expect(saveEntrySchema.safeParse({ content: "", mood: null, date: "2026-02-30" }).success).toBe(
-      false,
-    );
+  it("takes an optional entry id", () => {
+    expect(saveEntrySchema.safeParse({ id: "e1", content: "", mood: null }).success).toBe(true);
+    expect(saveEntrySchema.safeParse({ id: "", content: "", mood: null }).success).toBe(false);
   });
 });
 
-describe("isDateKey", () => {
-  it("accepts real calendar days", () => {
-    expect(isDateKey("2026-10-13")).toBe(true);
-    expect(isDateKey("2028-02-29")).toBe(true);
-  });
-
-  it("rejects malformed and impossible days", () => {
-    expect(isDateKey("2026-13-01")).toBe(false);
-    expect(isDateKey("2027-02-29")).toBe(false);
-    expect(isDateKey("2026-1-1")).toBe(false);
-    expect(isDateKey("tomorrow")).toBe(false);
+describe("formatEntryTime", () => {
+  it("shows the clock time in the user's timezone", () => {
+    const instant = new Date("2026-10-13T16:14:00Z");
+    expect(formatEntryTime(instant, "UTC")).toBe("4:14 PM");
+    expect(formatEntryTime(instant, "America/Los_Angeles")).toBe("9:14 AM");
+    expect(formatEntryTime(instant, "Asia/Tokyo")).toBe("1:14 AM");
   });
 });
 
