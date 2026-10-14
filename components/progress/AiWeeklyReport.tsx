@@ -32,6 +32,7 @@ export function AiWeeklyReport({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const started = useRef(false);
+  const hasReport = useRef(Boolean(initial));
 
   const canGenerate = aiEnabled && hasHabits;
 
@@ -39,7 +40,10 @@ export function AiWeeklyReport({
     setError(null);
     startTransition(async () => {
       const result = await generateWeeklyReport({ regenerate });
-      if (result.success) setReport(result.data);
+      if (result.success) {
+        hasReport.current = true;
+        setReport(result.data);
+      }
       else setError(result.error);
     });
   }
@@ -50,6 +54,16 @@ export function AiWeeklyReport({
     run(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // The page can stay mounted (hidden) while the user is on another page; coming back should not
+  // show an old "try again later" message, so it is dropped when the page is left. A failed first
+  // generation keeps its message and Try again button.
+  useEffect(
+    () => () => {
+      if (hasReport.current) setError(null);
+    },
+    [],
+  );
 
   if (!aiEnabled && !report) return null;
 
