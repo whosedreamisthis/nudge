@@ -1,11 +1,13 @@
 import { connection } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { AiWeeklyReport } from "@/components/progress/AiWeeklyReport";
 import { InsightsView } from "@/components/progress/InsightsView";
 import { ProgressTiles } from "@/components/progress/ProgressTiles";
 import { WeekNav } from "@/components/progress/WeekNav";
 import { WeeklyGrid } from "@/components/progress/WeeklyGrid";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { todayKey, weekStart } from "@/lib/dates";
+import { getWeeklyReport } from "@/lib/db/ai-report";
 import { getHeatmap } from "@/lib/db/consistency";
 import { getInsights } from "@/lib/db/insights";
 import { getProgressStats, getWeekGrid } from "@/lib/db/progress";
@@ -33,7 +35,7 @@ export default async function ProgressPage({
   const week = resolveWeek(rawWeek, today);
 
   // The grid can show an earlier week; the charts below it are always about the current one
-  const [stats, rows, heatmap, insights, currentRows] = await Promise.all([
+  const [stats, rows, heatmap, insights, currentRows, report] = await Promise.all([
     getProgressStats(user.id, today),
     getWeekGrid(user.id, user.timezone, week, today),
     getHeatmap(user.id, today),
@@ -41,6 +43,7 @@ export default async function ProgressPage({
     week === thisWeek
       ? null
       : getWeekGrid(user.id, user.timezone, thisWeek, today),
+    user.aiEnabled ? getWeeklyReport(user.id, thisWeek) : null,
   ]);
 
   return (
@@ -52,6 +55,13 @@ export default async function ProgressPage({
         bestStreak={stats.bestStreak}
         weeklyAverage={weeklyAverage(heatmap, today)}
         topHabit={topHabit(rows)}
+      />
+
+      <AiWeeklyReport
+        initial={report}
+        timezone={user.timezone}
+        aiEnabled={user.aiEnabled}
+        hasHabits={(currentRows ?? rows).length > 0}
       />
 
       {/* One column on phones and tablets; from xl the grid sits left and the charts right */}

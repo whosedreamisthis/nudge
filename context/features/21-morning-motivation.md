@@ -3,7 +3,7 @@
 ## Goals
 
 - Dismissable "Morning Motivation" card at the top of Today
-- Short AI message based on recent habit history
+- One-sentence AI message based on recent habit history
 - Generate once per user per day and store it as an `AiReport` of type `motivation`
 - Dismissing hides it until the next day
 
