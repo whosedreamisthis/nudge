@@ -40,7 +40,9 @@ export default async function ProgressPage({
     getWeekGrid(user.id, user.timezone, week, today),
     getHeatmap(user.id, today),
     getInsights(user.id, today),
-    week === thisWeek ? null : getWeekGrid(user.id, user.timezone, thisWeek, today),
+    week === thisWeek
+      ? null
+      : getWeekGrid(user.id, user.timezone, thisWeek, today),
   ]);
 
   return (
@@ -49,20 +51,35 @@ export default async function ProgressPage({
 
       <ProgressTiles
         today={getRingCounts(habits)}
-        averageStreakDays={averageStreakDays(habits.map((habit) => habit.streak))}
+        averageStreakDays={averageStreakDays(
+          habits.map((habit) => habit.streak),
+        )}
         weeklyAverage={weeklyAverage(heatmap, today)}
         topHabit={topHabit(rows)}
       />
 
-      <section aria-labelledby="grid-heading" className="mx-auto flex w-full flex-col gap-3 xl:max-w-4xl">
-        <h2 id="grid-heading" className="text-lg font-semibold">
-          Habits by day
-        </h2>
-        <WeekNav week={week} thisWeek={thisWeek} />
-        <WeeklyGrid rows={rows} today={today} isCurrentWeek={week === thisWeek} />
-      </section>
+      {/* One column on phones and tablets; from xl the grid sits left and the charts right */}
+      <div className="flex flex-col gap-6 xl:grid xl:grid-cols-2 xl:items-start xl:gap-8">
+        <section
+          aria-labelledby="grid-heading"
+          className="flex w-full flex-col gap-3"
+        >
+          <h2 id="grid-heading" className="text-lg font-semibold">
+            Habits by day
+          </h2>
+          <WeekNav week={week} thisWeek={thisWeek} />
+          <WeeklyGrid
+            rows={rows}
+            today={today}
+            isCurrentWeek={week === thisWeek}
+          />
+        </section>
 
-      <InsightsView insights={insights} performance={habitPerformance(currentRows ?? rows)} />
+        <InsightsView
+          insights={insights}
+          performance={habitPerformance(currentRows ?? rows)}
+        />
+      </div>
     </div>
   );
 }
