@@ -22,6 +22,8 @@ interface Item {
 }
 
 interface TodayEntriesProps {
+  // The Today/History tabs, shown on the same row as the New entry button
+  tabs: React.ReactNode;
   entries: TodayEntry[];
   timezone: string;
   fontClassName: string;
@@ -29,7 +31,7 @@ interface TodayEntriesProps {
 
 // Today's entries, newest first. "New entry" adds a blank one on top; it is only saved once
 // something is typed or a mood is picked, so unused drafts leave nothing behind.
-export function TodayEntries({ entries, timezone, fontClassName }: TodayEntriesProps) {
+export function TodayEntries({ tabs, entries, timezone, fontClassName }: TodayEntriesProps) {
   const [items, setItems] = useState<Item[]>(() =>
     entries.length > 0
       ? entries.map((entry) => ({ key: entry.id, ...entry }))
@@ -39,15 +41,19 @@ export function TodayEntries({ entries, timezone, fontClassName }: TodayEntriesP
 
   return (
     <div className="flex flex-col gap-6">
-      <Button
-        variant="outline"
-        className="self-start"
-        disabled={hasDraft}
-        onClick={() => setItems((current) => [blankItem(), ...current])}
-      >
-        <Plus aria-hidden />
-        New entry
-      </Button>
+      {/* The tabs shrink to leave room for the button */}
+      <div className="flex items-stretch gap-2">
+        {tabs}
+        {/* h-auto so it grows to the tab bar's height */}
+        <Button
+          className="ml-auto h-auto shrink-0"
+          disabled={hasDraft}
+          onClick={() => setItems((current) => [blankItem(), ...current])}
+        >
+          <Plus aria-hidden />
+          New entry
+        </Button>
+      </div>
 
       <ul className="flex flex-col gap-8">
         {items.map((item, index) => (
