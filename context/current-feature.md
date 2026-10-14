@@ -1,20 +1,18 @@
-# Current Feature: Morning Motivation
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Dismissable "Morning Motivation" card at the top of Today
-- One-sentence AI message based on recent habit history
-- Generate once per user per day and store it as an `AiReport` of type `motivation`
-- Dismissing hides it until the next day
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Reuses the Gemini client (`lib/gemini.ts`) and `AiReport` model from the weekly report feature.
-- Skip the card for brand-new users with no history.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -48,3 +46,4 @@ In Progress
 - **Demo Try Flow:** Try demo button on the landing and auth pages; one demo per IP via Upstash, signed resume cookie, banner and a daily cap (`actions/demo.ts`, `lib/demo-redis.ts`, `components/demo/`).
 - **Today Declutter:** Stat tiles leave Today; Progress shows Best streak and Active streaks instead of Today and Average streak (`components/shared/StatTile.tsx`, `lib/db/progress.ts`, `components/progress/ProgressTiles.tsx`).
 - **AI Weekly Report:** Progress card with a Gemini summary and 3 insights, stored per week in `AiReport`, with Regenerate, cooldown and `AI_DISABLED` mocks (`lib/gemini.ts`, `actions/ai-report.ts`, `components/progress/AiWeeklyReport.tsx`).
+- **Morning Motivation:** Dismissable Today card with a one-sentence Gemini message from recent history, generated once a day and stored as a `MOTIVATION` `AiReport` (`actions/motivation.ts`, `lib/motivation.ts`, `components/today/MorningMotivation.tsx`).
