@@ -29,10 +29,10 @@ export default async function JournalPage({ searchParams }: PageProps<"/journal"
     return (
       <>
         <PageHeader title="Journal" subtitle={formatLongDate(today)} />
-        <JournalTabs active="write" />
         {/* Keyed by day so a new day starts with a fresh list */}
         <TodayEntries
           key={today}
+          tabs={<JournalTabs active="write" />}
           entries={entries.map((entry) => ({ ...entry, createdAt: entry.createdAt.toISOString() }))}
           timezone={user.timezone}
           fontClassName={courier.className}
