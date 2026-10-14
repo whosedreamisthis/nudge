@@ -1,21 +1,18 @@
-# Current Feature: Journal Write Entry
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Add the `JournalEntry` model and migration (one entry per user per day)
-- `/journal` page to write or edit today's entry with an optional mood
-- Entry text uses **Courier Prime** (`next/font/google`)
-- Debounced autosave through a Server Action
-- Add Journal to the bottom navigation
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Optional prompt of the day can wait for a later feature.
-- Entries are private; never send them to the AI.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -40,3 +37,4 @@ In Progress
 - **Progress Weekly Grid:** `/progress` with four summary tiles and a habits-by-days weekly grid with previous/next week arrows (`app/(app)/progress/`, `components/progress/`, `lib/week-grid.ts`, `lib/db/progress.ts`).
 - **Progress Insights Tab:** `/progress` shows this-week-vs-last-week bars (with a 30-day summary line) and habit performance bars under the grid (`components/progress/`, `lib/insights.ts`, `lib/db/insights.ts`).
 - **Settings Modal:** Gear in the Navbar opens Settings: account, Light/Dark theme, timezone, AI switch, reminders placeholder and delete account (`components/shared/SettingsButton.tsx`, `actions/user.ts`, `lib/settings.ts`).
+- **Journal Write Entry:** `/journal` page to write today's entry with an optional mood, Courier Prime text and debounced autosave (`actions/journal.ts`, `components/journal/`, `lib/journal.ts`).
