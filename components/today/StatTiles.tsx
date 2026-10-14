@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { TodayStats } from "@/lib/stats";
 import { formatStreak } from "@/lib/streaks";
 
-interface TileProps {
+export interface TileProps {
   label: string;
   badge: ReactNode;
   tint: string;
@@ -11,7 +11,7 @@ interface TileProps {
   caption: ReactNode;
 }
 
-function Tile({ label, badge, tint, value, caption }: TileProps) {
+export function Tile({ label, badge, tint, value, caption }: TileProps) {
   return (
     <div className={`flex flex-col gap-3 rounded-2xl p-4 text-foreground shadow-sm ${tint}`}>
       <dt className="flex items-center gap-2 text-sm font-medium text-foreground/75">
@@ -28,6 +28,21 @@ function Tile({ label, badge, tint, value, caption }: TileProps) {
         <span className="mt-1.5 max-w-full truncate text-sm text-foreground/75">{caption}</span>
       </dd>
     </div>
+  );
+}
+
+// A habit's icon on a light tile, so a yellow icon still shows on an amber card
+export function HabitChip({ icon, name }: { icon: string; name: string }) {
+  return (
+    <span className="inline-flex max-w-full items-center gap-1.5">
+      <span
+        aria-hidden
+        className="flex size-6 shrink-0 items-center justify-center rounded-md bg-card/70 text-sm"
+      >
+        {icon}
+      </span>
+      <span className="truncate">{name}</span>
+    </span>
   );
 }
 
@@ -50,16 +65,7 @@ export function StatTiles({ stats }: { stats: TodayStats }) {
         value={bestStreak ? formatStreak({ unit: bestStreak.unit, current: bestStreak.best }) : "0"}
         caption={
           bestStreak ? (
-            <span className="inline-flex max-w-full items-center gap-1.5">
-              {/* A light tile behind the emoji, so a yellow icon still shows on the amber card */}
-              <span
-                aria-hidden
-                className="flex size-6 shrink-0 items-center justify-center rounded-md bg-card/70 text-sm"
-              >
-                {bestStreak.icon}
-              </span>
-              <span className="truncate">{bestStreak.name}</span>
-            </span>
+            <HabitChip icon={bestStreak.icon} name={bestStreak.name} />
           ) : (
             "Complete a habit to start one"
           )
