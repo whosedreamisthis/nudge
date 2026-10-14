@@ -49,3 +49,4 @@ Completed
 - **Morning Motivation:** Dismissable Today card with a one-sentence Gemini message from recent history, generated once a day and stored as a `MOTIVATION` `AiReport` (`actions/motivation.ts`, `lib/motivation.ts`, `components/today/MorningMotivation.tsx`).
 - **AI Feature Toggles:** Settings has a switch each for weekly report, morning motivation and habit suggestions, also for demos via a cookie (`actions/user.ts`, `lib/ai-settings.ts`, `components/shared/SettingsButton.tsx`).
 - **AI Habit Suggestions:** Habits page wizard asks three questions and suggests 3 habits, preferring catalog ones, then adds each via the prefilled modal (`actions/habit-suggestions.ts`, `lib/habit-suggestions.ts`, `components/habits/SuggestHabitWizard.tsx`).
+- **Caching:** `"use cache"` on habit, progress and journal data functions with per-user tags, expired by Server Actions via `updateTag` (`lib/cache-tags.ts`, `lib/db/`, `actions/`).
