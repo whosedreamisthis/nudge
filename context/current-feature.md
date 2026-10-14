@@ -1,37 +1,18 @@
-# Current Feature: Demo Try Flow
+# Current Feature
 
-A **Try demo** button creates a temporary, isolated Clerk user with seeded sample habits. One demo per IP at a time; pressing it again from the same IP signs the visitor back into the same demo.
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- **Try demo** button on the landing and sign-in / register pages
-- Server Action `startDemo()` (`actions/demo.ts`, no API route; sets the resume cookie, signs the visitor in, redirects to `/today`):
-  1. IP lookup in Redis: a hit means mint a Clerk sign-in token for that demo user and sign in (no new Clerk user)
-  2. Cookie fallback: no live demo for the IP but a valid, unexpired resume cookie means sign back into that demo
-  3. Otherwise claim the IP slot, create the Clerk user (generated unique email on `DEMO_EMAIL_DOMAIN`, no real credentials, `publicMetadata: demoMetadata(expiry)`)
-  4. Upsert the `User` row with `isDemo` and `demoExpiresAt = now + 12h` set in both create and update (the webhook or `getSessionUser` may have made a plain row first), timezone from the browser
-  5. `seedDemoUser` (from 29a), then sign in, set the resume cookie, redirect
-- Banner for demo users: "Demo: your data will be deleted in X hours. Register to keep your habits", linking to `/register`; demos cannot be converted to real accounts
-- One demo per IP with Upstash Redis: `SET nudge:demo:ip:<hash> <clerkId> NX EX 43200`, hash of the client IP only, race-safe (a losing racer deletes what it created and signs into the winner's demo), fail closed with "Demos are temporarily unavailable, please try again shortly" when Upstash is down (cookie resume still works)
-- Resume cookie: httpOnly, secure, signed with `DEMO_COOKIE_SECRET`, holds the demo's `clerkId`, expires with the demo; an expired demo clears it
-- The IP key is not deleted by the cleanup job: its TTL equals the demo's remaining lifetime, so it frees itself, and a stale slot (demo gone) is freed when `startDemo()` sees it. (The key holds only a hash of the IP, which can't be reversed from a Clerk id.)
-- `startDemo()` returns a one-time sign-in ticket (a Server Action can't create a Clerk session); the Try demo button exchanges it with `signIn.ticket()` and `signIn.finalize()`
-- If any creation step fails midway, delete the partial Clerk and DB data and the IP key
-- Vitest tests for IP-claim handling and `startDemo()` (database, Clerk and Upstash mocked)
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Env vars: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` and `DEMO_COOKIE_SECRET` are already in `.env.local`; `CRON_SECRET` is still unset.
-- **Shared Redis:** the Upstash database is shared with other projects (free tier = one database). Every key starts with `nudge:` (one helper owns the prefix), only exact keys we built are touched (no `KEYS`, `SCAN`, `FLUSHDB`, `FLUSHALL`), and commands are kept few because the daily command limit is shared.
-- Depends on 29a (done): `lib/demo.ts`, `lib/demo-seed.ts`, `lib/demo-cleanup.ts`, expiry check in `getSessionUser`.
-- Shared IP trade-off accepted: everyone behind one IP lands in the same demo.
-- Regenerate-report and habit suggestions must be disabled or rate-limited for demo users; features 20 and 22 apply this when built.
-- Never use `prisma db push`; schema changes go through migrations.
-- Full spec: `context/features/29b-demo-try-flow.md` (acceptance criteria included).
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -62,3 +43,4 @@ In Progress
 - **Focus Timer:** `/focus` countdown with presets, custom minutes, pause/resume/stop, stored in localStorage, with a chime and toast on finish (`components/focus/`, `lib/focus.ts`, `lib/focus-store.ts`).
 - **Focus: Link to a Habit:** Start a Focus session from `/focus?habit=<id>` or the Today menu; on finish a checkbox counts it for the habit (`actions/habits.ts`, `lib/focus.ts`, `components/focus/`).
 - **Demo Data and Expiry:** Demo seed (5 habits, 14 weeks of completions, journal entries), expired demos blocked in `getSessionUser`, and a CRON_SECRET-protected cleanup job (`lib/demo.ts`, `lib/demo-seed.ts`, `lib/demo-cleanup.ts`, `app/api/cron/cleanup-demos/`).
+- **Demo Try Flow:** Try demo button on the landing and auth pages; one demo per IP via Upstash, signed resume cookie, banner and a daily cap (`actions/demo.ts`, `lib/demo-redis.ts`, `components/demo/`).
