@@ -112,11 +112,11 @@ model HabitCompletion {
   @@index([userId, date])
 }
 
-// One private entry per user per day
+// A private entry; a user can write several a day
 model JournalEntry {
   id        String   @id @default(cuid())
   userId    String
-  // User-local calendar day
+  // User-local calendar day it was written; createdAt gives the time of day
   date      DateTime @db.Date
   content   String   @default("") @db.Text
   // 1 (rough) to 5 (great); null = no mood picked
@@ -126,5 +126,5 @@ model JournalEntry {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, date])
+  @@index([userId, date])
 }

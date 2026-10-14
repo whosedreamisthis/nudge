@@ -1,17 +1,55 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { findMany } = vi.hoisted(() => ({ findMany: vi.fn() }));
+const { findMany, findFirst } = vi.hoisted(() => ({ findMany: vi.fn(), findFirst: vi.fn() }));
 
-vi.mock("@/lib/db", () => ({ prisma: { journalEntry: { findMany } } }));
+vi.mock("@/lib/db", () => ({ prisma: { journalEntry: { findMany, findFirst } } }));
 
-import { getEntryMonths, getHistory } from "./journal";
+import { getEntriesForDay, getEntryById, getEntryMonths, getHistory } from "./journal";
 
 const NO_FILTERS = { q: "", month: "", mood: null, limit: 2 };
 
 const row = (date: string, content = "text", mood: number | null = null) => ({
+  id: `id-${date}`,
   date: new Date(`${date}T00:00:00.000Z`),
+  createdAt: new Date(`${date}T09:00:00.000Z`),
   content,
   mood,
+});
+
+describe("getEntriesForDay", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("reads the user's entries for the day, newest first", async () => {
+    findMany.mockResolvedValue([]);
+
+    await getEntriesForDay("u1", "2026-10-13");
+
+    const call = findMany.mock.calls[0][0];
+    expect(call.where).toMatchObject({
+      userId: "u1",
+      date: new Date("2026-10-13T00:00:00.000Z"),
+    });
+    expect(call.orderBy).toEqual({ createdAt: "desc" });
+  });
+});
+
+describe("getEntryById", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("scopes the lookup to the user and returns a date key", async () => {
+    findFirst.mockResolvedValue(row("2026-10-13"));
+
+    const entry = await getEntryById("u1", "e1");
+
+    expect(findFirst.mock.calls[0][0].where).toEqual({ id: "e1", userId: "u1" });
+    expect(entry?.date).toBe("2026-10-13");
+  });
+
+  it("returns null for someone else's or a missing entry", async () => {
+    findFirst.mockResolvedValue(null);
+
+    expect(await getEntryById("u1", "nope")).toBeNull();
+  });
 });
 
 describe("getHistory", () => {
@@ -25,7 +63,7 @@ describe("getHistory", () => {
     expect(entries.map((e) => e.date)).toEqual(["2026-10-03", "2026-10-02"]);
     expect(hasMore).toBe(true);
     expect(findMany.mock.calls[0][0]).toMatchObject({
-      orderBy: { date: "desc" },
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
       take: 3,
     });
   });

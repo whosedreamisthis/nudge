@@ -3,11 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { courier } from "@/components/journal/courier";
 import { HistoryFilters } from "@/components/journal/HistoryFilters";
 import { HistoryList } from "@/components/journal/HistoryList";
-import { JournalEditor } from "@/components/journal/JournalEditor";
 import { JournalTabs } from "@/components/journal/JournalTabs";
+import { TodayEntries } from "@/components/journal/TodayEntries";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { formatLongDate, todayKey } from "@/lib/dates";
-import { getEntry, getEntryMonths, getHistory } from "@/lib/db/journal";
+import { getEntriesForDay, getEntryMonths, getHistory } from "@/lib/db/journal";
 import { HISTORY_PAGE_SIZE, parseHistoryParams } from "@/lib/journal";
 import { getSessionUser } from "@/lib/session";
 
@@ -25,16 +25,16 @@ export default async function JournalPage({ searchParams }: PageProps<"/journal"
   const historyTab = params.tab === "history";
 
   if (!historyTab) {
-    const entry = await getEntry(user.id, today);
+    const entries = await getEntriesForDay(user.id, today);
     return (
       <>
         <PageHeader title="Journal" subtitle={formatLongDate(today)} />
         <JournalTabs active="write" />
-        {/* Keyed by day so a new day starts with a fresh editor */}
-        <JournalEditor
+        {/* Keyed by day so a new day starts with a fresh list */}
+        <TodayEntries
           key={today}
-          initialContent={entry?.content ?? ""}
-          initialMood={entry?.mood ?? null}
+          entries={entries.map((entry) => ({ ...entry, createdAt: entry.createdAt.toISOString() }))}
+          timezone={user.timezone}
           fontClassName={courier.className}
         />
       </>
@@ -63,6 +63,7 @@ export default async function JournalPage({ searchParams }: PageProps<"/journal"
         {...history}
         filtered={Boolean(filters.q || filters.month || filters.mood)}
         nextHref={`/journal?${next.toString()}`}
+        timezone={user.timezone}
       />
     </>
   );

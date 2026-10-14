@@ -1,36 +1,31 @@
 import { connection } from "next/server";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { ArrowLeft } from "lucide-react";
 import { courier } from "@/components/journal/courier";
 import { DeleteEntryButton } from "@/components/journal/DeleteEntryButton";
 import { JournalEditor } from "@/components/journal/JournalEditor";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { formatLongDate, todayKey } from "@/lib/dates";
-import { getEntry } from "@/lib/db/journal";
-import { isDateKey } from "@/lib/journal";
+import { formatLongDate } from "@/lib/dates";
+import { getEntryById } from "@/lib/db/journal";
 import { getSessionUser } from "@/lib/session";
 
-// One past entry, to read or edit
-export default async function JournalEntryPage({ params }: PageProps<"/journal/[date]">) {
+// One entry, to read or edit
+export default async function JournalEntryPage({ params }: PageProps<"/journal/[id]">) {
   await connection();
 
   // Real access check; the proxy redirect is only an optimization
   await auth.protect();
 
-  const [user, { date }] = await Promise.all([getSessionUser(), params]);
-  if (!user || !isDateKey(date)) notFound();
+  const [user, { id }] = await Promise.all([getSessionUser(), params]);
+  if (!user) notFound();
 
-  const today = todayKey(user.timezone);
-  // Today is written on the Today tab; the future has nothing to show
-  if (date === today) redirect("/journal");
-  if (date > today) notFound();
-
-  const entry = await getEntry(user.id, date);
+  // Scoped to the signed-in user, so someone else's entry looks like it doesn't exist
+  const entry = await getEntryById(user.id, id);
   if (!entry) notFound();
 
-  const label = formatLongDate(date);
+  const label = formatLongDate(entry.date);
 
   return (
     <>
@@ -43,13 +38,15 @@ export default async function JournalEntryPage({ params }: PageProps<"/journal/[
       </Link>
       <div className="flex items-start justify-between gap-4">
         <PageHeader title={label} />
-        <DeleteEntryButton date={date} label={label} />
+        <DeleteEntryButton id={entry.id} label={label} />
       </div>
       <JournalEditor
-        key={date}
-        date={date}
+        key={entry.id}
+        entryId={entry.id}
         initialContent={entry.content}
         initialMood={entry.mood}
+        createdAt={entry.createdAt.toISOString()}
+        timezone={user.timezone}
         fontClassName={courier.className}
       />
     </>
