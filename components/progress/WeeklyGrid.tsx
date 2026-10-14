@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 const DAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
 
 const STATE_CLASSES: Record<Exclude<DayState, "done">, string> = {
-  open: "bg-muted",
-  future: "bg-muted/40",
-  before: "bg-muted/25",
+  // The border colour is darker than the muted fill, which is too close to the light card
+  open: "bg-border/60",
+  future: "bg-border/40",
+  before: "bg-border/30",
 };
 
 const STATE_LABELS: Record<DayState, string> = {

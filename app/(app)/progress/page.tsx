@@ -1,12 +1,17 @@
 import { connection } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { InsightsView } from "@/components/progress/InsightsView";
+import { ProgressTabs } from "@/components/progress/ProgressTabs";
 import { ProgressTiles } from "@/components/progress/ProgressTiles";
 import { WeekNav } from "@/components/progress/WeekNav";
 import { WeeklyGrid } from "@/components/progress/WeeklyGrid";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { todayKey, weekStart } from "@/lib/dates";
+import { getHeatmap } from "@/lib/db/consistency";
+import { getInsights } from "@/lib/db/insights";
 import { getWeekGrid } from "@/lib/db/progress";
 import { getToday } from "@/lib/db/today";
+import { habitPerformance, weeklyAverage } from "@/lib/insights";
 import { getSessionUser } from "@/lib/session";
 import { getRingCounts } from "@/lib/week-goal";
 import { averageStreakDays, resolveWeek, topHabit } from "@/lib/week-grid";
@@ -30,25 +35,42 @@ export default async function ProgressPage({
   const rawWeek = Array.isArray(params.week) ? params.week[0] : params.week;
   const week = resolveWeek(rawWeek, today);
 
-  const [{ habits, stats }, rows] = await Promise.all([
+  if (params.tab === "insights") {
+    const [insights, rows] = await Promise.all([
+      getInsights(user.id, today),
+      getWeekGrid(user.id, user.timezone, thisWeek, today),
+    ]);
+
+    return (
+      <div className="flex flex-col gap-6">
+        <PageHeader title="Progress" subtitle="How your week is going." />
+        <ProgressTabs active="insights" />
+        <InsightsView insights={insights} performance={habitPerformance(rows)} />
+      </div>
+    );
+  }
+
+  const [{ habits }, rows, heatmap] = await Promise.all([
     getToday(user.id, today),
     getWeekGrid(user.id, user.timezone, week, today),
+    getHeatmap(user.id, today),
   ]);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Progress" subtitle="How your week is going." />
+      <ProgressTabs active="overview" />
 
       <ProgressTiles
         today={getRingCounts(habits)}
         averageStreakDays={averageStreakDays(habits.map((habit) => habit.streak))}
-        bestStreak={stats.bestStreak}
+        weeklyAverage={weeklyAverage(heatmap, today)}
         topHabit={topHabit(rows)}
       />
 
-      <section aria-labelledby="weekly-heading" className="mx-auto flex w-full flex-col gap-3 xl:max-w-4xl">
-        <h2 id="weekly-heading" className="text-lg font-semibold">
-          Weekly
+      <section aria-labelledby="grid-heading" className="mx-auto flex w-full flex-col gap-3 xl:max-w-4xl">
+        <h2 id="grid-heading" className="text-lg font-semibold">
+          Habits by day
         </h2>
         <WeekNav week={week} thisWeek={thisWeek} />
         <WeeklyGrid rows={rows} today={today} isCurrentWeek={week === thisWeek} />

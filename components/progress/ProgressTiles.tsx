@@ -1,6 +1,5 @@
-import { CircleCheck, Flame, Star, Trophy } from "lucide-react";
+import { Activity, CircleCheck, Flame, Star } from "lucide-react";
 import { HabitChip, Tile } from "@/components/today/StatTiles";
-import type { TodayStats } from "@/lib/stats";
 import { formatStreak } from "@/lib/streaks";
 import type { GridRow } from "@/lib/week-grid";
 
@@ -8,12 +7,13 @@ interface ProgressTilesProps {
   // Today's counts, as on the Today page's ring
   today: { done: number; total: number };
   averageStreakDays: number;
-  bestStreak: TodayStats["bestStreak"];
+  // Completions per day over the last 7 days
+  weeklyAverage: number;
   // The habit with the most completed days in the shown week
   topHabit: GridRow | null;
 }
 
-export function ProgressTiles({ today, averageStreakDays, bestStreak, topHabit }: ProgressTilesProps) {
+export function ProgressTiles({ today, averageStreakDays, weeklyAverage, topHabit }: ProgressTilesProps) {
   return (
     <dl aria-label="Your progress" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <Tile
@@ -31,17 +31,11 @@ export function ProgressTiles({ today, averageStreakDays, bestStreak, topHabit }
         caption="across your habits"
       />
       <Tile
-        label="Best streak"
+        label="Weekly average"
         tint="bg-tint-amber"
-        badge={<Trophy className="size-5 text-habit-amber" />}
-        value={bestStreak ? formatStreak({ unit: bestStreak.unit, current: bestStreak.best }) : "0"}
-        caption={
-          bestStreak ? (
-            <HabitChip icon={bestStreak.icon} name={bestStreak.name} />
-          ) : (
-            "Complete a habit to start one"
-          )
-        }
+        badge={<Activity className="size-5 text-habit-amber" />}
+        value={weeklyAverage}
+        caption="completions a day, last 7 days"
       />
       <Tile
         label="Top habit"

@@ -53,17 +53,17 @@ Most habit trackers either show a checklist and nothing else, or bury the useful
 
 ### 3.2 Progress & Insights (page 2)
 
-Design principle: **keep it concise.** The app should answer "how am I doing?" at a glance; users shouldn't get lost in reports. Two tabs only: **Weekly** and **Insights**.
+Design principle: **keep it concise.** The app should answer "how am I doing?" at a glance; users shouldn't get lost in reports. Two tabs only: **Overview** and **Insights**.
 
-**Weekly tab**
+**Overview tab**
 
 - **AI Weekly Report:** narrative summary of the week (Mon–Sun) plus 3 actionable insights. Has a "Regenerate report" button and a generated-at timestamp.
-- **Summary tiles:** today's progress, average streak, best streak (all-time), top habit.
+- **Summary tiles:** today's progress, average streak, weekly average (completions per day, last 7 days), top habit. Best streak is not repeated here, it is already on Today.
 - **Weekly grid:** habits × days (Mon–Sun), each habit with its own colour, completed days filled in. Previous / next arrows next to the date range let the user browse earlier weeks (the next arrow is disabled on the current week). For weekly habits, any day can be checked; the week counts as met once the target number of days is reached, and unchecked days are not misses.
 
 **Insights tab** (deliberately small)
 
-- **Two tiles:** total completions (all-time) and weekly average (last 7 days).
+- **One tile:** completions in the last 30 days, with the change against the 30 days before.
 - **This week vs last week:** one bar chart, completions per day.
 - **Habit performance:** one progress bar per habit for the week (e.g. 2/7 · 29%, 1/3 · 33%), measured against the habit's own target and capped at 100%.
 
@@ -252,7 +252,7 @@ Notes:
 | Route         | Purpose                                            |
 | ------------- | -------------------------------------------------- |
 | `/today`      | Today page (default after sign-in)                 |
-| `/progress`   | Progress & Insights (Weekly / Insights)               |
+| `/progress`   | Progress & Insights (Overview / Insights)               |
 | `/habits`     | Habit management and system-habit catalog          |
 | `/journal`    | Daily journal entries                              |
 | `/focus`      | Focus / meditation timer                           |
@@ -309,7 +309,7 @@ npx prisma migrate deploy
 ## 10. Open Questions
 
 - What goes in the **Settings modal**?
-- Is the Insights tab above the right minimum, or should it merge into the Weekly tab entirely?
+- Is the Insights tab above the right minimum, or should it merge into the Overview tab entirely?
 - Should a weekly habit optionally be pinned to specific weekdays, or is "N days per week, any days" enough? (The mockup only has the count.)
 - Can progress go **above** the goal (e.g. 3500/3000 ml)? Assumed yes, with the bar capped at 100%.
 - Should some system habits ship with a daily goal (water, meditation minutes, steps)? Assumed yes in the seed data.
