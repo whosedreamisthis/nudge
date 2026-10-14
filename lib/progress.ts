@@ -45,6 +45,11 @@ export function advanceAmount(amount: number, goal: number | null, stepSize: num
   return Math.min(goal, amount + (stepSize ?? goal));
 }
 
+// The day's amount after one step back (a whole step when the habit has none); never below 0
+export function undoAmount(amount: number, stepSize: number | null) {
+  return Math.max(0, amount - (stepSize ?? amount));
+}
+
 // Today's progress after a tap, for the optimistic update
 export function advanceProgress(progress: TodayProgress, stepSize: number | null): TodayProgress {
   const amount = advanceAmount(progress.amount, progress.goal, stepSize);

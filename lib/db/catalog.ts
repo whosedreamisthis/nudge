@@ -22,6 +22,9 @@ export function getCatalogHabits(userId: string, { q, category }: CatalogFilters
       categoryId: true,
       defaultFrequency: true,
       defaultTargetDaysPerWeek: true,
+      defaultDailyGoal: true,
+      defaultUnit: true,
+      defaultStepSize: true,
       category: { select: { name: true } },
       // An archived copy: Browse offers to restore it instead of adding a duplicate
       habits: { where: { userId, archivedAt: { not: null } }, select: { id: true }, take: 1 },

@@ -43,7 +43,10 @@ describe("advanceHabit", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(NOW);
-    getSessionUser.mockResolvedValue({ id: "u1", timezone: "Pacific/Auckland" });
+    getSessionUser.mockResolvedValue({
+      id: "u1",
+      timezone: "Pacific/Auckland",
+    });
     findFirst.mockResolvedValue({ id: "h1", dailyGoal: null, stepSize: null });
     findUnique.mockResolvedValue(null);
   });
@@ -80,7 +83,9 @@ describe("advanceHabit", () => {
     const result = await advanceHabit({ habitId: "h1" });
 
     expect(result).toEqual({ success: true, data: { amount: 2000 } });
-    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ update: { amount: 2000 } }));
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ update: { amount: 2000 } }),
+    );
   });
 
   it("clears a goal habit that has reached its goal", async () => {
@@ -97,7 +102,9 @@ describe("advanceHabit", () => {
     await advanceHabit({ habitId: "h1" });
 
     expect(findFirst).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "h1", userId: "u1", archivedAt: null } }),
+      expect.objectContaining({
+        where: { id: "h1", userId: "u1", archivedAt: null },
+      }),
     );
   });
 
@@ -155,7 +162,10 @@ describe("createHabit", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(NOW);
-    getSessionUser.mockResolvedValue({ id: "u1", timezone: "Pacific/Auckland" });
+    getSessionUser.mockResolvedValue({
+      id: "u1",
+      timezone: "Pacific/Auckland",
+    });
     findCategory.mockResolvedValue({ id: "c1" });
     createHabitRow.mockResolvedValue({ id: "h9" });
   });
@@ -172,6 +182,9 @@ describe("createHabit", () => {
         categoryId: "c1",
         icon: "📚",
         color: "sky",
+        dailyGoal: null,
+        unit: null,
+        stepSize: null,
         userId: "u1",
         targets: {
           create: {
@@ -183,7 +196,9 @@ describe("createHabit", () => {
       },
       select: { id: true },
     });
-    expect(createHabitRow.mock.calls[0][0].data).not.toHaveProperty("systemHabitId");
+    expect(createHabitRow.mock.calls[0][0].data).not.toHaveProperty(
+      "systemHabitId",
+    );
     expect(revalidatePath).toHaveBeenCalledWith("/today");
     expect(revalidatePath).toHaveBeenCalledWith("/habits");
   });
@@ -206,7 +221,10 @@ describe("createHabit", () => {
   it("rejects a signed-out user", async () => {
     getSessionUser.mockResolvedValue(null);
 
-    expect(await createHabit(input)).toEqual({ success: false, error: "Not signed in" });
+    expect(await createHabit(input)).toEqual({
+      success: false,
+      error: "Not signed in",
+    });
     expect(createHabitRow).not.toHaveBeenCalled();
   });
 
@@ -214,19 +232,17 @@ describe("createHabit", () => {
     const catalogInput = { ...input, icon: "🥤", systemHabitId: "s1" };
 
     beforeEach(() => {
-      findSystemHabit.mockResolvedValue({
-        defaultDailyGoal: 2000,
-        defaultUnit: "ml",
-        defaultStepSize: 250,
-      });
+      findSystemHabit.mockResolvedValue({ id: "s1" });
       findFirst.mockResolvedValue(null);
     });
 
-    it("links the system habit and copies its goal from the database, not the client", async () => {
+    it("links the system habit and stores the goal from the form", async () => {
       const result = await createHabit({
         ...catalogInput,
-        dailyGoal: 1,
-      } as typeof catalogInput);
+        dailyGoal: 2000,
+        unit: "ml",
+        stepSize: 250,
+      });
 
       expect(result).toEqual({ success: true, data: { id: "h9" } });
       expect(createHabitRow.mock.calls[0][0].data).toMatchObject({
@@ -241,7 +257,10 @@ describe("createHabit", () => {
     it("rejects a system habit that does not exist", async () => {
       findSystemHabit.mockResolvedValue(null);
 
-      expect(await createHabit(catalogInput)).toEqual({ success: false, error: "Habit not found" });
+      expect(await createHabit(catalogInput)).toEqual({
+        success: false,
+        error: "Habit not found",
+      });
       expect(createHabitRow).not.toHaveBeenCalled();
     });
 
@@ -264,7 +283,10 @@ describe("createHabit", () => {
   it("rejects a category that does not exist", async () => {
     findCategory.mockResolvedValue(null);
 
-    expect(await createHabit(input)).toEqual({ success: false, error: "Category not found" });
+    expect(await createHabit(input)).toEqual({
+      success: false,
+      error: "Category not found",
+    });
     expect(createHabitRow).not.toHaveBeenCalled();
   });
 

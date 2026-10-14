@@ -1,10 +1,11 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import { Archive, Ellipsis, Pencil, Trash2 } from "lucide-react";
+import { Archive, Ellipsis, Hash, Pencil, Trash2, Undo2 } from "lucide-react";
 import { useState, useTransition } from "react";
-import { archiveHabit, deleteHabit } from "@/actions/habits";
+import { archiveHabit, deleteHabit, undoHabit } from "@/actions/habits";
 import { DeleteHabitDialog } from "@/components/habits/DeleteHabitDialog";
+import { SetAmountDialog } from "@/components/today/SetAmountDialog";
 import { useNewHabitModal } from "@/lib/new-habit-store";
 import { cn } from "@/lib/utils";
 import type { HabitColor, TodayHabit } from "@/types/habits";
@@ -21,9 +22,14 @@ interface HabitMenuProps {
 
 // Actions menu in the bottom right of a habit row, under the completion circle. The ellipsis shows on hover and
 // keyboard focus (and always on touch screens, which can't hover).
-export function HabitMenu({ habit, disabled = false, onError }: HabitMenuProps) {
+export function HabitMenu({
+  habit,
+  disabled = false,
+  onError,
+}: HabitMenuProps) {
   const openModal = useNewHabitModal((state) => state.openModal);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [settingAmount, setSettingAmount] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function edit() {
@@ -36,6 +42,16 @@ export function HabitMenu({ habit, disabled = false, onError }: HabitMenuProps) 
       frequency: habit.frequency,
       targetDaysPerWeek: habit.targetDaysPerWeek,
       color: habit.color as HabitColor,
+      dailyGoal: habit.progress.goal,
+      unit: habit.unit,
+      stepSize: habit.stepSize,
+    });
+  }
+
+  function undo() {
+    startTransition(async () => {
+      const result = await undoHabit({ habitId: habit.id });
+      if (!result.success) onError(result.error);
     });
   }
 
@@ -70,11 +86,42 @@ export function HabitMenu({ habit, disabled = false, onError }: HabitMenuProps) 
         <Menu.Portal>
           <Menu.Positioner align="end" sideOffset={4}>
             <Menu.Popup className="min-w-36 rounded-lg bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-border">
-              <Menu.Item disabled={disabled} onClick={edit} className={ITEM_CLASS}>
+              {/* Only a habit with a daily goal has steps to undo or an amount to set */}
+              {habit.progress.goal !== null && (
+                <>
+                  <Menu.Item
+                    disabled={
+                      disabled || pending || habit.progress.amount === 0
+                    }
+                    onClick={undo}
+                    className={ITEM_CLASS}
+                  >
+                    <Undo2 aria-hidden className="size-4" />
+                    Undo
+                  </Menu.Item>
+                  <Menu.Item
+                    disabled={disabled}
+                    onClick={() => setSettingAmount(true)}
+                    className={ITEM_CLASS}
+                  >
+                    <Hash aria-hidden className="size-4" />
+                    Set amount
+                  </Menu.Item>
+                </>
+              )}
+              <Menu.Item
+                disabled={disabled}
+                onClick={edit}
+                className={ITEM_CLASS}
+              >
                 <Pencil aria-hidden className="size-4" />
                 Edit
               </Menu.Item>
-              <Menu.Item disabled={disabled || pending} onClick={archive} className={ITEM_CLASS}>
+              <Menu.Item
+                disabled={disabled || pending}
+                onClick={archive}
+                className={ITEM_CLASS}
+              >
                 <Archive aria-hidden className="size-4" />
                 Archive
               </Menu.Item>
@@ -93,6 +140,18 @@ export function HabitMenu({ habit, disabled = false, onError }: HabitMenuProps) 
           </Menu.Positioner>
         </Menu.Portal>
       </Menu.Root>
+
+      {habit.progress.goal !== null && (
+        <SetAmountDialog
+          habitId={habit.id}
+          habitName={habit.name}
+          unit={habit.unit}
+          amount={habit.progress.amount}
+          goal={habit.progress.goal}
+          open={settingAmount}
+          onOpenChange={setSettingAmount}
+        />
+      )}
 
       <DeleteHabitDialog
         habitName={habit.name}
