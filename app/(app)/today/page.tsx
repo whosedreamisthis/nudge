@@ -60,10 +60,10 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
           habits={habits}
           stats={stats}
           header={<PageHeader {...header} />}
+          aside={heatmap && <ConsistencyCard heatmap={heatmap} />}
           sample={useSample}
         />
       )}
-      {heatmap && habits.length > 0 && <ConsistencyCard heatmap={heatmap} />}
     </>
   );
 }

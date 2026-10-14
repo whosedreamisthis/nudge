@@ -15,7 +15,7 @@ interface ProgressTilesProps {
 
 export function ProgressTiles({ today, averageStreakDays, bestStreak, topHabit }: ProgressTilesProps) {
   return (
-    <dl aria-label="Your progress" className="grid grid-cols-2 gap-3">
+    <dl aria-label="Your progress" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <Tile
         label="Today"
         tint="bg-tint-green"
