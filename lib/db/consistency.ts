@@ -1,3 +1,5 @@
+import { cacheLife, cacheTag } from "next/cache";
+import { completionsTag, habitsTag } from "@/lib/cache-tags";
 import { prisma } from "@/lib/db";
 import { fromDbDate, toDbDate, type DateKey } from "@/lib/dates";
 import { buildHeatmap, heatmapStart, type Heatmap } from "@/lib/consistency";
@@ -7,6 +9,10 @@ import { isDayComplete } from "@/lib/streaks";
 // A habit with a daily goal counts once its goal is reached; archived habits still count,
 // because those days happened.
 export async function getHeatmap(userId: string, today: DateKey): Promise<Heatmap> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(habitsTag(userId), completionsTag(userId));
+
   const rows = await prisma.habitCompletion.findMany({
     where: { userId, date: { gte: toDbDate(heatmapStart(today)), lte: toDbDate(today) } },
     select: { date: true, amount: true, habit: { select: { dailyGoal: true } } },

@@ -1,3 +1,5 @@
+import { cacheLife, cacheTag } from "next/cache";
+import { journalTag } from "@/lib/cache-tags";
 import { prisma } from "@/lib/db";
 import { fromDbDate, toDbDate, type DateKey } from "@/lib/dates";
 import { monthRange, type HistoryFilters } from "@/lib/journal";
@@ -6,7 +8,11 @@ import { monthRange, type HistoryFilters } from "@/lib/journal";
 const NOT_EMPTY = { OR: [{ content: { not: "" } }, { mood: { not: null } }] };
 
 // The day's entries, newest first
-export function getEntriesForDay(userId: string, day: DateKey) {
+export async function getEntriesForDay(userId: string, day: DateKey) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(journalTag(userId));
+
   return prisma.journalEntry.findMany({
     where: { userId, date: toDbDate(day), ...NOT_EMPTY },
     select: { id: true, content: true, mood: true, createdAt: true },
@@ -16,6 +22,10 @@ export function getEntriesForDay(userId: string, day: DateKey) {
 
 // One of the user's entries, or null when it doesn't exist or belongs to someone else
 export async function getEntryById(userId: string, id: string) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(journalTag(userId));
+
   const entry = await prisma.journalEntry.findFirst({
     where: { id, userId },
     select: { id: true, date: true, content: true, mood: true, createdAt: true },
@@ -26,6 +36,10 @@ export async function getEntryById(userId: string, id: string) {
 // Past entries, newest first, narrowed by the History filters. One extra row is read to know
 // whether "Show more" has anything to show.
 export async function getHistory(userId: string, { q, month, mood, limit }: HistoryFilters) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(journalTag(userId));
+
   const range = month ? monthRange(month) : null;
   const rows = await prisma.journalEntry.findMany({
     where: {
@@ -50,6 +64,10 @@ export async function getHistory(userId: string, { q, month, mood, limit }: Hist
 
 // The months that have an entry, newest first, for the month filter
 export async function getEntryMonths(userId: string): Promise<string[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(journalTag(userId));
+
   const rows = await prisma.journalEntry.findMany({
     where: { userId },
     select: { date: true },

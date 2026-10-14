@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { expireJournal } from "@/lib/cache-tags";
 import { prisma } from "@/lib/db";
 import { todayKey, toDbDate } from "@/lib/dates";
 import { deleteEntrySchema, saveEntrySchema, type SaveEntryInput } from "@/lib/journal";
@@ -30,6 +31,7 @@ export async function saveJournalEntry(
         data: { content, mood },
       });
       if (count === 0) return { success: false, error: "Entry not found" };
+      expireJournal(user.id);
       return { success: true, data: null };
     }
 
@@ -39,6 +41,7 @@ export async function saveJournalEntry(
       data: { userId: user.id, date: toDbDate(todayKey(user.timezone)), content, mood },
       select: { id: true, createdAt: true },
     });
+    expireJournal(user.id);
     return { success: true, data: { id: entry.id, createdAt: entry.createdAt.toISOString() } };
   } catch {
     return { success: false, error: "Could not save, try again" };
@@ -59,6 +62,7 @@ export async function deleteJournalEntry(input: { id: string }): Promise<ActionR
     return { success: false, error: "Could not delete the entry, try again" };
   }
 
+  expireJournal(user.id);
   revalidatePath("/journal");
   return { success: true, data: null };
 }

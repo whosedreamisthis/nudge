@@ -12,7 +12,7 @@ const { getSessionUser, findFirst, findUnique, upsert, remove, revalidatePath } 
 );
 
 vi.mock("@/lib/session", () => ({ getSessionUser }));
-vi.mock("next/cache", () => ({ revalidatePath }));
+vi.mock("next/cache", () => ({ revalidatePath, updateTag: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     habit: { findFirst },

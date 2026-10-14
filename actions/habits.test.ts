@@ -7,6 +7,7 @@ const {
   upsert,
   remove,
   revalidatePath,
+  updateTag,
   findCategory,
   createHabitRow,
   findSystemHabit,
@@ -18,12 +19,13 @@ const {
   upsert: vi.fn(),
   remove: vi.fn(),
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
   findCategory: vi.fn(),
   createHabitRow: vi.fn(),
 }));
 
 vi.mock("@/lib/session", () => ({ getSessionUser }));
-vi.mock("next/cache", () => ({ revalidatePath }));
+vi.mock("next/cache", () => ({ revalidatePath, updateTag }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     habit: { findFirst, create: createHabitRow },
@@ -64,6 +66,7 @@ describe("advanceHabit", () => {
       create: { habitId: "h1", userId: "u1", date: day, amount: 1 },
     });
     expect(revalidatePath).toHaveBeenCalledWith("/today");
+    expect(updateTag).toHaveBeenCalledWith("user:u1:completions");
   });
 
   it("removes the completion when the habit is already done", async () => {

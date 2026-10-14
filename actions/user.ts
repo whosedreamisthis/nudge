@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { expireHabitData } from "@/lib/cache-tags";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
@@ -15,6 +16,7 @@ export async function captureTimezone(timezone: string) {
   if (!isValidTimezone(timezone)) return;
 
   await prisma.user.update({ where: { id: user.id }, data: { timezone } });
+  expireHabitData(user.id);
 }
 
 // Settings: change the timezone. Completions are stored as dates and stay as they are; "today"
@@ -28,6 +30,8 @@ export async function updateTimezone(timezone: string): Promise<ActionResult<nul
   }
 
   await prisma.user.update({ where: { id: user.id }, data: { timezone } });
+  // "today" and the week boundaries move with the timezone
+  expireHabitData(user.id);
   revalidatePath("/", "layout");
   return { success: true, data: null };
 }

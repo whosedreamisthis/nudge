@@ -1,8 +1,15 @@
+import { cacheLife, cacheTag } from "next/cache";
+import { CATALOG_TAG, habitsTag } from "@/lib/cache-tags";
 import { prisma } from "@/lib/db";
 import type { CatalogFilters } from "@/lib/catalog";
 
 // System habits the user hasn't added (an archived habit doesn't count as added), filtered by the URL params
-export function getCatalogHabits(userId: string, { q, category }: CatalogFilters) {
+export async function getCatalogHabits(userId: string, { q, category }: CatalogFilters) {
+  "use cache";
+  cacheLife("hours");
+  // The list is the shared catalog minus what this user has added
+  cacheTag(CATALOG_TAG, habitsTag(userId));
+
   return prisma.systemHabit.findMany({
     where: {
       habits: { none: { userId, archivedAt: null } },
@@ -31,4 +38,13 @@ export function getCatalogHabits(userId: string, { q, category }: CatalogFilters
     },
     orderBy: [{ category: { name: "asc" } }, { name: "asc" }],
   });
+}
+
+// Category names for the habit forms; shared by everyone, changes only with the seed
+export async function getCategories() {
+  "use cache";
+  cacheLife("days");
+  cacheTag(CATALOG_TAG);
+
+  return prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } });
 }
