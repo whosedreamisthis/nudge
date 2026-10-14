@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
-import { UserButton } from "@clerk/nextjs";
+import { SignOutButton, UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { Logo } from "@/components/shared/Logo";
+import { Button } from "@/components/ui/button";
 import { SettingsButton } from "@/components/shared/SettingsButton";
 import { getSessionUser } from "@/lib/session";
 
@@ -20,7 +21,16 @@ async function UserMenu() {
       {user && (
         <SettingsButton timezone={user.timezone} aiEnabled={user.aiEnabled} isDemo={user.isDemo} />
       )}
-      <UserButton />
+      {/* UserButton's menu opens the profile and email editor, which a demo user can't use */}
+      {user?.isDemo ? (
+        <SignOutButton redirectUrl="/">
+          <Button variant="ghost" size="sm">
+            Sign out
+          </Button>
+        </SignOutButton>
+      ) : (
+        <UserButton />
+      )}
     </div>
   );
 }

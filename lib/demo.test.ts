@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEMO_LIFETIME_MS,
   demoExpiryFrom,
+  demoHoursLeft,
   demoMetadata,
   isCronAuthorized,
   isDemoExpired,
@@ -66,5 +67,18 @@ describe("isCronAuthorized", () => {
   it("allows nothing when no secret is set", () => {
     expect(isCronAuthorized("Bearer ", "")).toBe(false);
     expect(isCronAuthorized("Bearer undefined", undefined)).toBe(false);
+  });
+});
+
+describe("demoHoursLeft", () => {
+  it("rounds up to whole hours", () => {
+    expect(demoHoursLeft(new Date("2026-10-15T00:00:00Z"), NOW)).toBe(12);
+    expect(demoHoursLeft(new Date("2026-10-14T23:59:00Z"), NOW)).toBe(12);
+    expect(demoHoursLeft(new Date("2026-10-14T13:00:01Z"), NOW)).toBe(2);
+  });
+
+  it("never shows less than one hour while the demo still works", () => {
+    expect(demoHoursLeft(new Date("2026-10-14T12:00:30Z"), NOW)).toBe(1);
+    expect(demoHoursLeft(NOW, NOW)).toBe(1);
   });
 });

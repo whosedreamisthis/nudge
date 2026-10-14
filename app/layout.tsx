@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { DemoBanner } from "@/components/demo/DemoBanner";
+import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/shared/Navbar";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import "./globals.css";
@@ -41,9 +43,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeProvider>
           <ClerkProvider appearance={clerkAppearance}>
             <Navbar />
+            <Suspense fallback={null}>
+              <DemoBanner />
+            </Suspense>
             {/* Pages read the session at request time, so they stream inside this boundary */}
             <Suspense fallback={null}>{children}</Suspense>
           </ClerkProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

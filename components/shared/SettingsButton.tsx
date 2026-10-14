@@ -81,7 +81,7 @@ function SettingsContent({
         </Dialog.Close>
       </div>
 
-      <AccountSection onClose={onClose} />
+      <AccountSection onClose={onClose} isDemo={isDemo} />
       <ThemeSection />
       {!isDemo && (
         <>
@@ -95,22 +95,25 @@ function SettingsContent({
   );
 }
 
-function AccountSection({ onClose }: { onClose: () => void }) {
+function AccountSection({ onClose, isDemo }: { onClose: () => void; isDemo: boolean }) {
   const { openUserProfile, signOut } = useClerk();
 
   return (
     <Section title="Account">
       <div className="flex flex-wrap gap-2">
-        {/* Clerk's profile has its own dialog, so close ours first */}
-        <Button
-          variant="outline"
-          onClick={() => {
-            onClose();
-            openUserProfile();
-          }}
-        >
-          Manage profile and email
-        </Button>
+        {/* A demo's profile and email are throwaway, so they can't be managed */}
+        {!isDemo && (
+          // Clerk's profile has its own dialog, so close ours first
+          <Button
+            variant="outline"
+            onClick={() => {
+              onClose();
+              openUserProfile();
+            }}
+          >
+            Manage profile and email
+          </Button>
+        )}
         <Button variant="outline" onClick={() => signOut({ redirectUrl: "/" })}>
           Sign out
         </Button>

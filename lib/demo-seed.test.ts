@@ -86,14 +86,16 @@ describe("planCompletions", () => {
 });
 
 describe("seedDemoUser", () => {
-  const habitCreate = vi.fn();
+  const habitCreateMany = vi.fn();
+  const targetCreateMany = vi.fn();
   const completionCreateMany = vi.fn();
   const journalCreateMany = vi.fn();
   const systemHabitFindMany = vi.fn();
   const categoryFindMany = vi.fn();
 
   const db = {
-    habit: { create: habitCreate },
+    habit: { createMany: habitCreateMany },
+    habitTarget: { createMany: targetCreateMany },
     habitCompletion: { createMany: completionCreateMany },
     journalEntry: { createMany: journalCreateMany },
     systemHabit: { findMany: systemHabitFindMany },
@@ -102,8 +104,9 @@ describe("seedDemoUser", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    let n = 0;
-    habitCreate.mockImplementation(async () => ({ id: `h${++n}` }));
+    for (const mock of [habitCreateMany, targetCreateMany, completionCreateMany, journalCreateMany]) {
+      mock.mockResolvedValue({ count: 0 });
+    }
     systemHabitFindMany.mockResolvedValue([
       { id: "s1", name: "Take vitamins" },
       { id: "s2", name: "Drink 2L of water" },
@@ -115,40 +118,79 @@ describe("seedDemoUser", () => {
   });
 
   const seed = () => seedDemoUser({ userId: "u1", timezone: "UTC", now: NOW }, db);
+  const habitRows = () => habitCreateMany.mock.calls[0][0].data as Record<string, unknown>[];
 
-  it("creates the five habits for the user, each with a target from its first week", async () => {
+  it("inserts each kind of row with one bulk call, so a demo needs few round trips", async () => {
     await seed();
 
-    expect(habitCreate).toHaveBeenCalledTimes(5);
-    const first = habitCreate.mock.calls[0][0].data;
-    expect(first).toMatchObject({ userId: "u1", name: "Take vitamins", systemHabitId: "s1", categoryId: "cat_health" });
-    expect(first.targets.create).toMatchObject({ frequency: "DAILY", targetDaysPerWeek: 7 });
-    expect(fromDbDate(first.targets.create.effectiveFrom)).toBe(weekStart(addDays(TODAY, -97)));
+    expect(habitCreateMany).toHaveBeenCalledTimes(1);
+    expect(targetCreateMany).toHaveBeenCalledTimes(1);
+    expect(completionCreateMany).toHaveBeenCalledTimes(1);
+    expect(journalCreateMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("writes the habits before the rows that point at them", async () => {
+    const order: string[] = [];
+    habitCreateMany.mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      order.push("habits");
+    });
+    targetCreateMany.mockImplementation(async () => order.push("targets"));
+    completionCreateMany.mockImplementation(async () => order.push("completions"));
+
+    await seed();
+
+    expect(order[0]).toBe("habits");
+    expect(order).toHaveLength(3);
+  });
+
+  it("creates the five habits for the user with ids made up front", async () => {
+    await seed();
+
+    const rows = habitRows();
+    expect(rows).toHaveLength(5);
+    expect(rows.every((row) => row.userId === "u1" && typeof row.id === "string" && row.id.length > 0)).toBe(true);
+    expect(new Set(rows.map((row) => row.id)).size).toBe(5);
+    expect(rows[0]).toMatchObject({ name: "Take vitamins", systemHabitId: "s1", categoryId: "cat_health" });
   });
 
   it("links catalog habits to their system habit and leaves custom ones unlinked", async () => {
     await seed();
 
-    const data = habitCreate.mock.calls.map((call) => call[0].data);
-    expect(data.find((habit) => habit.name === "Morning run").systemHabitId).toBe("s3");
-    expect(data.find((habit) => habit.name === "Read for 20 minutes").systemHabitId).toBeUndefined();
+    const rows = habitRows();
+    expect(rows.find((row) => row.name === "Morning run")!.systemHabitId).toBe("s3");
+    expect(rows.find((row) => row.name === "Read for 20 minutes")!.systemHabitId).toBeNull();
   });
 
   it("gives the water habit its goal, unit and step", async () => {
     await seed();
 
-    const water = habitCreate.mock.calls.map((call) => call[0].data).find((habit) => habit.name === "Drink 2L of water");
-    expect(water).toMatchObject({ dailyGoal: 2000, unit: "ml", stepSize: 250 });
+    expect(habitRows().find((row) => row.name === "Drink 2L of water")).toMatchObject({
+      dailyGoal: 2000,
+      unit: "ml",
+      stepSize: 250,
+    });
   });
 
-  it("writes about 14 weeks of completions per habit, all for this user and habit", async () => {
+  it("gives every habit one target from the week it started", async () => {
     await seed();
 
-    expect(completionCreateMany).toHaveBeenCalledTimes(5);
-    const [vitamins] = completionCreateMany.mock.calls[0];
-    expect(vitamins.skipDuplicates).toBe(true);
-    expect(vitamins.data.length).toBeGreaterThan(60);
-    expect(vitamins.data.every((row: { userId: string; habitId: string }) => row.userId === "u1" && row.habitId === "h1")).toBe(true);
+    const ids = habitRows().map((row) => row.id);
+    const targets = targetCreateMany.mock.calls[0][0].data as Record<string, unknown>[];
+    expect(targets.map((target) => target.habitId)).toEqual(ids);
+    expect(targets[0]).toMatchObject({ frequency: "DAILY", targetDaysPerWeek: 7 });
+    expect(fromDbDate(targets[0].effectiveFrom as Date)).toBe(weekStart(addDays(TODAY, -97)));
+    expect(targets[2]).toMatchObject({ frequency: "WEEKLY", targetDaysPerWeek: 3 });
+  });
+
+  it("writes about 14 weeks of completions, all for this user and one of the habits", async () => {
+    await seed();
+
+    const ids = new Set(habitRows().map((row) => row.id));
+    const [{ data, skipDuplicates }] = completionCreateMany.mock.calls[0];
+    expect(skipDuplicates).toBe(true);
+    expect(data.length).toBeGreaterThan(150);
+    expect(data.every((row: { userId: string; habitId: string }) => row.userId === "u1" && ids.has(row.habitId))).toBe(true);
   });
 
   it("writes a few journal entries on recent days", async () => {
@@ -160,6 +202,16 @@ describe("seedDemoUser", () => {
     expect(fromDbDate(rows[0].date)).toBe(addDays(TODAY, -1));
   });
 
+  it("makes the same demo for the same seed, apart from the ids", async () => {
+    await seed();
+    const first = completionCreateMany.mock.calls[0][0].data.map((row: { date: Date; amount: number }) => [row.date, row.amount]);
+    vi.clearAllMocks();
+    await seed();
+    const second = completionCreateMany.mock.calls[0][0].data.map((row: { date: Date; amount: number }) => [row.date, row.amount]);
+
+    expect(second).toEqual(first);
+  });
+
   it("uses the user's local day, not the server's", async () => {
     // 2026-10-14 12:00 UTC is already the 15th in Auckland
     await seedDemoUser({ userId: "u1", timezone: "Pacific/Auckland", now: NOW }, db);
@@ -168,10 +220,19 @@ describe("seedDemoUser", () => {
     expect(fromDbDate(rows[0].date)).toBe("2026-10-14");
   });
 
-  it("fails clearly when the catalog has not been seeded", async () => {
+  it("fails clearly when the catalog has not been seeded, before writing anything", async () => {
     categoryFindMany.mockResolvedValue([]);
 
     await expect(seed()).rejects.toThrow("npm run db:seed");
-    expect(habitCreate).not.toHaveBeenCalled();
+    expect(habitCreateMany).not.toHaveBeenCalled();
+    expect(journalCreateMany).not.toHaveBeenCalled();
+  });
+
+  it("does not write the rows that depend on habits when the habits fail", async () => {
+    habitCreateMany.mockRejectedValue(new Error("db is down"));
+
+    await expect(seed()).rejects.toThrow("db is down");
+    expect(targetCreateMany).not.toHaveBeenCalled();
+    expect(completionCreateMany).not.toHaveBeenCalled();
   });
 });

@@ -19,14 +19,16 @@ Depends on: `29a-demo-data-and-cleanup.md` (migration, seed, expiry and cleanup 
 - Banner for demo users: "Demo: your data will be deleted in X hours. Register to keep your habits" linking to `/register`.
 - **Demos cannot be converted to real accounts.** Visitors who want persistence register normally and start fresh.
 - Resume cookie: httpOnly, secure, signed, holds the demo's `clerkId`, expires with the demo. If the demo has expired, the cookie is ignored and cleared.
-- Extend the 29a cleanup job to delete the expired demo's IP key too.
+- The IP key frees itself: its TTL is the demo's remaining lifetime, and `startDemo()` frees a stale slot when it sees one. The 29a cleanup job needs no change (it can't derive the key from a Clerk id anyway, since only a hash of the IP is stored).
+- `startDemo()` returns a one-time sign-in ticket; the button signs in with it on the client (a Server Action can't create a Clerk session).
 
 ## One demo per IP (Upstash)
 
-- **Upstash Redis** with an atomic claim: `SET demo:ip:<hash> <clerkId> NX EX 43200` (12 h). `@upstash/ratelimit` is not needed.
+- **Upstash Redis** with an atomic claim: `SET nudge:demo:ip:<hash> <clerkId> NX EX 43200` (12 h). `@upstash/ratelimit` is not needed.
 - Key is a hash of the client IP (from trusted proxy headers such as `x-forwarded-for`); the raw IP is never stored.
-- The TTL equals the demo lifetime, so the slot frees itself. The cleanup job also deletes the key, and a failed creation deletes it immediately.
+- The TTL equals the demo lifetime, so the slot frees itself. A failed creation deletes it immediately.
 - `NX` makes the claim race-safe: if two presses race, the loser deletes the Clerk user and DB rows it just created and signs into the winner's demo.
+- **Shared Redis:** the Upstash database is shared with other projects (the free tier allows only one). Every key this app writes starts with `nudge:` (`lib/demo-redis.ts` owns the prefix), and the app only ever touches exact keys it built: no `KEYS`, `SCAN`, `FLUSHDB` or `FLUSHALL`, and no database-wide settings. Keep the command count low, since the free tier's daily command limit is shared too.
 - Lookup is a plain `GET`: a hit means resume, a miss means create.
 - **Fail closed:** if Upstash is unreachable, block new demos (the action returns an error: "Demos are temporarily unavailable, please try again shortly") to protect the Clerk user quota. Cookie resume still works.
 - **Accepted trade-off:** everyone behind a shared IP (office, school, mobile carrier) lands in the same demo and can see each other's changes. Demo data is throwaway.

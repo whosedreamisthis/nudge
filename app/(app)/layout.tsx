@@ -1,7 +1,6 @@
 import { FocusWatcher } from "@/components/focus/FocusWatcher";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
-import { Toaster } from "@/components/ui/sonner";
 
 // Shell for the signed-in pages. Each page still checks access itself; this only lays things out.
 // Phones get a bottom tab bar, md and up get a left sidebar.
@@ -14,7 +13,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </main>
       <BottomNav />
       <FocusWatcher />
-      <Toaster />
     </div>
   );
 }
