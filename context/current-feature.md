@@ -1,25 +1,18 @@
-# Current Feature: AI Feature Toggles
+# Current Feature
 
-Settings gets a switch for each AI feature, so each can be turned off on its own.
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Settings > AI features lists a toggle for the weekly report and one for morning motivation, under the existing master switch
-- The master switch stays: when off, every AI feature is off and the per-feature toggles are disabled
-- A feature that is off is hidden (Today card, Progress card) and its action refuses with "AI features are turned off in Settings"
-- Each toggle saves immediately, rolls back on error, and is unavailable in the demo
-- New `User` columns `aiWeeklyReport` and `aiMotivation` (default true) with a migration
-- Unit tests cover the new action and the per-feature checks
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Habit suggestions (spec 22) isn't built yet; its toggle is added when that feature ships
-- Files: `prisma/schema.prisma`, `actions/user.ts`, `actions/ai-report.ts`, `actions/motivation.ts`, `components/shared/SettingsButton.tsx`, `components/shared/Navbar.tsx`, `app/(app)/today/page.tsx`, `app/(app)/progress/page.tsx`
-- `components/shared/SettingsButton.tsx` has an uncommitted change (the Reminders placeholder removed); it is left as is
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -54,3 +47,4 @@ In Progress
 - **Today Declutter:** Stat tiles leave Today; Progress shows Best streak and Active streaks instead of Today and Average streak (`components/shared/StatTile.tsx`, `lib/db/progress.ts`, `components/progress/ProgressTiles.tsx`).
 - **AI Weekly Report:** Progress card with a Gemini summary and 3 insights, stored per week in `AiReport`, with Regenerate, cooldown and `AI_DISABLED` mocks (`lib/gemini.ts`, `actions/ai-report.ts`, `components/progress/AiWeeklyReport.tsx`).
 - **Morning Motivation:** Dismissable Today card with a one-sentence Gemini message from recent history, generated once a day and stored as a `MOTIVATION` `AiReport` (`actions/motivation.ts`, `lib/motivation.ts`, `components/today/MorningMotivation.tsx`).
+- **AI Feature Toggles:** Settings has a switch each for weekly report, morning motivation and habit suggestions, also for demos via a cookie (`actions/user.ts`, `lib/ai-settings.ts`, `components/shared/SettingsButton.tsx`).
