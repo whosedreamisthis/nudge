@@ -48,12 +48,17 @@ export function AiWeeklyReport({
     });
   }
 
+  // Also runs when the switch in Settings goes off and on again while this page stays mounted
   useEffect(() => {
-    if (initial || !canGenerate || started.current) return;
+    if (!canGenerate) {
+      started.current = false;
+      return;
+    }
+    if (report || started.current) return;
     started.current = true;
     run(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [canGenerate]);
 
   // The page can stay mounted (hidden) while the user is on another page; coming back should not
   // show an old "try again later" message, so it is dropped when the page is left. A failed first
@@ -65,7 +70,7 @@ export function AiWeeklyReport({
     [],
   );
 
-  if (!aiEnabled && !report) return null;
+  if (!aiEnabled) return null;
 
   return (
     <section

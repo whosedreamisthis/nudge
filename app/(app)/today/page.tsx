@@ -14,6 +14,7 @@ import { getHeatmap } from "@/lib/db/consistency";
 import { getMotivation } from "@/lib/db/motivation";
 import { getToday } from "@/lib/db/today";
 import { getSampleToday } from "@/lib/sample-habits";
+import { getAiSettings } from "@/lib/ai-settings";
 import { getSessionUser } from "@/lib/session";
 
 export default async function TodayPage({ searchParams }: PageProps<"/today">) {
@@ -30,6 +31,7 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
   ]);
   if (!user) return null;
 
+  const ai = await getAiSettings(user);
   const today = todayKey(user.timezone);
   // /today?sample=1 fills the page with made-up habits, in development only
   const useSample = process.env.NODE_ENV !== "production" && params.sample === "1";
@@ -40,7 +42,7 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
     // The made-up habits have no completions to chart
     useSample ? null : getHeatmap(user.id, today),
     // Generated in the browser on the first visit of the day, so the page doesn't wait for Gemini
-    useSample || !user.aiEnabled ? null : getMotivation(user.id, today),
+    useSample || !ai.motivation ? null : getMotivation(user.id, today),
   ]);
 
   const header = {
@@ -64,7 +66,7 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
           habits={habits}
           header={<PageHeader {...header} />}
           banner={
-            !useSample && user.aiEnabled && (
+            !useSample && ai.motivation && (
               <MorningMotivation initial={motivation} canGenerate />
             )
           }

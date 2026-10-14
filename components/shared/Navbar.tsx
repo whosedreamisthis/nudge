@@ -6,6 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Logo } from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";
 import { SettingsButton } from "@/components/shared/SettingsButton";
+import { getAiSettings } from "@/lib/ai-settings";
 import { getSessionUser } from "@/lib/session";
 
 // Per user and per request (session, database), so stop prerendering before reading them
@@ -19,12 +20,16 @@ async function UserMenu() {
   return (
     <div className="flex items-center gap-2">
       {user && (
-        <SettingsButton timezone={user.timezone} aiEnabled={user.aiEnabled} isDemo={user.isDemo} />
+        <SettingsButton
+          timezone={user.timezone}
+          ai={await getAiSettings(user)}
+          isDemo={user.isDemo}
+        />
       )}
       {/* UserButton's menu opens the profile and email editor, which a demo user can't use */}
       {user?.isDemo ? (
         <SignOutButton redirectUrl="/">
-          <Button variant="ghost" size="sm">
+          <Button variant="outline" size="sm">
             Sign out
           </Button>
         </SignOutButton>

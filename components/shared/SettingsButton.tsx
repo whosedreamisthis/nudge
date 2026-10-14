@@ -1,20 +1,20 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { useClerk, useUser } from "@clerk/nextjs";
-import { Bell, Moon, Settings, Sun, X } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { Moon, Settings, Sun, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useRef, useState, useTransition } from "react";
-import { setAiEnabled, updateTimezone } from "@/actions/user";
+import { setAiFeature, updateTimezone } from "@/actions/user";
 import { Button } from "@/components/ui/button";
-import { DELETE_PHRASE, isDeleteConfirmed, timezoneOptions } from "@/lib/settings";
+import { type AiFeature, type AiSettings, DELETE_PHRASE, isDeleteConfirmed, timezoneOptions } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 interface SettingsButtonProps {
   timezone: string;
-  aiEnabled: boolean;
-  // A demo is temporary: it keeps the theme and sign-out, nothing that persists or deletes
+  ai: AiSettings;
+  // A demo is temporary: it keeps the theme and AI switches, nothing that persists or deletes
   isDemo: boolean;
 }
 
@@ -42,7 +42,7 @@ export function SettingsButton(props: SettingsButtonProps) {
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
         <Dialog.Popup className="fixed inset-0 z-50 overflow-y-auto overscroll-contain scrollbar-none bg-popover p-5 text-popover-foreground sm:inset-auto sm:top-1/2 sm:left-1/2 sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:shadow-xl sm:ring-1 sm:ring-border">
           {/* Mounts on each open, so the form fields start from the saved values */}
-          <SettingsContent {...props} onClose={() => setOpen(false)} />
+          <SettingsContent {...props} />
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
@@ -60,17 +60,16 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function SettingsContent({
   timezone,
-  aiEnabled,
+  ai,
   isDemo,
-  onClose,
-}: SettingsButtonProps & { onClose: () => void }) {
+}: SettingsButtonProps) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <Dialog.Title className="text-lg font-semibold">Settings</Dialog.Title>
           <Dialog.Description className="text-sm text-muted-foreground">
-            Your account and how Nudge looks and works.
+            How Nudge looks and works.
           </Dialog.Description>
         </div>
         <Dialog.Close
@@ -81,44 +80,15 @@ function SettingsContent({
         </Dialog.Close>
       </div>
 
-      <AccountSection onClose={onClose} isDemo={isDemo} />
       <ThemeSection />
+      <AiSection ai={ai} />
       {!isDemo && (
         <>
           <TimezoneSection timezone={timezone} />
-          <AiSection enabled={aiEnabled} />
-          <RemindersSection />
           <DeleteSection />
         </>
       )}
     </div>
-  );
-}
-
-function AccountSection({ onClose, isDemo }: { onClose: () => void; isDemo: boolean }) {
-  const { openUserProfile, signOut } = useClerk();
-
-  return (
-    <Section title="Account">
-      <div className="flex flex-wrap gap-2">
-        {/* A demo's profile and email are throwaway, so they can't be managed */}
-        {!isDemo && (
-          // Clerk's profile has its own dialog, so close ours first
-          <Button
-            variant="outline"
-            onClick={() => {
-              onClose();
-              openUserProfile();
-            }}
-          >
-            Manage profile and email
-          </Button>
-        )}
-        <Button variant="outline" onClick={() => signOut({ redirectUrl: "/" })}>
-          Sign out
-        </Button>
-      </div>
-    </Section>
   );
 }
 
@@ -199,19 +169,19 @@ function TimezoneSection({ timezone }: { timezone: string }) {
   );
 }
 
-function AiSection({ enabled }: { enabled: boolean }) {
-  const [on, setOn] = useState(enabled);
+function AiSection({ ai }: { ai: AiSettings }) {
+  const [values, setValues] = useState(ai);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  function toggle() {
-    const next = !on;
-    setOn(next);
+  function toggle(feature: AiFeature) {
+    const next = !values[feature];
+    setValues((v) => ({ ...v, [feature]: next }));
     setError(null);
     startTransition(async () => {
-      const result = await setAiEnabled(next);
+      const result = await setAiFeature(feature, next);
       if (!result.success) {
-        setOn(!next);
+        setValues((v) => ({ ...v, [feature]: !next }));
         setError(result.error);
       }
     });
@@ -219,30 +189,24 @@ function AiSection({ enabled }: { enabled: boolean }) {
 
   return (
     <Section title="AI features">
-      <div className="flex items-center justify-between gap-3">
-        <p id="ai-label" className="text-sm">
-          Weekly report, morning motivation and habit suggestions
-        </p>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={on}
-          aria-labelledby="ai-label"
-          onClick={toggle}
-          className={cn(
-            "relative h-6 w-11 shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            on ? "bg-habit-emerald" : "bg-border",
-          )}
-        >
-          <span
-            aria-hidden
-            className={cn(
-              "absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform",
-              on && "translate-x-5",
-            )}
-          />
-        </button>
-      </div>
+      <SwitchRow
+        id="ai-weekly-report"
+        label="Weekly report"
+        checked={values.weeklyReport}
+        onToggle={() => toggle("weeklyReport")}
+      />
+      <SwitchRow
+        id="ai-motivation"
+        label="Morning motivation"
+        checked={values.motivation}
+        onToggle={() => toggle("motivation")}
+      />
+      <SwitchRow
+        id="ai-habit-suggestions"
+        label="Habit suggestions"
+        checked={values.habitSuggestions}
+        onToggle={() => toggle("habitSuggestions")}
+      />
       <p className="text-sm text-muted-foreground">
         When on, your habit names, completions and journal text are sent to Google&apos;s Gemini to write these.
       </p>
@@ -251,15 +215,42 @@ function AiSection({ enabled }: { enabled: boolean }) {
   );
 }
 
-// A placeholder so the layout is settled; reminders themselves are not decided yet
-function RemindersSection() {
+function SwitchRow({
+  id,
+  label,
+  checked,
+  onToggle,
+}: {
+  id: string;
+  label: string;
+  checked: boolean;
+  onToggle: () => void;
+}) {
   return (
-    <Section title="Reminders">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Bell aria-hidden className="size-4" />
-        Coming soon
-      </div>
-    </Section>
+    <div className="flex items-center justify-between gap-3">
+      <p id={id} className="text-sm">
+        {label}
+      </p>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-labelledby={id}
+        onClick={onToggle}
+        className={cn(
+          "relative h-6 w-11 shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          checked ? "bg-habit-emerald" : "bg-border",
+        )}
+      >
+        <span
+          aria-hidden
+          className={cn(
+            "absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform",
+            checked && "translate-x-5",
+          )}
+        />
+      </button>
+    </div>
   );
 }
 
