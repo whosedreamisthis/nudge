@@ -142,7 +142,10 @@ function NewHabitForm({
               systemHabitId: prefill.systemHabitId,
             }),
           });
-      if (result.success) onDone();
+      if (result.success) {
+        prefill?.onCreated?.();
+        onDone();
+      }
       else setError(result.error);
     });
   }
