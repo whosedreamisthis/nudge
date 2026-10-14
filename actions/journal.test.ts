@@ -1,15 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getSessionUser, create, updateMany, deleteMany, revalidatePath } = vi.hoisted(() => ({
+const { getSessionUser, create, updateMany, deleteMany, revalidatePath, updateTag } = vi.hoisted(() => ({
   getSessionUser: vi.fn(),
   create: vi.fn(),
   updateMany: vi.fn(),
   deleteMany: vi.fn(),
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.mock("@/lib/session", () => ({ getSessionUser }));
-vi.mock("next/cache", () => ({ revalidatePath }));
+vi.mock("next/cache", () => ({ revalidatePath, updateTag }));
 vi.mock("@/lib/db", () => ({
   prisma: { journalEntry: { create, updateMany, deleteMany } },
 }));
@@ -65,6 +66,7 @@ describe("saveJournalEntry", () => {
       data: { content: "Edited", mood: 2 },
     });
     expect(create).not.toHaveBeenCalled();
+    expect(updateTag).toHaveBeenCalledWith("user:u1:journal");
   });
 
   it("keeps an existing entry that was cleared to nothing", async () => {
@@ -120,6 +122,7 @@ describe("deleteJournalEntry", () => {
     expect(result).toEqual({ success: true, data: null });
     expect(deleteMany).toHaveBeenCalledWith({ where: { id: "e1", userId: "u1" } });
     expect(revalidatePath).toHaveBeenCalledWith("/journal");
+    expect(updateTag).toHaveBeenCalledWith("user:u1:journal");
   });
 
   it("rejects when signed out", async () => {

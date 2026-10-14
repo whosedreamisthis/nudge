@@ -1,16 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getSessionUser, update, revalidatePath, cookieGet, cookieSet } = vi.hoisted(() => ({
+const { getSessionUser, update, revalidatePath, updateTag, cookieGet, cookieSet } = vi.hoisted(() => ({
   getSessionUser: vi.fn(),
   update: vi.fn(),
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
   cookieGet: vi.fn(),
   cookieSet: vi.fn(),
 }));
 
 vi.mock("@/lib/session", () => ({ getSessionUser }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: cookieGet, set: cookieSet }) }));
-vi.mock("next/cache", () => ({ revalidatePath }));
+vi.mock("next/cache", () => ({ revalidatePath, updateTag }));
 vi.mock("@/lib/db", () => ({ prisma: { user: { update } } }));
 
 import { captureTimezone, setAiFeature, updateTimezone } from "./user";
@@ -65,6 +66,8 @@ describe("updateTimezone", () => {
     expect(result.success).toBe(true);
     expect(update).toHaveBeenCalledWith({ where: { id: "u1" }, data: { timezone: "Europe/London" } });
     expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
+    expect(updateTag).toHaveBeenCalledWith("user:u1:habits");
+    expect(updateTag).toHaveBeenCalledWith("user:u1:completions");
   });
 
   it("rejects an invalid timezone", async () => {

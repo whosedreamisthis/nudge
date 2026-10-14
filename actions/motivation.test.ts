@@ -12,7 +12,7 @@ const { getSessionUser, upsert, update, getMotivation, getRecentHistory, generat
   }));
 
 vi.mock("@/lib/session", () => ({ getSessionUser }));
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), updateTag: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { aiReport: { upsert, update } } }));
 vi.mock("@/lib/db/motivation", () => ({ getMotivation, getRecentHistory }));
 vi.mock("@/lib/gemini", () => ({ generateJson, isAiDisabled }));

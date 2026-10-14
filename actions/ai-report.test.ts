@@ -11,7 +11,7 @@ const { getSessionUser, upsert, getWeeklyReport, getWeekGrid, getProgressStats, 
   }));
 
 vi.mock("@/lib/session", () => ({ getSessionUser }));
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), updateTag: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { aiReport: { upsert } } }));
 vi.mock("@/lib/db/ai-report", () => ({ getWeeklyReport }));
 vi.mock("@/lib/db/progress", () => ({ getWeekGrid, getProgressStats }));

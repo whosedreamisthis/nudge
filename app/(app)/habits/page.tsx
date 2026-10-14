@@ -11,9 +11,8 @@ import { SuggestHabitWizard } from "@/components/habits/SuggestHabitWizard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { getAiSettings } from "@/lib/ai-settings";
 import { parseCatalogParams } from "@/lib/catalog";
-import { prisma } from "@/lib/db";
 import { countArchivedHabits, getArchivedHabits } from "@/lib/db/archived";
-import { getCatalogHabits } from "@/lib/db/catalog";
+import { getCatalogHabits, getCategories } from "@/lib/db/catalog";
 import { getSessionUser } from "@/lib/session";
 
 export default async function HabitsPage({
@@ -36,7 +35,7 @@ export default async function HabitsPage({
   const suggestEnabled = user ? (await getAiSettings(user)).habitSuggestions : false;
 
   const [categories, archivedCount, archived, catalog] = await Promise.all([
-    prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    getCategories(),
     countArchivedHabits(userId),
     archivedTab ? getArchivedHabits(userId) : [],
     archivedTab ? [] : getCatalogHabits(userId, filters),

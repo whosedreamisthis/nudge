@@ -1,5 +1,7 @@
+import { cacheLife, cacheTag } from "next/cache";
+import { completionsTag, habitsTag } from "@/lib/cache-tags";
 import { prisma } from "@/lib/db";
-import { addDays, fromDbDate, toDateKey, toDbDate, type DateKey } from "@/lib/dates";
+import { addDays, fromDbDate, toDateKey, toDbDate, weekStart, type DateKey } from "@/lib/dates";
 import { getTodayStats, type TodayStats } from "@/lib/stats";
 import { buildWeekGrid, type GridRow } from "@/lib/week-grid";
 
@@ -12,6 +14,12 @@ export async function getWeekGrid(
   week: DateKey,
   today: DateKey,
 ): Promise<GridRow[]> {
+  "use cache";
+  // A week before this one only changes when someone edits it
+  if (week < weekStart(today)) cacheLife("days");
+  else cacheLife("hours");
+  cacheTag(habitsTag(userId), completionsTag(userId));
+
   const habits = await prisma.habit.findMany({
     where: { userId, archivedAt: null },
     orderBy: { createdAt: "asc" },
@@ -50,6 +58,10 @@ export async function getWeekGrid(
 
 // The streak tiles: how many streaks are running and the longest one, over all active habits
 export async function getProgressStats(userId: string, today: DateKey): Promise<TodayStats> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(habitsTag(userId), completionsTag(userId));
+
   const habits = await prisma.habit.findMany({
     where: { userId, archivedAt: null },
     orderBy: { createdAt: "asc" },

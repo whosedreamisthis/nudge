@@ -1,3 +1,5 @@
+import { cacheLife, cacheTag } from "next/cache";
+import { completionsTag, habitsTag } from "@/lib/cache-tags";
 import { prisma } from "@/lib/db";
 import { fromDbDate, weekStart, type DateKey } from "@/lib/dates";
 import { getTodayProgress } from "@/lib/progress";
@@ -10,6 +12,10 @@ export async function getToday(
   userId: string,
   today: DateKey,
 ): Promise<{ habits: TodayHabit[] }> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(habitsTag(userId), completionsTag(userId));
+
   const habits = await prisma.habit.findMany({
     where: { userId, archivedAt: null },
     orderBy: { createdAt: "asc" },

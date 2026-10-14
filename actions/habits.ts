@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { expireCompletions, expireHabitData } from "@/lib/cache-tags";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { fromDbDate, todayKey, toDbDate, weekStart } from "@/lib/dates";
@@ -65,6 +66,7 @@ async function changeAmount(
     return { success: false, error: "Could not save, try again" };
   }
 
+  expireCompletions(user.id);
   revalidatePath("/today");
   return { success: true, data: { amount } };
 }
@@ -184,6 +186,7 @@ export async function createHabit(
       },
       select: { id: true },
     });
+    expireHabitData(user.id);
     revalidatePath("/today");
     revalidatePath("/habits");
     return { success: true, data: { id: habit.id } };
@@ -279,6 +282,8 @@ export async function updateHabit(
     return { success: false, error: "Could not save the habit, try again" };
   }
 
+  expireHabitData(user.id);
+
   revalidatePath("/today");
   revalidatePath("/habits");
   return { success: true, data: { id: habit.id } };
@@ -303,6 +308,8 @@ export async function archiveHabit(
   } catch {
     return { success: false, error: "Could not archive the habit, try again" };
   }
+
+  expireHabitData(user.id);
 
   revalidatePath("/today");
   revalidatePath("/habits");
@@ -340,6 +347,8 @@ export async function deleteHabit(
   } catch {
     return { success: false, error: "Could not delete the habit, try again" };
   }
+
+  expireHabitData(user.id);
 
   revalidatePath("/today");
   revalidatePath("/habits");
@@ -394,6 +403,8 @@ export async function restoreHabit(
   } catch {
     return { success: false, error: "Could not restore the habit, try again" };
   }
+
+  expireHabitData(user.id);
 
   revalidatePath("/today");
   revalidatePath("/habits");

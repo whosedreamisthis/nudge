@@ -19,7 +19,7 @@ const {
 }));
 
 vi.mock("@/lib/session", () => ({ getSessionUser }));
-vi.mock("next/cache", () => ({ revalidatePath }));
+vi.mock("next/cache", () => ({ revalidatePath, updateTag: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     habit: { findFirst, update, updateMany, deleteMany },

@@ -9,7 +9,7 @@ import { TodayHabits } from "@/components/today/TodayHabits";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TimezoneSync } from "@/components/shared/TimezoneSync";
 import { formatLongDate, todayKey } from "@/lib/dates";
-import { prisma } from "@/lib/db";
+import { getCategories } from "@/lib/db/catalog";
 import { getHeatmap } from "@/lib/db/consistency";
 import { getMotivation } from "@/lib/db/motivation";
 import { getToday } from "@/lib/db/today";
@@ -38,7 +38,7 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
   const [{ habits }, categories, heatmap, motivation] = await Promise.all([
     useSample ? getSampleToday(today) : getToday(user.id, today),
     // For the edit form, which reuses the New Habit modal
-    prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    getCategories(),
     // The made-up habits have no completions to chart
     useSample ? null : getHeatmap(user.id, today),
     // Generated in the browser on the first visit of the day, so the page doesn't wait for Gemini
