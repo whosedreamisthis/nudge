@@ -1,18 +1,32 @@
-# Current Feature
+# Current Feature: Demo Data and Expiry
 
-<!-- Feature name and short description -->
+Backend half of the demo account: mark, seed, expire and delete demo users. The Try demo button and per-IP lock come in `29b-demo-try-flow.md`.
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Migration: `User.isDemo Boolean @default(false)` and `User.demoExpiresAt DateTime?` with an index
+- Demo Clerk users carry `publicMetadata: { isDemo: true, demoExpiresAt }` (helper in `lib/demo.ts`), so the cleanup job can find them
+- `lib/demo-seed.ts`: `seedDemoUser(userId, timezone)` creates 5 habits (daily, multi-step water goal, weekly 3 days/week), about 14 weeks of completions with realistic gaps, and a few journal entries
+- Request-time expiry: a demo whose `demoExpiresAt` has passed is signed out and blocked even if cleanup hasn't run
+- Cleanup job `GET /api/cron/cleanup-demos` (protected by `CRON_SECRET`): delete expired demos (Clerk user first, then the DB user, in batches), orphan sweep of Clerk demo users with no DB row, idempotent, retries failed Clerk deletes
+- Clerk webhook: `user.created` is safe for demo users, and `user.deleted` is a no-op if the DB user is already gone
+- Demo users see only theme and sign-out in Settings (see `27-settings-modal.md`)
+- Vitest tests for seeding, expiry and cleanup (database and Clerk mocked)
 
 ## Notes
 
-<!-- Any extra notes -->
+- Env var: `CRON_SECRET`. Upstash and `DEMO_COOKIE_SECRET` come with 29b.
+- The pre-generated `AiReport` row is added by `20-ai-weekly-report` (it owns that model); later features that add user-created data extend `lib/demo-seed.ts` and its test.
+- 29b extends the cleanup job to delete the expired demo's IP key.
+- Vercel Hobby limits cron to once a day; use an external scheduler or accept lag, relying on request-time expiry.
+- Open question: do demo users count toward Clerk user limits on the current plan?
+- To try it without the button, create a demo user by hand (or a test helper) and run the job.
+- Never use `prisma db push`; schema changes go through migrations.
+- Full spec: `context/features/29a-demo-data-and-cleanup.md` (acceptance criteria included).
 
 ## Completed Features
 

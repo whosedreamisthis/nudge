@@ -25,4 +25,4 @@
 - **Serverless caveat:** the default in-memory cache does not persist between requests on serverless hosting, and it does not carry over to a new deploy. Self-hosted gets the full benefit. If this app runs on serverless, evaluate `"use cache: remote"` (Redis or KV) before relying on the speed-up, and measure before and after.
 - **Tests:** `lib/db/*.test.ts` mock `prisma`; also mock `next/cache` (`cacheLife`, `cacheTag`) there. Add a test that each mutating action calls `updateTag` with the right tags and that no cached function reads a runtime API.
 - Build with `npm run build` and watch for blocking-route and `next-request-in-use-cache` errors; they are the main failure mode.
-- Keep the demo (`29-demo-spec.md`) in mind: when a demo user is deleted, its tags just stop being read; no cleanup is needed.
+- Keep the demo (`29a-demo-data-and-cleanup.md` and `29b-demo-try-flow.md`) in mind: when a demo user is deleted, its tags just stop being read; no cleanup is needed.
