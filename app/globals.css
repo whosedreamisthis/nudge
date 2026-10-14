@@ -76,6 +76,12 @@
   --color-tint-green: var(--tint-green);
   --color-tint-blue: var(--tint-blue);
   --color-tint-pink: var(--tint-pink);
+
+  --color-heat-0: var(--heat-0);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
 }
 
 /*
@@ -148,6 +154,13 @@
   --tint-blue: #d6e6ee;
   --tint-pink: #f0dee5;
 
+  /* Consistency heatmap: grey (nothing) to dark orange (a lot) */
+  --heat-0: #e3e5df;
+  --heat-1: #f3d3b8;
+  --heat-2: #e8a86f;
+  --heat-3: #d9792f;
+  --heat-4: #a8480f;
+
   --sidebar: #fefcf6;
   --sidebar-foreground: #162a2c;
   --sidebar-primary: #55634f;
@@ -195,6 +208,12 @@
   --tint-green: #1b3a2b;
   --tint-blue: #17343f;
   --tint-pink: #3a2530;
+
+  --heat-0: #26383a;
+  --heat-1: #5a3a22;
+  --heat-2: #8f5a2a;
+  --heat-3: #c4701f;
+  --heat-4: #f09a3e;
 
   --sidebar: #162a2c;
   --sidebar-foreground: #f4efe6;

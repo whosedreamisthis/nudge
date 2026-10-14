@@ -1,18 +1,19 @@
-# Current Feature
-
-<!-- Feature name and short description -->
+# Current Feature: Consistency Heatmap
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- "Consistency" card on Today with the last 14 weeks of completions as a grid of dots
+- 5-step colour scale (grey → dark orange) with a Less → More legend
+- Caption with the total completions in the period
 
 ## Notes
 
-<!-- Any extra notes -->
+- Count completions per day across all habits; bucket into the 5 steps.
+- One grouped query rather than one per day.
 
 ## Completed Features
 
