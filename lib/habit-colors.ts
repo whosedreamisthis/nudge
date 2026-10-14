@@ -52,3 +52,20 @@ export function habitFillClass(color: string) {
 export function categoryTagClass(categoryName: string) {
   return CATEGORY_TAG_CLASSES[categoryName] ?? "bg-muted";
 }
+
+// A solid block in the habit's colour, for completed days on the Progress grid
+const SOLID_CLASSES: Record<HabitColor, string> = {
+  indigo: "bg-habit-indigo",
+  sky: "bg-habit-sky",
+  emerald: "bg-habit-emerald",
+  amber: "bg-habit-amber",
+  red: "bg-habit-red",
+  pink: "bg-habit-pink",
+  violet: "bg-habit-violet",
+  teal: "bg-habit-teal",
+  lime: "bg-habit-lime",
+};
+
+export function habitSolidClass(color: string) {
+  return SOLID_CLASSES[isHabitColor(color) ? color : "indigo"];
+}

@@ -31,26 +31,23 @@ export function ConsistencyCard({ heatmap }: { heatmap: Heatmap }) {
       </h2>
 
       {/* One column per week, Monday at the top; the dots are for the eye, the caption says it in words */}
-      <div
-        role="img"
-        aria-label={caption}
-        className="mt-3 grid grid-flow-col grid-rows-7 gap-1"
-        style={{ gridTemplateColumns: `repeat(${HEATMAP_WEEKS}, minmax(0, 1fr))` }}
-      >
-        {weeks.flatMap((week, w) =>
-          week.map((day, d) =>
-            day ? (
-              <span
-                key={day.date}
-                title={describeDay(day.date, day.count)}
-                className={cn("aspect-square rounded-full", LEVEL_CLASSES[day.level])}
-              />
-            ) : (
-              // A day that has not happened yet keeps its place in the grid
-              <span key={`empty-${w}-${d}`} aria-hidden className="aspect-square" />
-            ),
-          ),
-        )}
+      <div role="img" aria-label={caption} className="mt-3 flex gap-1">
+        {weeks.map((week, w) => (
+          <div key={w} className="flex min-w-0 flex-1 flex-col gap-1">
+            {week.map((day, d) =>
+              day ? (
+                <span
+                  key={day.date}
+                  title={describeDay(day.date, day.count)}
+                  className={cn("block aspect-square w-full rounded-full", LEVEL_CLASSES[day.level])}
+                />
+              ) : (
+                // A day that has not happened yet keeps its place in the column
+                <span key={`empty-${d}`} aria-hidden className="block aspect-square w-full" />
+              ),
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-3 text-xs text-muted-foreground">
