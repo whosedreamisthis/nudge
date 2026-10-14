@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LoadMore } from "@/components/journal/LoadMore";
 import { courier } from "@/components/journal/courier";
 import {
   MOODS,
@@ -78,15 +79,7 @@ export function HistoryList({
           </ul>
         </section>
       ))}
-      {hasMore && (
-        <Link
-          href={nextHref}
-          scroll={false}
-          className="self-center rounded-sm px-4 py-2 text-sm font-medium text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          Show more
-        </Link>
-      )}
+      {hasMore && <LoadMore href={nextHref} />}
     </div>
   );
 }

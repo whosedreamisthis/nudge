@@ -8,7 +8,7 @@ import { TodayEntries } from "@/components/journal/TodayEntries";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { formatLongDate, todayKey } from "@/lib/dates";
 import { getEntriesForDay, getEntryMonths, getHistory } from "@/lib/db/journal";
-import { HISTORY_PAGE_SIZE, parseHistoryParams } from "@/lib/journal";
+import { HISTORY_MAX_LIMIT, HISTORY_PAGE_SIZE, parseHistoryParams } from "@/lib/journal";
 import { getSessionUser } from "@/lib/session";
 
 export default async function JournalPage({ searchParams }: PageProps<"/journal">) {
@@ -61,6 +61,7 @@ export default async function JournalPage({ searchParams }: PageProps<"/journal"
       <HistoryFilters months={months} q={filters.q} month={filters.month} mood={filters.mood} />
       <HistoryList
         {...history}
+        hasMore={history.hasMore && filters.limit < HISTORY_MAX_LIMIT}
         filtered={Boolean(filters.q || filters.month || filters.mood)}
         nextHref={`/journal?${next.toString()}`}
         timezone={user.timezone}
