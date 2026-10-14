@@ -1,22 +1,18 @@
-# Current Feature: Multi-Step Habits
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Optional daily goal in the New Habit modal: amount, unit, step size
-- Today row shows a progress bar and amount (e.g. "2500/3000 ml") instead of a single check
-- Tap adds one step; `…` menu has undo and "set exact amount"
-- The habit counts as complete only when `amount >= dailyGoal`
-- Progress can exceed the goal; the bar caps at 100%
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Partial progress never counts toward streaks, the ring, or the weekly grid.
-- Reaching 0 deletes the `HabitCompletion` row.
-- Vitest tests for the increment / undo / set-amount actions.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -36,3 +32,4 @@ In Progress
 - **Habits Catalog Page:** `/habits` lists system habits not yet added, with URL-param search and category filter, grouped by category; Add opens the prefilled modal (`components/habits/Catalog*.tsx`, `lib/catalog.ts`, `lib/db/catalog.ts`).
 - **Habit Actions Menu:** Today row menu with Edit (reuses the modal, new target from this week), Archive, and Delete with confirmation for custom habits only (`components/today/HabitMenu.tsx`, `actions/habits.ts`, `lib/targets.ts`).
 - **Archived Habits:** Archived tab on `/habits` with a count, Restore (also clears today's completion) and Delete for custom habits; Browse offers Restore for archived catalog habits (`components/habits/Archived*.tsx`, `lib/db/archived.ts`, `actions/habits.ts`).
+- **Multi-Step Habits:** Optional daily goal, unit and amount per tap in the New Habit and Edit forms, plus Undo and Set amount in the Today menu (`actions/habits.ts`, `lib/habit-form.ts`, `components/today/SetAmountDialog.tsx`).
