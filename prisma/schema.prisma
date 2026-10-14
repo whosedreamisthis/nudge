@@ -23,6 +23,7 @@ model User {
 
   habits      Habit[]
   completions HabitCompletion[]
+  journalEntries JournalEntry[]
 
   @@index([demoExpiresAt])
 }
@@ -109,4 +110,21 @@ model HabitCompletion {
 
   @@unique([habitId, date])
   @@index([userId, date])
+}
+
+// One private entry per user per day
+model JournalEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  // User-local calendar day
+  date      DateTime @db.Date
+  content   String   @default("") @db.Text
+  // 1 (rough) to 5 (great); null = no mood picked
+  mood      Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
 }

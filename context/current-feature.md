@@ -1,18 +1,21 @@
-# Current Feature
-
-<!-- Feature name and short description -->
+# Current Feature: Journal Write Entry
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Add the `JournalEntry` model and migration (one entry per user per day)
+- `/journal` page to write or edit today's entry with an optional mood
+- Entry text uses **Courier Prime** (`next/font/google`)
+- Debounced autosave through a Server Action
+- Add Journal to the bottom navigation
 
 ## Notes
 
-<!-- Any extra notes -->
+- Optional prompt of the day can wait for a later feature.
+- Entries are private; never send them to the AI.
 
 ## Completed Features
 
