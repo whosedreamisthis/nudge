@@ -50,6 +50,15 @@ describe("mockMotivation", () => {
   });
 });
 
+describe("general motivation", () => {
+  it("builds a history-free prompt and mock when nothing was done", () => {
+    const prompt = buildMotivationPrompt([{ name: "Read", done: 0 }], "2026-10-14");
+    expect(prompt).toContain("no habit history");
+    expect(prompt).not.toContain("Read");
+    expect(mockMotivation([{ name: "Read", done: 0 }]).message).not.toContain("0 times");
+  });
+});
+
 describe("buildMotivationPrompt", () => {
   it("lists each habit with its count and the date", () => {
     const prompt = buildMotivationPrompt([{ name: "Read", done: 5 }], "2026-10-14");

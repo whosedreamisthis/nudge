@@ -7,7 +7,6 @@ import { getMotivation, getRecentHistory } from "@/lib/db/motivation";
 import { generateJson, isAiDisabled } from "@/lib/gemini";
 import {
   buildMotivationPrompt,
-  hasHistory,
   mockMotivation,
   motivationReplySchema,
   motivationResponseSchema,
@@ -17,8 +16,8 @@ import { getAiSettings } from "@/lib/ai-settings";
 import { getSessionUser } from "@/lib/session";
 import type { ActionResult } from "@/types/actions";
 
-// Returns today's message, generating it once per user per day. null means there is nothing to
-// show (no history yet).
+// Returns today's message, generating it once per user per day. With no history yet the message
+// is a general one.
 export async function generateMotivation(): Promise<ActionResult<StoredMotivation | null>> {
   const user = await getSessionUser();
   if (!user) return { success: false, error: "Not signed in" };
@@ -31,7 +30,6 @@ export async function generateMotivation(): Promise<ActionResult<StoredMotivatio
     if (existing) return { success: true, data: existing };
 
     const habits = await getRecentHistory(user.id, today);
-    if (!hasHistory(habits)) return { success: true, data: null };
 
     const raw = isAiDisabled()
       ? mockMotivation(habits)

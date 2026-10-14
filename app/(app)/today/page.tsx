@@ -58,6 +58,11 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
       {habits.length === 0 ? (
         <>
           <PageHeader {...header} />
+          {!useSample && ai.motivation && (
+            <div className="mb-4">
+              <MorningMotivation initial={motivation} canGenerate />
+            </div>
+          )}
           <EmptyHabits />
         </>
       ) : (

@@ -36,7 +36,7 @@ export function historyStart(today: DateKey): DateKey {
   return addDays(today, -HISTORY_DAYS);
 }
 
-// Brand-new users, and anyone with nothing done in the window, get no card
+// Brand-new users, and anyone with nothing done in the window, get a general message instead
 export function hasHistory(habits: HabitHistory[]): boolean {
   return habits.some((habit) => habit.done > 0);
 }
@@ -48,14 +48,23 @@ export function mockMotivation(habits: HabitHistory[]): { message: string } {
     null,
   );
   return {
-    message: best
-      ? `Mock motivation: you showed up for ${best.name} ${best.done} ${best.done === 1 ? "time" : "times"} lately, keep it going today.`
-      : "Mock motivation: a small win this morning sets the tone for the day.",
+    message:
+      best && best.done > 0
+        ? `Mock motivation: you showed up for ${best.name} ${best.done} ${best.done === 1 ? "time" : "times"} lately, keep it going today.`
+        : "Mock motivation: a small win this morning sets the tone for the day.",
   };
 }
 
 // Only habit names and how often they were done go in, nothing else about the user
 export function buildMotivationPrompt(habits: HabitHistory[], today: DateKey): string {
+  if (!hasHistory(habits)) {
+    return [
+      "You are a supportive habit coach writing the morning message for the user of a habit tracker.",
+      `Today is ${today}. The user has no habit history yet.`,
+      "Write exactly one sentence, second person, warm and general, encouraging them to start with one small habit today.",
+      "Do not invent data, do not use emojis, and do not ask a question.",
+    ].join("\n");
+  }
   const lines = habits.map(
     (habit) => `- ${habit.name}: done ${habit.done} of the last ${HISTORY_DAYS} days`,
   );

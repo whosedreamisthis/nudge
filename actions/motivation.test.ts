@@ -48,11 +48,12 @@ describe("generateMotivation", () => {
     expect(upsert).not.toHaveBeenCalled();
   });
 
-  it("returns nothing for a user with no history", async () => {
-    getRecentHistory.mockResolvedValueOnce([{ name: "Read", done: 0 }]);
+  it("generates a general message for a user with no history", async () => {
+    getRecentHistory.mockResolvedValueOnce([]);
 
-    expect(await generateMotivation()).toEqual({ success: true, data: null });
-    expect(generateJson).not.toHaveBeenCalled();
+    expect(await generateMotivation()).toEqual({ success: true, data: stored });
+    expect(generateJson.mock.calls[0][0]).toContain("no habit history");
+    expect(upsert).toHaveBeenCalledTimes(1);
   });
 
   it("generates and stores a message", async () => {
