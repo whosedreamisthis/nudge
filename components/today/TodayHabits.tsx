@@ -12,13 +12,15 @@ interface TodayHabitsProps {
   habits: TodayHabit[];
   // The page header; it sits beside the completion ring, which needs the optimistic state
   header: ReactNode;
+  // Full width under the header (it should carry xl:col-span-2); may render nothing
+  banner?: ReactNode;
   // Shown in the side column on large screens, and after the list on phones
   aside?: ReactNode;
   // Made-up habits are not in the database, so taps only change what is shown
   sample?: boolean;
 }
 
-export function TodayHabits({ habits, header, aside, sample = false }: TodayHabitsProps) {
+export function TodayHabits({ habits, header, banner, aside, sample = false }: TodayHabitsProps) {
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const [local, setLocal] = useState(habits);
@@ -93,7 +95,9 @@ export function TodayHabits({ habits, header, aside, sample = false }: TodayHabi
         <CompletionRing done={done} total={total} />
       </div>
 
-      <div className="flex flex-col gap-3 xl:col-start-1 xl:row-start-2">
+      {banner}
+
+      <div className="flex flex-col gap-3 xl:col-start-1">
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
@@ -105,7 +109,7 @@ export function TodayHabits({ habits, header, aside, sample = false }: TodayHabi
         </ul>
       </div>
 
-      {aside && <div className="xl:col-start-2 xl:row-start-2">{aside}</div>}
+      {aside && <div className="xl:col-start-2">{aside}</div>}
     </div>
   );
 }
