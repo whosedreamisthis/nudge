@@ -31,14 +31,14 @@ export default async function HabitsPage({
   const filters = parseCatalogParams(params);
   // No user row yet (webhook still pending) means nothing added and nothing archived
   const user = await getSessionUser();
-  const userId = user?.id ?? "";
   const suggestEnabled = user ? (await getAiSettings(user)).habitSuggestions : false;
 
   const [categories, archivedCount, archived, catalog] = await Promise.all([
     getCategories(),
-    countArchivedHabits(userId),
-    archivedTab ? getArchivedHabits(userId) : [],
-    archivedTab ? [] : getCatalogHabits(userId, filters),
+    user ? countArchivedHabits(user.id) : 0,
+    user && archivedTab ? getArchivedHabits(user.id) : [],
+    // Without a user row nothing is added yet, so the whole catalog shows
+    archivedTab ? [] : getCatalogHabits(user?.id ?? "", filters),
   ]);
 
   return (

@@ -8,11 +8,8 @@ import { monthRange, type HistoryFilters } from "@/lib/journal";
 const NOT_EMPTY = { OR: [{ content: { not: "" } }, { mood: { not: null } }] };
 
 // The day's entries, newest first
-export async function getEntriesForDay(userId: string, day: DateKey) {
-  "use cache";
-  cacheLife("hours");
-  cacheTag(journalTag(userId));
-
+// Not cached: the editors start from these, so they must never be stale
+export function getEntriesForDay(userId: string, day: DateKey) {
   return prisma.journalEntry.findMany({
     where: { userId, date: toDbDate(day), ...NOT_EMPTY },
     select: { id: true, content: true, mood: true, createdAt: true },
@@ -21,11 +18,8 @@ export async function getEntriesForDay(userId: string, day: DateKey) {
 }
 
 // One of the user's entries, or null when it doesn't exist or belongs to someone else
+// Not cached, for the same reason
 export async function getEntryById(userId: string, id: string) {
-  "use cache";
-  cacheLife("hours");
-  cacheTag(journalTag(userId));
-
   const entry = await prisma.journalEntry.findFirst({
     where: { id, userId },
     select: { id: true, date: true, content: true, mood: true, createdAt: true },
@@ -35,11 +29,20 @@ export async function getEntryById(userId: string, id: string) {
 
 // Past entries, newest first, narrowed by the History filters. One extra row is read to know
 // whether "Show more" has anything to show.
-export async function getHistory(userId: string, { q, month, mood, limit }: HistoryFilters) {
+export function getHistory(userId: string, filters: HistoryFilters) {
+  // Every search text would be its own entry, so searches are read straight from the database
+  return filters.q ? readHistory(userId, filters) : getCachedHistory(userId, filters);
+}
+
+async function getCachedHistory(userId: string, filters: HistoryFilters) {
   "use cache";
   cacheLife("hours");
   cacheTag(journalTag(userId));
 
+  return readHistory(userId, filters);
+}
+
+async function readHistory(userId: string, { q, month, mood, limit }: HistoryFilters) {
   const range = month ? monthRange(month) : null;
   const rows = await prisma.journalEntry.findMany({
     where: {

@@ -41,7 +41,7 @@ Environment variables go in `.env.local` (not `.env`). See `.env.example` for th
 
 ## Caching
 
-Cache Components is on. Data functions in `lib/db/` use `"use cache"` with per-user tags (`user:{id}:habits`, `user:{id}:completions`, `user:{id}:journal`) and a shared `catalog` tag. Server Actions expire the tags they change with `updateTag` (see `lib/cache-tags.ts`). Cached functions never read the session; the user, timezone and date are passed in as arguments. The default in-memory cache does not persist on serverless hosting.
+Cache Components is on. Data functions in `lib/db/` use `"use cache"` with per-user tags (`user:{id}:habits`, `user:{id}:completions`, `user:{id}:journal`) and a shared `catalog` tag. Server Actions expire the tags they change with `updateTag` (see `lib/cache-tags.ts`). Cached functions never read the session; the user, timezone and date are passed in as arguments. Journal autosave refreshes the History cache in the background (`revalidateTag(tag, "max")`) so typing is never interrupted, and the editors read uncached data. On Vercel the default in-memory cache mostly does not persist between requests, so the speed-up is limited and stale data across instances is unlikely; measure before moving the hot reads to `"use cache: remote"`.
 
 ## Project docs
 

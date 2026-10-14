@@ -223,7 +223,7 @@ export async function startDemo(input: z.input<typeof inputSchema>): Promise<Act
     }
   } catch (error) {
     console.error("Redis is unreachable:", error);
-    await releaseSlot(store, key).catch(() => {});
+    await releaseSlot(store, key).catch((releaseError: unknown) => console.error("Could not free the slot:", releaseError));
     return { success: false, error: UNAVAILABLE };
   }
 

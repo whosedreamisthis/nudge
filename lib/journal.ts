@@ -64,7 +64,7 @@ export function parseHistoryParams(params: {
     mood: Number.isInteger(mood) && mood >= 1 && mood <= 5 ? mood : null,
     limit:
       Number.isInteger(limit) && limit > HISTORY_PAGE_SIZE
-        ? Math.min(limit, 1000)
+        ? Math.min(limit, 300)
         : HISTORY_PAGE_SIZE,
   };
 }
