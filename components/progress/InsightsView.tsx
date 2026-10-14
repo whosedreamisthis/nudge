@@ -1,5 +1,3 @@
-import { CircleCheck } from "lucide-react";
-import { Tile } from "@/components/today/StatTiles";
 import { formatLongDate } from "@/lib/dates";
 import { habitSolidClass } from "@/lib/habit-colors";
 import type { ChartDay, HabitPerformance, Insights } from "@/lib/insights";
@@ -10,16 +8,18 @@ function describe(day: ChartDay) {
   return `${formatLongDate(day.date)}: ${day.count === 1 ? "1 habit" : `${day.count} habits`} completed`;
 }
 
-// "+12 vs the 30 days before"; nothing to compare against when the period before was empty
-function changeCaption(current: number, previous: number) {
-  if (previous === 0) return "completions";
+// "142 completions in the last 30 days, +12 vs the 30 days before"; no comparison when the
+// period before was empty
+function monthSummary(current: number, previous: number) {
+  const base = `${current} ${current === 1 ? "completion" : "completions"} in the last 30 days`;
+  if (previous === 0) return base;
   const diff = current - previous;
-  const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
-  return `${sign}${Math.abs(diff)} vs the 30 days before`;
+  const sign = diff > 0 ? "+" : "−";
+  return `${base}, ${diff === 0 ? "same as" : `${sign}${Math.abs(diff)} vs`} the 30 days before`;
 }
 
 // Plain CSS bars: this week against last week, one pair of bars per weekday
-function WeekChart({ thisWeek, lastWeek }: Pick<Insights, "thisWeek" | "lastWeek">) {
+function WeekChart({ thisWeek, lastWeek, last30, previous30 }: Insights) {
   const max = Math.max(1, ...thisWeek.map((d) => d.count), ...lastWeek.map((d) => d.count));
   const bar = (day: ChartDay, className: string) => (
     <div
@@ -48,6 +48,8 @@ function WeekChart({ thisWeek, lastWeek }: Pick<Insights, "thisWeek" | "lastWeek
           </span>
         </div>
       </div>
+
+      <p className="mt-1 text-sm text-muted-foreground">{monthSummary(last30, previous30)}</p>
 
       <div className="mt-4 grid grid-cols-7 gap-2">
         {thisWeek.map((day, i) => (
@@ -116,6 +118,7 @@ function Performance({ habits }: { habits: HabitPerformance[] }) {
   );
 }
 
+// The current week's charts, under the grid: always this week, whichever week the grid shows
 export function InsightsView({
   insights,
   performance,
@@ -125,16 +128,7 @@ export function InsightsView({
 }) {
   return (
     <div className="mx-auto flex w-full flex-col gap-4 xl:max-w-4xl">
-      <dl aria-label="Your insights">
-        <Tile
-          label="Last 30 days"
-          tint="bg-tint-green"
-          badge={<CircleCheck className="size-5 text-complete" />}
-          value={insights.last30}
-          caption={changeCaption(insights.last30, insights.previous30)}
-        />
-      </dl>
-      <WeekChart thisWeek={insights.thisWeek} lastWeek={insights.lastWeek} />
+      <WeekChart {...insights} />
       <Performance habits={performance} />
     </div>
   );
