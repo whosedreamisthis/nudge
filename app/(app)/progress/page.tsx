@@ -46,7 +46,7 @@ export default async function ProgressPage({
         topHabit={topHabit(rows)}
       />
 
-      <section aria-labelledby="weekly-heading" className="flex flex-col gap-3">
+      <section aria-labelledby="weekly-heading" className="mx-auto flex w-full flex-col gap-3 xl:max-w-4xl">
         <h2 id="weekly-heading" className="text-lg font-semibold">
           Weekly
         </h2>

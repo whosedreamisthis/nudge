@@ -54,7 +54,7 @@ export function CatalogList({
               · {group.habits.length}
             </span>
           </summary>
-          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+          <ul className="grid divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card lg:grid-cols-2 lg:[&>li:nth-child(2)]:border-t-0 lg:[&>li:nth-child(odd)]:border-r lg:[&>li:nth-child(odd)]:border-border">
             {group.habits.map((habit) => (
               <li key={habit.id} className="flex items-center gap-3 p-3">
                 <span

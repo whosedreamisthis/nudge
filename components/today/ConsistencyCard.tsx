@@ -24,7 +24,7 @@ export function ConsistencyCard({ heatmap }: { heatmap: Heatmap }) {
   return (
     <section
       aria-labelledby="consistency-heading"
-      className="mt-6 rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border"
+      className="mt-6 rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border xl:mt-0"
     >
       <h2 id="consistency-heading" className="text-sm font-medium text-foreground/75">
         Consistency

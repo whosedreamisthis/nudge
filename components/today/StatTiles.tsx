@@ -50,7 +50,7 @@ export function StatTiles({ stats }: { stats: TodayStats }) {
   const { activeStreaks, bestStreak } = stats;
 
   return (
-    <dl aria-label="Your stats" className="mb-6 grid grid-cols-2 gap-3">
+    <dl aria-label="Your stats" className="grid grid-cols-2 gap-3">
       <Tile
         label="Active streaks"
         tint="bg-tint-orange"

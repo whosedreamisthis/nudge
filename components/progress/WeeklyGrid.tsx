@@ -48,7 +48,7 @@ export function WeeklyGrid({
         <caption className="sr-only">Habits completed each day this week</caption>
         <thead>
           <tr>
-            <th scope="col" className="w-[38%] text-left text-xs font-medium text-muted-foreground">
+            <th scope="col" className="w-[38%] text-left lg:w-56 text-xs font-medium text-muted-foreground">
               <span className="sr-only">Habit</span>
             </th>
             {rows[0].days.map(({ date }, i) => (
@@ -96,7 +96,7 @@ export function WeeklyGrid({
                   <span
                     title={`${STATE_LABELS[state]}, ${date}`}
                     className={cn(
-                      "mx-auto flex aspect-square w-full max-w-7 items-center justify-center rounded-md",
+                      "mx-auto flex aspect-square w-full max-w-7 items-center md:max-w-9 justify-center rounded-md",
                       state === "done" ? habitSolidClass(row.color) : STATE_CLASSES[state],
                     )}
                   >

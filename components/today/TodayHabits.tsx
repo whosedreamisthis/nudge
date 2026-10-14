@@ -15,11 +15,13 @@ interface TodayHabitsProps {
   stats: TodayStats;
   // The page header; it sits beside the completion ring, which needs the optimistic state
   header: ReactNode;
+  // Shown under the stat tiles in the side column on large screens, and after the list on phones
+  aside?: ReactNode;
   // Made-up habits are not in the database, so taps only change what is shown
   sample?: boolean;
 }
 
-export function TodayHabits({ habits, stats, header, sample = false }: TodayHabitsProps) {
+export function TodayHabits({ habits, stats, header, aside, sample = false }: TodayHabitsProps) {
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const [local, setLocal] = useState(habits);
@@ -85,24 +87,32 @@ export function TodayHabits({ habits, stats, header, sample = false }: TodayHabi
     )),
   ];
 
+  // On phones everything stacks in this order. From xl the list takes the left column and the
+  // tiles and the aside (the consistency card) the right one, under a full-width header.
   return (
-    <>
-      <div className="flex items-start justify-between gap-4">
+    <div className="flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-x-8">
+      <div className="flex items-start justify-between gap-4 xl:col-span-2">
         {header}
         <CompletionRing done={done} total={total} />
       </div>
 
-      <StatTiles stats={stats} />
+      <div className="xl:col-start-2 xl:row-start-2">
+        <StatTiles stats={stats} />
+      </div>
 
-      {error && (
-        <p role="alert" className="mb-3 text-sm text-destructive">
-          {error}
-        </p>
-      )}
+      <div className="mt-6 flex flex-col gap-3 xl:col-start-1 xl:row-start-2 xl:row-span-2 xl:mt-0">
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
 
-      <ul aria-label="Today's habits" className="flex flex-col gap-3">
-        {rows}
-      </ul>
-    </>
+        <ul aria-label="Today's habits" className="flex flex-col gap-3">
+          {rows}
+        </ul>
+      </div>
+
+      {aside && <div className="xl:col-start-2 xl:row-start-3">{aside}</div>}
+    </div>
   );
 }
