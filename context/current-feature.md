@@ -1,24 +1,18 @@
-# Current Feature: AI Weekly Report
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Weekly tab card with a narrative summary and 3 actionable insights, generated with the Gemini API (`GEMINI_API_KEY`, one shared client in `lib/gemini.ts`)
-- Add the `AiReport` model and migration
-- Store one report per user per week; reuse it on later visits
-- "Regenerate report" button overwrites the stored report; show the generated-at time
-- Loading and error states
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Build the prompt from this week's completions, streaks, and targets only.
-- Generate server-side; never expose `GEMINI_API_KEY` to the client.
-- Check the current Gemini SDK and model names in the docs before coding; use a fast, low-cost model.
-- Rate-limit regeneration.
-- Next up after this: `21-morning-motivation.md` (reuses `lib/gemini.ts` and `AiReport`; the model needs a type field, e.g. `weekly` / `motivation`).
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -51,3 +45,4 @@ In Progress
 - **Demo Data and Expiry:** Demo seed (5 habits, 14 weeks of completions, journal entries), expired demos blocked in `getSessionUser`, and a CRON_SECRET-protected cleanup job (`lib/demo.ts`, `lib/demo-seed.ts`, `lib/demo-cleanup.ts`, `app/api/cron/cleanup-demos/`).
 - **Demo Try Flow:** Try demo button on the landing and auth pages; one demo per IP via Upstash, signed resume cookie, banner and a daily cap (`actions/demo.ts`, `lib/demo-redis.ts`, `components/demo/`).
 - **Today Declutter:** Stat tiles leave Today; Progress shows Best streak and Active streaks instead of Today and Average streak (`components/shared/StatTile.tsx`, `lib/db/progress.ts`, `components/progress/ProgressTiles.tsx`).
+- **AI Weekly Report:** Progress card with a Gemini summary and 3 insights, stored per week in `AiReport`, with Regenerate, cooldown and `AI_DISABLED` mocks (`lib/gemini.ts`, `actions/ai-report.ts`, `components/progress/AiWeeklyReport.tsx`).
