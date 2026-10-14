@@ -1,20 +1,18 @@
-# Current Feature: Progress Weekly Grid
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- `/progress` with a Weekly tab
-- Summary tiles: today's progress, average streak, best streak, top habit
-- Habits × days (Mon–Sun) grid with each habit's colour for completed days
-- Date range with previous / next arrows; next is disabled on the current week
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Weekly habits: the week counts as met at the target; unchecked days aren't misses.
-- Insights tab and the AI report are separate features.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -36,3 +34,4 @@ In Progress
 - **Archived Habits:** Archived tab on `/habits` with a count, Restore (also clears today's completion) and Delete for custom habits; Browse offers Restore for archived catalog habits (`components/habits/Archived*.tsx`, `lib/db/archived.ts`, `actions/habits.ts`).
 - **Multi-Step Habits:** Optional daily goal, unit and amount per tap in the New Habit and Edit forms, plus Undo and Set amount in the Today menu (`actions/habits.ts`, `lib/habit-form.ts`, `components/today/SetAmountDialog.tsx`).
 - **Consistency Heatmap:** Today card showing the last 14 weeks of completed habits per day as dots on a five-step grey-to-orange scale, with legend and total (`components/today/ConsistencyCard.tsx`, `lib/consistency.ts`, `lib/db/consistency.ts`).
+- **Progress Weekly Grid:** `/progress` with four summary tiles and a habits-by-days weekly grid with previous/next week arrows (`app/(app)/progress/`, `components/progress/`, `lib/week-grid.ts`, `lib/db/progress.ts`).
