@@ -127,7 +127,7 @@ export function InsightsView({
   performance: HabitPerformance[];
 }) {
   return (
-    <div className="mx-auto flex w-full flex-col gap-4 xl:max-w-4xl">
+    <div className="flex w-full flex-col gap-4">
       <WeekChart {...insights} />
       <Performance habits={performance} />
     </div>
