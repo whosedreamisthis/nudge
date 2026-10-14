@@ -1,22 +1,18 @@
-# Current Feature: Focus: Link to a Habit
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Optionally link a Focus session to one of the user's habits
-- Completing the session marks that habit complete for today (or adds the minutes to a minutes-based daily goal)
-- Stopping early does not complete the habit
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Reuses the completion action; don't duplicate the logic.
-- Minutes: if the habit has a daily goal in minutes, finishing adds the session minutes to it; any other habit is simply marked complete.
-- Entry via `/focus?habit=<id>` or the Today habit menu ("Start focus"); the picker names the habit. On finish, a "Count this session for {habit}" checkbox (on by default) decides whether Done counts it.
-- The link (`habitId`, `habitName`) is stored in the localStorage timer state, so it survives reloads; a running timer keeps its own habit.
-- No session history: "focus minutes this week" on Insights is dropped, so there is no database model and the link only lives in the localStorage timer state.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -45,3 +41,4 @@ In Progress
 - **Journal History:** History tab grouped by month with search and month/mood filters, entry page to read or edit, and delete with confirmation (`app/(app)/journal/`, `components/journal/`, `lib/db/journal.ts`).
 - **Journal Multiple Entries:** Any number of journal entries per day, each with its own mood and clock time; Today lists them with a New entry button, History and the entry page work by id (`actions/journal.ts`, `components/journal/TodayEntries.tsx`, `app/(app)/journal/[id]/`).
 - **Focus Timer:** `/focus` countdown with presets, custom minutes, pause/resume/stop, stored in localStorage, with a chime and toast on finish (`components/focus/`, `lib/focus.ts`, `lib/focus-store.ts`).
+- **Focus: Link to a Habit:** Start a Focus session from `/focus?habit=<id>` or the Today menu; on finish a checkbox counts it for the habit (`actions/habits.ts`, `lib/focus.ts`, `components/focus/`).
