@@ -214,7 +214,7 @@ CRON_SECRET=                # protects the demo cleanup job
 - **User sync:** a Clerk webhook at `/api/webhooks/clerk` verifies the request with `verifyWebhook()` from `@clerk/nextjs/webhooks`, then upserts the `User` row on `user.created` / `user.updated` and deletes it, with all of that user's data, on `user.deleted`. It returns 400 on a bad signature, and any non-2xx makes Clerk retry, so the handler must be idempotent. `getSessionUser()` also creates the row on first request if the webhook hasn't arrived yet.
 - **Timezone:** captured from the browser on first sign-in and stored on `User.timezone` (editable in Settings).
 - **Account management:** profile, email and sign-out use Clerk's `<UserButton />` / `<UserProfile />`, so the Settings modal doesn't need its own password or email forms. Deleting an account goes through Clerk, and the webhook cleans up our data.
-- **Demo account:** a "Try demo" button creates a temporary Clerk user with seeded sample habits, one per IP, deleted from Clerk and the database after 12 hours. Uses Upstash Redis for the IP lock. See `context/features/demo-spec.md`. Otherwise the app is for signed-in users only.
+- **Demo account:** a "Try demo" button creates a temporary Clerk user with seeded sample habits, one per IP, deleted from Clerk and the database after 12 hours. Uses Upstash Redis for the IP lock. See `context/features/29a-demo-data-and-cleanup.md` and `29b-demo-try-flow.md`. Otherwise the app is for signed-in users only.
 
 ---
 

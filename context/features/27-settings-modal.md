@@ -15,7 +15,7 @@
 - Keep it minimal; the full list is in `context/project-overview.md` section 3.8.
 - Timezone change: `captureTimezone` only sets the value once (while it is still "UTC"), so editing needs its own action. Completions are stored as dates and must not be rewritten; "today" and the week boundaries move, so streaks can recalculate. Refresh the app's pages after the change.
 - Delete account: the Clerk webhook cleans up our data, but it can lag. Sign the user out straight away and send them to the landing page instead of showing stale data.
-- Demo users (see `29-demo-spec.md`): show only theme and sign-out. Hide Delete account and lock the timezone, since the demo expires after 12 hours.
+- Demo users (see `29a-demo-data-and-cleanup.md` and `29b-demo-try-flow.md`): show only theme and sign-out. Hide Delete account and lock the timezone, since the demo expires after 12 hours.
 - Phones: full-screen modal that scrolls; Clerk's profile component in its own section.
 - Reminders: show the section so the layout is settled, but leave it disabled with "Coming soon". Real reminders (channel, times, per habit or global) are an open question in the overview.
 - Out of scope until decided: data export.

@@ -33,6 +33,7 @@ Small, ordered specs. Load one at a time with `/feature load <name>` (e.g. `/fea
 | 27  | settings-modal             | Settings   |
 | 28  | celebrations               | Polish     |
 | 30  | caching                    | Performance |
-| —   | demo-spec                  | Demo       |
+| 29a | demo-data-and-cleanup      | Demo       |
+| 29b | demo-try-flow              | Demo       |
 
-`demo-spec` is a larger spec (temporary per-IP demo account). Build it after 04, then keep `lib/demo-seed.ts` current as later features add data. Consider splitting it into smaller specs (create/resume, cleanup job, seed) before loading.
+`29a` and `29b` were split from one larger demo spec (temporary per-IP demo account). Build 29a first, so no demo can exist before the code that deletes it, then 29b. Keep `lib/demo-seed.ts` current as later features add data.

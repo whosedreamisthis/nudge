@@ -76,4 +76,41 @@ describe("POST /api/webhooks/clerk", () => {
     expect((await post()).status).toBe(200);
     expect(upsert).toHaveBeenCalledTimes(2);
   });
+
+  it("marks a demo user from its Clerk metadata", async () => {
+    verifyWebhook.mockResolvedValue({
+      type: "user.created",
+      data: { id: "demo_1", public_metadata: { isDemo: true, demoExpiresAt: "2026-10-15T00:00:00.000Z" } },
+    });
+
+    expect((await post()).status).toBe(200);
+    expect(upsert).toHaveBeenCalledWith({
+      where: { clerkId: "demo_1" },
+      update: {},
+      create: { clerkId: "demo_1", isDemo: true, demoExpiresAt: new Date("2026-10-15T00:00:00.000Z") },
+    });
+  });
+
+  it("does not mark an ordinary user as a demo", async () => {
+    verifyWebhook.mockResolvedValue({
+      type: "user.created",
+      data: { id: "user_1", public_metadata: { plan: "free" } },
+    });
+
+    await post();
+
+    expect(upsert).toHaveBeenCalledWith({
+      where: { clerkId: "user_1" },
+      update: {},
+      create: { clerkId: "user_1" },
+    });
+  });
+
+  it("does not fail when a demo is deleted twice (the cleanup job deleted the row first)", async () => {
+    verifyWebhook.mockResolvedValue({ type: "user.deleted", data: { id: "demo_1" } });
+    deleteMany.mockResolvedValue({ count: 0 });
+
+    expect((await post()).status).toBe(200);
+    expect(deleteMany).toHaveBeenCalledWith({ where: { clerkId: "demo_1" } });
+  });
 });

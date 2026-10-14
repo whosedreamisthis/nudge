@@ -12,10 +12,10 @@ export default async function Home() {
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-bold tracking-tight">Build habits that stick.</h1>
         <p className="text-muted-foreground">
-          A simple, colourful habit tracker with streaks and gentle nudges.
+          A simple habit tracker with streaks and gentle nudges.
         </p>
       </div>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap justify-center gap-3">
         <Button nativeButton={false} render={<Link href="/register" />}>
           Get started
         </Button>
