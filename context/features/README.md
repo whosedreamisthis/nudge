@@ -32,6 +32,7 @@ Small, ordered specs. Load one at a time with `/feature load <name>` (e.g. `/fea
 | 26  | focus-habit-link           | Focus      |
 | 27  | settings-modal             | Settings   |
 | 28  | celebrations               | Polish     |
+| 30  | caching                    | Performance |
 | —   | demo-spec                  | Demo       |
 
 `demo-spec` is a larger spec (temporary per-IP demo account). Build it after 04, then keep `lib/demo-seed.ts` current as later features add data. Consider splitting it into smaller specs (create/resume, cleanup job, seed) before loading.

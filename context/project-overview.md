@@ -127,7 +127,7 @@ A timer for sessions of focused time. No mockup yet; proposed scope:
 Opened by a gear icon in the top Navbar, next to the profile button, on every screen size. Kept minimal:
 
 - **Account:** profile, email and sign-out through Clerk's `<UserProfile />`; no password or email forms of our own.
-- **Theme:** System / Light / Dark. System is the default and follows the OS.
+- **Theme:** Light / Dark. Until the user picks one the app follows the OS, and the matching button shows as selected.
 - **Timezone:** editable. It decides what "today" is, so a change moves "today" and the week boundaries; completions are stored as dates and are not rewritten, so history is untouched but streaks can recalculate. The app refreshes after the change.
 - **AI features:** one switch to turn off the AI Weekly Report, morning motivation and habit suggestions, with a line saying what is sent to Gemini (habit names, completions and journal text where used).
 - **Reminders:** a placeholder section, disabled with "Coming soon". Nothing is stored yet; what reminders do is still an open question.
