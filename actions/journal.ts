@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { expireJournal } from "@/lib/cache-tags";
+import { expireJournal, refreshJournal } from "@/lib/cache-tags";
 import { prisma } from "@/lib/db";
 import { todayKey, toDbDate } from "@/lib/dates";
 import { deleteEntrySchema, saveEntrySchema, type SaveEntryInput } from "@/lib/journal";
@@ -10,8 +10,8 @@ import type { ActionResult } from "@/types/actions";
 
 // Autosave target. Without an id it creates an entry for the user's local today (and returns the
 // id and creation time); with one it updates that entry. An empty new entry is not created, so
-// nothing is returned for it. No revalidation, the editor already holds the text and a refresh
-// mid-typing would be disruptive.
+// nothing is returned for it. No page refresh, the editor already holds the text and a refresh
+// mid-typing would be disruptive; the cached History list is refreshed in the background.
 export async function saveJournalEntry(
   input: SaveEntryInput,
 ): Promise<ActionResult<{ id: string; createdAt: string } | null>> {
@@ -31,7 +31,7 @@ export async function saveJournalEntry(
         data: { content, mood },
       });
       if (count === 0) return { success: false, error: "Entry not found" };
-      expireJournal(user.id);
+      refreshJournal(user.id);
       return { success: true, data: null };
     }
 
@@ -41,7 +41,7 @@ export async function saveJournalEntry(
       data: { userId: user.id, date: toDbDate(todayKey(user.timezone)), content, mood },
       select: { id: true, createdAt: true },
     });
-    expireJournal(user.id);
+    refreshJournal(user.id);
     return { success: true, data: { id: entry.id, createdAt: entry.createdAt.toISOString() } };
   } catch {
     return { success: false, error: "Could not save, try again" };

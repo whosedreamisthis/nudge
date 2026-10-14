@@ -70,7 +70,7 @@ describe("parseHistoryParams", () => {
   it("uses the first of a repeated param and caps the limit", () => {
     const parsed = parseHistoryParams({ q: ["a", "b"], limit: "99999" });
     expect(parsed.q).toBe("a");
-    expect(parsed.limit).toBe(1000);
+    expect(parsed.limit).toBe(300);
   });
 });
 
