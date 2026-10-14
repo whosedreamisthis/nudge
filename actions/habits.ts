@@ -6,30 +6,33 @@ import { prisma } from "@/lib/db";
 import { fromDbDate, todayKey, toDbDate, weekStart } from "@/lib/dates";
 import {
   createHabitSchema,
+  goalData,
+  setAmountSchema,
   updateHabitSchema,
   type CreateHabitInput,
   type UpdateHabitInput,
 } from "@/lib/habit-form";
 import { planTargetChange } from "@/lib/targets";
 import { getSessionUser } from "@/lib/session";
-import { advanceAmount } from "@/lib/progress";
+import { advanceAmount, undoAmount } from "@/lib/progress";
 import type { ActionResult } from "@/types/actions";
 
 const habitIdSchema = z.object({ habitId: z.string().min(1) });
 
-// One tap on a habit for the user's local today. A simple habit flips between done and not done;
-// a habit with a daily goal moves up by its step size, and a tap on a finished day clears it.
-export async function advanceHabit(
-  input: z.input<typeof habitIdSchema>,
+// Loads the user's active habit and its completion for their local today, then saves the amount
+// `next` returns (0 removes the completion; null means the change does not apply to this habit)
+async function changeAmount(
+  habitId: string,
+  next: (
+    current: number,
+    habit: { dailyGoal: number | null; stepSize: number | null },
+  ) => number | null,
 ): Promise<ActionResult<{ amount: number }>> {
-  const parsed = habitIdSchema.safeParse(input);
-  if (!parsed.success) return { success: false, error: "Invalid habit" };
-
   const user = await getSessionUser();
   if (!user) return { success: false, error: "Not signed in" };
 
   const habit = await prisma.habit.findFirst({
-    where: { id: parsed.data.habitId, userId: user.id, archivedAt: null },
+    where: { id: habitId, userId: user.id, archivedAt: null },
     select: { id: true, dailyGoal: true, stepSize: true },
   });
   if (!habit) return { success: false, error: "Habit not found" };
@@ -37,7 +40,9 @@ export async function advanceHabit(
   const date = toDbDate(todayKey(user.timezone));
   const where = { habitId_date: { habitId: habit.id, date } };
   const existing = await prisma.habitCompletion.findUnique({ where });
-  const amount = advanceAmount(existing?.amount ?? 0, habit.dailyGoal, habit.stepSize);
+  const amount = next(existing?.amount ?? 0, habit);
+  if (amount === null)
+    return { success: false, error: "This habit has no daily goal" };
 
   try {
     if (amount === 0) {
@@ -58,31 +63,82 @@ export async function advanceHabit(
   return { success: true, data: { amount } };
 }
 
+// One tap on a habit for the user's local today. A simple habit flips between done and not done;
+// a habit with a daily goal moves up by its step size, and a tap on a finished day clears it.
+export async function advanceHabit(
+  input: z.input<typeof habitIdSchema>,
+): Promise<ActionResult<{ amount: number }>> {
+  const parsed = habitIdSchema.safeParse(input);
+  if (!parsed.success) return { success: false, error: "Invalid habit" };
+
+  return changeAmount(parsed.data.habitId, (amount, habit) =>
+    advanceAmount(amount, habit.dailyGoal, habit.stepSize),
+  );
+}
+
+// Takes one step back from today's amount; reaching 0 removes the completion
+export async function undoHabit(
+  input: z.input<typeof habitIdSchema>,
+): Promise<ActionResult<{ amount: number }>> {
+  const parsed = habitIdSchema.safeParse(input);
+  if (!parsed.success) return { success: false, error: "Invalid habit" };
+
+  return changeAmount(parsed.data.habitId, (amount, habit) =>
+    undoAmount(amount, habit.stepSize),
+  );
+}
+
+// Sets today's amount for a habit with a daily goal; it can go past the goal, and 0 removes it
+export async function setHabitAmount(
+  input: z.input<typeof setAmountSchema>,
+): Promise<ActionResult<{ amount: number }>> {
+  const parsed = setAmountSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid amount",
+    };
+  }
+
+  return changeAmount(parsed.data.habitId, (_, habit) =>
+    habit.dailyGoal === null ? null : parsed.data.amount,
+  );
+}
+
 // Creates a habit, custom or linked to a catalog habit, with its first target, effective from this week
 export async function createHabit(
   input: CreateHabitInput,
 ): Promise<ActionResult<{ id: string }>> {
   const parsed = createHabitSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid habit" };
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid habit",
+    };
   }
 
   const user = await getSessionUser();
   if (!user) return { success: false, error: "Not signed in" };
 
-  const { frequency, targetDaysPerWeek, systemHabitId, ...fields } = parsed.data;
+  const {
+    frequency,
+    targetDaysPerWeek,
+    systemHabitId,
+    dailyGoal,
+    unit,
+    stepSize,
+    ...fields
+  } = parsed.data;
   const category = await prisma.category.findUnique({
     where: { id: fields.categoryId },
     select: { id: true },
   });
   if (!category) return { success: false, error: "Category not found" };
 
-  // A catalog habit brings its own goal; the client never sets it
-  let goal: { dailyGoal: number | null; unit: string | null; stepSize: number | null } | null = null;
   if (systemHabitId) {
     const system = await prisma.systemHabit.findUnique({
       where: { id: systemHabitId },
-      select: { defaultDailyGoal: true, defaultUnit: true, defaultStepSize: true },
+      select: { id: true },
     });
     if (!system) return { success: false, error: "Habit not found" };
     const added = await prisma.habit.findFirst({
@@ -90,18 +146,14 @@ export async function createHabit(
       select: { id: true },
     });
     if (added) return { success: false, error: "You already added this habit" };
-    goal = {
-      dailyGoal: system.defaultDailyGoal,
-      unit: system.defaultUnit,
-      stepSize: system.defaultStepSize,
-    };
   }
 
   try {
     const habit = await prisma.habit.create({
       data: {
         ...fields,
-        ...(systemHabitId && { systemHabitId, ...goal }),
+        ...goalData({ dailyGoal, unit, stepSize }),
+        ...(systemHabitId && { systemHabitId }),
         userId: user.id,
         targets: {
           create: {
@@ -127,19 +179,35 @@ export async function updateHabit(
 ): Promise<ActionResult<{ id: string }>> {
   const parsed = updateHabitSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid habit" };
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid habit",
+    };
   }
 
   const user = await getSessionUser();
   if (!user) return { success: false, error: "Not signed in" };
 
-  const { habitId, frequency, targetDaysPerWeek, ...fields } = parsed.data;
+  const {
+    habitId,
+    frequency,
+    targetDaysPerWeek,
+    dailyGoal,
+    unit,
+    stepSize,
+    ...fields
+  } = parsed.data;
   const habit = await prisma.habit.findFirst({
     where: { id: habitId, userId: user.id, archivedAt: null },
     select: {
       id: true,
       targets: {
-        select: { id: true, frequency: true, targetDaysPerWeek: true, effectiveFrom: true },
+        select: {
+          id: true,
+          frequency: true,
+          targetDaysPerWeek: true,
+          effectiveFrom: true,
+        },
       },
     },
   });
@@ -154,7 +222,10 @@ export async function updateHabit(
   const days = frequency === "DAILY" ? 7 : targetDaysPerWeek;
   const week = weekStart(todayKey(user.timezone));
   const change = planTargetChange(
-    habit.targets.map((t) => ({ ...t, effectiveFrom: fromDbDate(t.effectiveFrom) })),
+    habit.targets.map((t) => ({
+      ...t,
+      effectiveFrom: fromDbDate(t.effectiveFrom),
+    })),
     week,
     { frequency, targetDaysPerWeek: days },
   );
@@ -164,9 +235,15 @@ export async function updateHabit(
       where: { id: habit.id },
       data: {
         ...fields,
+        // A new goal counts from now on; days already recorded keep their amounts
+        ...goalData({ dailyGoal, unit, stepSize }),
         ...(change.type === "create" && {
           targets: {
-            create: { frequency, targetDaysPerWeek: days, effectiveFrom: toDbDate(week) },
+            create: {
+              frequency,
+              targetDaysPerWeek: days,
+              effectiveFrom: toDbDate(week),
+            },
           },
         }),
         ...(change.type === "update" && {
@@ -230,7 +307,10 @@ export async function deleteHabit(
   });
   if (!habit) return { success: false, error: "Habit not found" };
   if (habit.systemHabitId) {
-    return { success: false, error: "Catalog habits can't be deleted, archive it instead" };
+    return {
+      success: false,
+      error: "Catalog habits can't be deleted, archive it instead",
+    };
   }
 
   try {
@@ -258,7 +338,11 @@ export async function restoreHabit(
   if (!user) return { success: false, error: "Not signed in" };
 
   const habit = await prisma.habit.findFirst({
-    where: { id: parsed.data.habitId, userId: user.id, archivedAt: { not: null } },
+    where: {
+      id: parsed.data.habitId,
+      userId: user.id,
+      archivedAt: { not: null },
+    },
     select: { id: true, systemHabitId: true },
   });
   if (!habit) return { success: false, error: "Habit not found" };
@@ -266,7 +350,11 @@ export async function restoreHabit(
   // A catalog habit added again while this one was archived: two active copies would be a duplicate
   if (habit.systemHabitId) {
     const active = await prisma.habit.findFirst({
-      where: { userId: user.id, systemHabitId: habit.systemHabitId, archivedAt: null },
+      where: {
+        userId: user.id,
+        systemHabitId: habit.systemHabitId,
+        archivedAt: null,
+      },
       select: { id: true },
     });
     if (active) return { success: false, error: "You already have this habit" };
@@ -279,7 +367,9 @@ export async function restoreHabit(
       where: { id: habit.id },
       data: {
         archivedAt: null,
-        completions: { deleteMany: { date: toDbDate(todayKey(user.timezone)) } },
+        completions: {
+          deleteMany: { date: toDbDate(todayKey(user.timezone)) },
+        },
       },
     });
   } catch {

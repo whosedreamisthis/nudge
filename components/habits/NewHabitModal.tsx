@@ -43,7 +43,8 @@ const COPY = {
   },
   edit: {
     title: "Edit Habit",
-    description: "A new target applies from this week; earlier weeks keep theirs.",
+    description:
+      "A new target applies from this week; earlier weeks keep theirs.",
     submit: "Save changes",
     pending: "Saving…",
   },
@@ -53,7 +54,11 @@ const FIELD_CLASS =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const LABEL_CLASS = "text-sm font-medium";
 
-export function NewHabitModal({ categories }: { categories: CategoryOption[] }) {
+export function NewHabitModal({
+  categories,
+}: {
+  categories: CategoryOption[];
+}) {
   const { open, closeModal } = useNewHabitModal();
 
   return (
@@ -79,11 +84,19 @@ function NewHabitForm({
   const prefill = useNewHabitModal((state) => state.prefill);
   const [name, setName] = useState(prefill?.name ?? "");
   const [description, setDescription] = useState(prefill?.description ?? "");
-  const [categoryId, setCategoryId] = useState(prefill?.categoryId ?? categories[0]?.id ?? "");
-  const [frequency, setFrequency] = useState<"DAILY" | "WEEKLY">(prefill?.frequency ?? "DAILY");
+  const [categoryId, setCategoryId] = useState(
+    prefill?.categoryId ?? categories[0]?.id ?? "",
+  );
+  const [frequency, setFrequency] = useState<"DAILY" | "WEEKLY">(
+    prefill?.frequency ?? "DAILY",
+  );
   const [days, setDays] = useState(prefill?.targetDaysPerWeek ?? 7);
   const [icon, setIcon] = useState<string>(prefill?.icon ?? HABIT_ICONS[0]);
   const [color, setColor] = useState<HabitColor>(prefill?.color ?? "indigo");
+  // Kept as text while typing; an empty goal means a plain done / not done habit
+  const [goal, setGoal] = useState(prefill?.dailyGoal?.toString() ?? "");
+  const [unit, setUnit] = useState(prefill?.unit ?? "");
+  const [step, setStep] = useState(prefill?.stepSize?.toString() ?? "");
   const editingId = prefill?.habitId;
   const copy = editingId ? COPY.edit : prefill ? COPY.add : COPY.create;
   const [error, setError] = useState<string | null>(null);
@@ -116,12 +129,18 @@ function NewHabitForm({
         targetDaysPerWeek: days,
         icon,
         color,
+        dailyGoal: goal.trim() ? Number(goal) : null,
+        unit: goal.trim() ? unit.trim() : null,
+        // A goal with no step adds 1 per tap
+        stepSize: goal.trim() ? Number(step.trim() || 1) : null,
       };
       const result = editingId
         ? await updateHabit({ ...fields, habitId: editingId })
         : await createHabit({
             ...fields,
-            ...(prefill?.systemHabitId && { systemHabitId: prefill.systemHabitId }),
+            ...(prefill?.systemHabitId && {
+              systemHabitId: prefill.systemHabitId,
+            }),
           });
       if (result.success) onDone();
       else setError(result.error);
@@ -132,7 +151,9 @@ function NewHabitForm({
     <form onSubmit={submit} className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <Dialog.Title className="text-xl font-bold">{copy.title}</Dialog.Title>
+          <Dialog.Title className="text-xl font-bold">
+            {copy.title}
+          </Dialog.Title>
           <Dialog.Description className="text-sm text-muted-foreground">
             {copy.description}
           </Dialog.Description>
@@ -195,7 +216,9 @@ function NewHabitForm({
               onClick={() => chooseFrequency(option)}
               className={cn(
                 "rounded-lg border px-3 py-2 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                frequency === option ? "border-primary bg-primary/10" : "border-border",
+                frequency === option
+                  ? "border-primary bg-primary/10"
+                  : "border-border",
               )}
             >
               {option === "DAILY" ? "Daily" : "Weekly"}
@@ -229,6 +252,51 @@ function NewHabitForm({
       </fieldset>
 
       <fieldset className="flex flex-col gap-1.5">
+        <legend className={cn(LABEL_CLASS, "mb-1.5")}>
+          Daily goal{" "}
+          <span className="font-normal text-muted-foreground">(optional)</span>
+        </legend>
+        <div className="grid grid-cols-3 gap-2">
+          <input
+            type="number"
+            inputMode="numeric"
+            min={2}
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            aria-label="Goal amount"
+            placeholder="Goal, e.g. 8"
+            className={FIELD_CLASS}
+          />
+          <input
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            maxLength={12}
+            aria-label="Unit"
+            placeholder="Unit, e.g. glasses"
+            className={FIELD_CLASS}
+          />
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            value={step}
+            onChange={(e) => setStep(e.target.value)}
+            aria-label="Amount added per tap"
+            placeholder="Per tap (1)"
+            className={FIELD_CLASS}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Leave empty for a simple done / not done habit. A new goal counts from
+          now on.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Example: a goal of 8, unit &quot;glasses&quot; and 1 per tap shows 0/8
+          glasses on Today. Each tap adds a glass, and the habit is done at 8/8.
+        </p>
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-1.5">
         <legend className={cn(LABEL_CLASS, "mb-1.5")}>Icon</legend>
         <div className="grid grid-cols-10 gap-1">
           {icons.map((option) => (
@@ -240,7 +308,9 @@ function NewHabitForm({
               onClick={() => setIcon(option)}
               className={cn(
                 "flex aspect-square items-center justify-center rounded-md text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                icon === option ? cn("ring-2 ring-primary", habitTileClass(color)) : "hover:bg-muted",
+                icon === option
+                  ? cn("ring-2 ring-primary", habitTileClass(color))
+                  : "hover:bg-muted",
               )}
             >
               {option}
@@ -262,7 +332,8 @@ function NewHabitForm({
               className={cn(
                 "size-7 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 SWATCH_CLASSES[option],
-                color === option && "ring-2 ring-foreground ring-offset-2 ring-offset-popover",
+                color === option &&
+                  "ring-2 ring-foreground ring-offset-2 ring-offset-popover",
               )}
             />
           ))}
@@ -276,7 +347,9 @@ function NewHabitForm({
       )}
 
       <div className="flex justify-end gap-2">
-        <Dialog.Close render={<Button variant="outline" type="button" />}>Cancel</Dialog.Close>
+        <Dialog.Close render={<Button variant="outline" type="button" />}>
+          Cancel
+        </Dialog.Close>
         <Button type="submit" disabled={pending || !name.trim()}>
           {pending ? copy.pending : copy.submit}
         </Button>

@@ -104,6 +104,9 @@ export function CatalogList({
                       categoryId: habit.categoryId,
                       frequency: habit.defaultFrequency,
                       targetDaysPerWeek: habit.defaultTargetDaysPerWeek,
+                      dailyGoal: habit.defaultDailyGoal,
+                      unit: habit.defaultUnit,
+                      stepSize: habit.defaultStepSize,
                     }}
                   />
                 )}

@@ -78,6 +78,9 @@ describe("updateHabit", () => {
         categoryId: "c1",
         icon: "📚",
         color: "sky",
+        dailyGoal: null,
+        unit: null,
+        stepSize: null,
       },
     });
     expect(revalidatePath).toHaveBeenCalledWith("/today");
@@ -263,7 +266,10 @@ describe("restoreHabit", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(NOW);
-    getSessionUser.mockResolvedValue({ id: "u1", timezone: "Pacific/Auckland" });
+    getSessionUser.mockResolvedValue({
+      id: "u1",
+      timezone: "Pacific/Auckland",
+    });
     findFirst
       .mockReset()
       .mockResolvedValueOnce({ id: "h1", systemHabitId: null })
@@ -285,7 +291,9 @@ describe("restoreHabit", () => {
       // Wednesday 2026-10-14 in Auckland, though it is still the 13th in UTC
       data: {
         archivedAt: null,
-        completions: { deleteMany: { date: new Date("2026-10-14T00:00:00.000Z") } },
+        completions: {
+          deleteMany: { date: new Date("2026-10-14T00:00:00.000Z") },
+        },
       },
     });
     expect(revalidatePath).toHaveBeenCalledWith("/today");

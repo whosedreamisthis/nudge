@@ -7,6 +7,9 @@ export interface HabitPrefill {
   habitId?: string;
   systemHabitId?: string;
   color?: HabitColor;
+  dailyGoal?: number | null;
+  unit?: string | null;
+  stepSize?: number | null;
   name: string;
   description: string;
   icon: string;
