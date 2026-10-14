@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   effectiveStatus,
   finishTimer,
+  focusAmount,
   formatClock,
   getRemainingMs,
+  isMinutesUnit,
   parseCustomMinutes,
   parseTimerState,
   pauseTimer,
@@ -34,8 +36,15 @@ describe("timer transitions", () => {
     expect(timer.habitId).toBeUndefined();
   });
 
-  it("keeps a linked habit id", () => {
-    expect(startTimer(5, NOW, "h1").habitId).toBe("h1");
+  it("keeps a linked habit", () => {
+    const timer = startTimer(5, NOW, { habitId: "h1", habitName: "Meditate" });
+    expect(timer).toMatchObject({ habitId: "h1", habitName: "Meditate" });
+  });
+
+  it("keeps the link through pause, resume and finish", () => {
+    const linked = startTimer(5, NOW, { habitId: "h1", habitName: "Meditate" });
+    expect(resumeTimer(pauseTimer(linked, NOW + 1000), NOW + 2000).habitId).toBe("h1");
+    expect(finishTimer(linked)).toMatchObject({ habitId: "h1", habitName: "Meditate" });
   });
 
   it("pauses with the time left and resumes from it", () => {
@@ -93,7 +102,7 @@ describe("formatClock", () => {
 
 describe("parseTimerState", () => {
   it("round-trips a stored timer", () => {
-    const timer = startTimer(20, NOW, "h1");
+    const timer = startTimer(20, NOW, { habitId: "h1", habitName: "Meditate" });
     expect(parseTimerState(JSON.stringify(timer))).toEqual(timer);
   });
 
@@ -103,5 +112,36 @@ describe("parseTimerState", () => {
     expect(parseTimerState("not json")).toBeNull();
     expect(parseTimerState(JSON.stringify({ status: "running" }))).toBeNull();
     expect(parseTimerState(JSON.stringify({ ...startTimer(5, NOW), status: "weird" }))).toBeNull();
+  });
+});
+
+describe("isMinutesUnit", () => {
+  it("recognises minute units in any case", () => {
+    for (const unit of ["min", "mins", "Minutes", " minute "]) expect(isMinutesUnit(unit)).toBe(true);
+  });
+
+  it("rejects other units and none", () => {
+    for (const unit of ["ml", "times", "minutes per day", ""]) expect(isMinutesUnit(unit)).toBe(false);
+    expect(isMinutesUnit(null)).toBe(false);
+  });
+});
+
+describe("focusAmount", () => {
+  it("marks a simple habit done and never clears it", () => {
+    expect(focusAmount(0, { dailyGoal: null, unit: null }, 20)).toBe(1);
+    expect(focusAmount(1, { dailyGoal: null, unit: null }, 20)).toBe(1);
+  });
+
+  it("adds the session minutes to a minutes goal, even past the goal", () => {
+    const habit = { dailyGoal: 30, unit: "min" };
+    expect(focusAmount(0, habit, 20)).toBe(20);
+    expect(focusAmount(20, habit, 20)).toBe(40);
+  });
+
+  it("fills a goal in any other unit", () => {
+    const habit = { dailyGoal: 8, unit: "glasses" };
+    expect(focusAmount(0, habit, 20)).toBe(8);
+    expect(focusAmount(3, habit, 20)).toBe(8);
+    expect(focusAmount(10, habit, 20)).toBe(10);
   });
 });
