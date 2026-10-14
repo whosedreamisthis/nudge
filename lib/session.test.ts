@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { auth, upsert, revokeSession } = vi.hoisted(() => ({
+const { auth, findUnique, upsert, revokeSession } = vi.hoisted(() => ({
   auth: vi.fn(),
+  findUnique: vi.fn(),
   upsert: vi.fn(),
   revokeSession: vi.fn(),
 }));
@@ -12,21 +13,34 @@ vi.mock("@clerk/nextjs/server", () => ({
   auth,
   clerkClient: async () => ({ sessions: { revokeSession } }),
 }));
-vi.mock("@/lib/db", () => ({ prisma: { user: { upsert } } }));
+vi.mock("@/lib/db", () => ({ prisma: { user: { findUnique, upsert } } }));
 
 import { getSessionUser } from "./session";
 
 describe("getSessionUser", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    findUnique.mockResolvedValue(null);
+  });
 
   it("returns null when signed out", async () => {
     auth.mockResolvedValue({ userId: null });
 
     expect(await getSessionUser()).toBeNull();
+    expect(findUnique).not.toHaveBeenCalled();
     expect(upsert).not.toHaveBeenCalled();
   });
 
-  it("finds or creates the User row for the Clerk id", async () => {
+  it("returns the existing User row without writing", async () => {
+    auth.mockResolvedValue({ userId: "user_1" });
+    findUnique.mockResolvedValue({ id: "u1", clerkId: "user_1", timezone: "UTC" });
+
+    expect((await getSessionUser())?.id).toBe("u1");
+    expect(findUnique).toHaveBeenCalledWith({ where: { clerkId: "user_1" } });
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it("creates the User row when it is missing", async () => {
     auth.mockResolvedValue({ userId: "user_1" });
     upsert.mockResolvedValue({ id: "u1", clerkId: "user_1", timezone: "UTC" });
 
@@ -55,35 +69,35 @@ describe("getSessionUser", () => {
     });
 
     it("lets a live demo through", async () => {
-      upsert.mockResolvedValue(row(true, new Date(Date.now() + 60_000)));
+      findUnique.mockResolvedValue(row(true, new Date(Date.now() + 60_000)));
 
       expect((await getSessionUser())?.id).toBe("u1");
       expect(revokeSession).not.toHaveBeenCalled();
     });
 
     it("blocks an expired demo and revokes its session", async () => {
-      upsert.mockResolvedValue(row(true, new Date(Date.now() - 1000)));
+      findUnique.mockResolvedValue(row(true, new Date(Date.now() - 1000)));
 
       expect(await getSessionUser()).toBeNull();
       expect(revokeSession).toHaveBeenCalledWith("sess_1");
     });
 
     it("blocks a demo with no expiry", async () => {
-      upsert.mockResolvedValue(row(true, null));
+      findUnique.mockResolvedValue(row(true, null));
 
       expect(await getSessionUser()).toBeNull();
     });
 
     it("still blocks when the session cannot be revoked", async () => {
       vi.spyOn(console, "error").mockImplementation(() => {});
-      upsert.mockResolvedValue(row(true, new Date(Date.now() - 1000)));
+      findUnique.mockResolvedValue(row(true, new Date(Date.now() - 1000)));
       revokeSession.mockRejectedValue(new Error("clerk is down"));
 
       expect(await getSessionUser()).toBeNull();
     });
 
     it("never blocks a real user", async () => {
-      upsert.mockResolvedValue(row(false, null));
+      findUnique.mockResolvedValue(row(false, null));
 
       expect((await getSessionUser())?.id).toBe("u1");
     });

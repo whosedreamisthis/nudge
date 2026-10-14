@@ -4,18 +4,21 @@ import { prisma } from "@/lib/db";
 import { isDemoExpired } from "@/lib/demo";
 
 // Maps the signed-in Clerk user to our User row. Creates it if the webhook
-// hasn't arrived yet. Every user-scoped query should filter by the returned id.
+// hasn't arrived yet (a read first, since the row nearly always exists). Every user-scoped
+// query should filter by the returned id.
 // An expired demo gets no user at all, so every page and action is blocked even when the cleanup
 // job hasn't run yet; its Clerk session is revoked so the next visit is signed out.
 export const getSessionUser = cache(async () => {
   const { userId, sessionId } = await auth();
   if (!userId) return null;
 
-  const user = await prisma.user.upsert({
-    where: { clerkId: userId },
-    update: {},
-    create: { clerkId: userId },
-  });
+  const user =
+    (await prisma.user.findUnique({ where: { clerkId: userId } })) ??
+    (await prisma.user.upsert({
+      where: { clerkId: userId },
+      update: {},
+      create: { clerkId: userId },
+    }));
 
   if (isDemoExpired(user, new Date())) {
     if (sessionId) {
