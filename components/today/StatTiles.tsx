@@ -25,7 +25,7 @@ function Tile({ label, badge, tint, value, caption }: TileProps) {
       </dt>
       <dd className="flex flex-col items-center text-center">
         <span className="text-4xl leading-none font-bold tabular-nums">{value}</span>
-        <span className="mt-1.5 truncate text-sm text-foreground/75">{caption}</span>
+        <span className="mt-1.5 max-w-full truncate text-sm text-foreground/75">{caption}</span>
       </dd>
     </div>
   );
@@ -50,9 +50,16 @@ export function StatTiles({ stats }: { stats: TodayStats }) {
         value={bestStreak ? formatStreak({ unit: bestStreak.unit, current: bestStreak.best }) : "0"}
         caption={
           bestStreak ? (
-            <>
-              <span aria-hidden>{bestStreak.icon}</span> {bestStreak.name}
-            </>
+            <span className="inline-flex max-w-full items-center gap-1.5">
+              {/* A light tile behind the emoji, so a yellow icon still shows on the amber card */}
+              <span
+                aria-hidden
+                className="flex size-6 shrink-0 items-center justify-center rounded-md bg-card/70 text-sm"
+              >
+                {bestStreak.icon}
+              </span>
+              <span className="truncate">{bestStreak.name}</span>
+            </span>
           ) : (
             "Complete a habit to start one"
           )
