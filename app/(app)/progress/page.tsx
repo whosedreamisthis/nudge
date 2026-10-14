@@ -1,7 +1,6 @@
 import { connection } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { InsightsView } from "@/components/progress/InsightsView";
-import { ProgressTabs } from "@/components/progress/ProgressTabs";
 import { ProgressTiles } from "@/components/progress/ProgressTiles";
 import { WeekNav } from "@/components/progress/WeekNav";
 import { WeeklyGrid } from "@/components/progress/WeeklyGrid";
@@ -35,31 +34,18 @@ export default async function ProgressPage({
   const rawWeek = Array.isArray(params.week) ? params.week[0] : params.week;
   const week = resolveWeek(rawWeek, today);
 
-  if (params.tab === "insights") {
-    const [insights, rows] = await Promise.all([
-      getInsights(user.id, today),
-      getWeekGrid(user.id, user.timezone, thisWeek, today),
-    ]);
-
-    return (
-      <div className="flex flex-col gap-6">
-        <PageHeader title="Progress" subtitle="How your week is going." />
-        <ProgressTabs active="insights" />
-        <InsightsView insights={insights} performance={habitPerformance(rows)} />
-      </div>
-    );
-  }
-
-  const [{ habits }, rows, heatmap] = await Promise.all([
+  // The grid can show an earlier week; the charts below it are always about the current one
+  const [{ habits }, rows, heatmap, insights, currentRows] = await Promise.all([
     getToday(user.id, today),
     getWeekGrid(user.id, user.timezone, week, today),
     getHeatmap(user.id, today),
+    getInsights(user.id, today),
+    week === thisWeek ? null : getWeekGrid(user.id, user.timezone, thisWeek, today),
   ]);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Progress" subtitle="How your week is going." />
-      <ProgressTabs active="overview" />
 
       <ProgressTiles
         today={getRingCounts(habits)}
@@ -75,6 +61,8 @@ export default async function ProgressPage({
         <WeekNav week={week} thisWeek={thisWeek} />
         <WeeklyGrid rows={rows} today={today} isCurrentWeek={week === thisWeek} />
       </section>
+
+      <InsightsView insights={insights} performance={habitPerformance(currentRows ?? rows)} />
     </div>
   );
 }
