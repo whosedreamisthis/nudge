@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  averageStreakDays,
   buildWeekGrid,
   resolveWeek,
   topHabit,
@@ -151,27 +150,6 @@ describe("topHabit", () => {
   it("is null when nothing was completed", () => {
     expect(topHabit(buildWeekGrid([habit()], WEEK, TODAY))).toBeNull();
     expect(topHabit([])).toBeNull();
-  });
-});
-
-describe("averageStreakDays", () => {
-  it("averages the current streaks, counting a week as 7 days", () => {
-    expect(
-      averageStreakDays([
-        { unit: "day", current: 3 },
-        { unit: "week", current: 1 },
-      ]),
-    ).toBe(5);
-  });
-
-  it("rounds, and is 0 with no habits", () => {
-    expect(
-      averageStreakDays([
-        { unit: "day", current: 1 },
-        { unit: "day", current: 2 },
-      ]),
-    ).toBe(2);
-    expect(averageStreakDays([])).toBe(0);
   });
 });
 

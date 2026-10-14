@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { addDays, fromDbDate, toDateKey, toDbDate, type DateKey } from "@/lib/dates";
+import { getTodayStats, type TodayStats } from "@/lib/stats";
 import { buildWeekGrid, type GridRow } from "@/lib/week-grid";
 
 // The user's active habits laid out for one week (Monday to Sunday), oldest habit first.
@@ -45,4 +46,36 @@ export async function getWeekGrid(
   }));
 
   return buildWeekGrid(inputs, week, today);
+}
+
+// The streak tiles: how many streaks are running and the longest one, over all active habits
+export async function getProgressStats(userId: string, today: DateKey): Promise<TodayStats> {
+  const habits = await prisma.habit.findMany({
+    where: { userId, archivedAt: null },
+    orderBy: { createdAt: "asc" },
+    select: {
+      name: true,
+      icon: true,
+      dailyGoal: true,
+      targets: { select: { frequency: true, targetDaysPerWeek: true, effectiveFrom: true } },
+      completions: { select: { date: true, amount: true } },
+    },
+  });
+
+  return getTodayStats(
+    habits.map((habit) => ({
+      name: habit.name,
+      icon: habit.icon,
+      history: {
+        completions: habit.completions.map((c) => ({ date: fromDbDate(c.date), amount: c.amount })),
+        dailyGoal: habit.dailyGoal,
+        targets: habit.targets.map((t) => ({
+          frequency: t.frequency,
+          targetDaysPerWeek: t.targetDaysPerWeek,
+          effectiveFrom: fromDbDate(t.effectiveFrom),
+        })),
+        today,
+      },
+    })),
+  );
 }

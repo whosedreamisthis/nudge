@@ -1,16 +1,15 @@
 import { prisma } from "@/lib/db";
 import { fromDbDate, weekStart, type DateKey } from "@/lib/dates";
 import { getTodayProgress } from "@/lib/progress";
-import { getTodayStats, type StatsEntry, type TodayStats } from "@/lib/stats";
 import { getStreak, targetForWeek, type StreakInput } from "@/lib/streaks";
 import type { TodayHabit } from "@/types/habits";
 
 // The user's active habits with their current streaks and today's progress (oldest first),
-// plus the summary tiles, all from one query
+// from one query
 export async function getToday(
   userId: string,
   today: DateKey,
-): Promise<{ habits: TodayHabit[]; stats: TodayStats }> {
+): Promise<{ habits: TodayHabit[] }> {
   const habits = await prisma.habit.findMany({
     where: { userId, archivedAt: null },
     orderBy: { createdAt: "asc" },
@@ -21,7 +20,6 @@ export async function getToday(
     },
   });
 
-  const entries: StatsEntry[] = [];
   const rows = habits.map((habit) => {
     const history: StreakInput = {
       completions: habit.completions.map((c) => ({
@@ -37,7 +35,6 @@ export async function getToday(
       today,
     };
 
-    entries.push({ name: habit.name, icon: habit.icon, history });
     const target = targetForWeek(history.targets, weekStart(today));
 
     return {
@@ -58,5 +55,5 @@ export async function getToday(
     };
   });
 
-  return { habits: rows, stats: getTodayStats(entries) };
+  return { habits: rows };
 }

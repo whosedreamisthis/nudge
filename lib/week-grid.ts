@@ -3,7 +3,6 @@ import {
   completedDays,
   targetForWeek,
   type Completion,
-  type Streak,
   type StreakTarget,
 } from "@/lib/streaks";
 
@@ -77,13 +76,6 @@ export function topHabit(rows: GridRow[]): GridRow | null {
     if (row.done > 0 && (!top || row.done > top.done)) top = row;
   }
   return top;
-}
-
-// Mean of the habits' current streaks, with weeks counted as 7 days; 0 when there are none
-export function averageStreakDays(streaks: Pick<Streak, "unit" | "current">[]): number {
-  if (streaks.length === 0) return 0;
-  const days = streaks.map(({ unit, current }) => (unit === "week" ? current * 7 : current));
-  return Math.round(days.reduce((sum, d) => sum + d, 0) / days.length);
 }
 
 // The Monday to show from the ?week= param: this week unless it names an earlier, real day

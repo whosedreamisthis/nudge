@@ -31,7 +31,7 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
   const today = todayKey(user.timezone);
   // /today?sample=1 fills the page with made-up habits, in development only
   const useSample = process.env.NODE_ENV !== "production" && params.sample === "1";
-  const [{ habits, stats }, categories, heatmap] = await Promise.all([
+  const [{ habits }, categories, heatmap] = await Promise.all([
     useSample ? getSampleToday(today) : getToday(user.id, today),
     // For the edit form, which reuses the New Habit modal
     prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
@@ -58,7 +58,6 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
         <TodayHabits
           key={today}
           habits={habits}
-          stats={stats}
           header={<PageHeader {...header} />}
           aside={heatmap && <ConsistencyCard heatmap={heatmap} />}
           sample={useSample}
