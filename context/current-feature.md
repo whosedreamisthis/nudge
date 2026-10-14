@@ -1,18 +1,28 @@
-# Current Feature
-
-<!-- Feature name and short description -->
+# Current Feature: Settings Modal
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Settings modal opened by a gear icon button in the top Navbar, next to the Clerk profile button (`components/shared/Navbar.tsx`), on every screen size
+- Account section using Clerk `<UserProfile />` for profile, email and sign-out
+- Theme setting (Light / Dark) using `useTheme()` from `next-themes`; the `ThemeProvider` is already in the root layout. Until the user picks one, the app follows the OS and the matching button shows as selected
+- Timezone setting (stored on `User.timezone`), editable with a validated IANA name
+- AI switch: turns off the AI Weekly Report, morning motivation and habit suggestions, with a line saying what is sent to Gemini
+- Reminders: placeholder section only (disabled, "Coming soon"); no settings are stored yet
+- Delete account through Clerk, with a type-to-confirm step
 
 ## Notes
 
-<!-- Any extra notes -->
+- Keep it minimal; the full list is in `context/project-overview.md` section 3.8.
+- Timezone change: `captureTimezone` only sets the value once (while it is still "UTC"), so editing needs its own action. Completions are stored as dates and must not be rewritten; "today" and the week boundaries move, so streaks can recalculate. Refresh the app's pages after the change.
+- Delete account: the Clerk webhook cleans up our data, but it can lag. Sign the user out straight away and send them to the landing page instead of showing stale data.
+- Demo users (see `29-demo-spec.md`): show only theme and sign-out. Hide Delete account and lock the timezone, since the demo expires after 12 hours.
+- Phones: full-screen modal that scrolls; Clerk's profile component in its own section.
+- Reminders: show the section so the layout is settled, but leave it disabled with "Coming soon". Real reminders (channel, times, per habit or global) are an open question in the overview.
+- Out of scope until decided: data export.
 
 ## Completed Features
 
@@ -35,4 +45,4 @@ Completed
 - **Multi-Step Habits:** Optional daily goal, unit and amount per tap in the New Habit and Edit forms, plus Undo and Set amount in the Today menu (`actions/habits.ts`, `lib/habit-form.ts`, `components/today/SetAmountDialog.tsx`).
 - **Consistency Heatmap:** Today card showing the last 14 weeks of completed habits per day as dots on a five-step grey-to-orange scale, with legend and total (`components/today/ConsistencyCard.tsx`, `lib/consistency.ts`, `lib/db/consistency.ts`).
 - **Progress Weekly Grid:** `/progress` with four summary tiles and a habits-by-days weekly grid with previous/next week arrows (`app/(app)/progress/`, `components/progress/`, `lib/week-grid.ts`, `lib/db/progress.ts`).
-- **Progress Insights Tab:** `/progress` Overview/Insights tabs; Insights has a 30-day tile with change, this-week-vs-last-week bars and habit performance bars (`components/progress/`, `lib/insights.ts`, `lib/db/insights.ts`).
+- **Progress Insights Tab:** `/progress` shows this-week-vs-last-week bars (with a 30-day summary line) and habit performance bars under the grid (`components/progress/`, `lib/insights.ts`, `lib/db/insights.ts`).

@@ -5,7 +5,7 @@ import { weekRangeLabel } from "@/lib/week-grid";
 import { cn } from "@/lib/utils";
 
 const ARROW_CLASS =
-  "flex size-8 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "flex size-8 items-center justify-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 // Previous and next week arrows around the date range; the current week has no param,
 // and next is switched off there since the future has nothing to show

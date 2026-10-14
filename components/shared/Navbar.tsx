@@ -1,12 +1,28 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { connection } from "next/server";
 import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { Logo } from "@/components/shared/Logo";
+import { SettingsButton } from "@/components/shared/SettingsButton";
+import { getSessionUser } from "@/lib/session";
 
+// Per user and per request (session, database), so stop prerendering before reading them
 async function UserMenu() {
+  await connection();
   const { isAuthenticated } = await auth();
-  return isAuthenticated ? <UserButton /> : null;
+  if (!isAuthenticated) return null;
+
+  const user = await getSessionUser();
+
+  return (
+    <div className="flex items-center gap-2">
+      {user && (
+        <SettingsButton timezone={user.timezone} aiEnabled={user.aiEnabled} isDemo={user.isDemo} />
+      )}
+      <UserButton />
+    </div>
+  );
 }
 
 export function Navbar() {

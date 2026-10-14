@@ -238,6 +238,16 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind v4 resets buttons to the default arrow; clickable things should show a pointer */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="switch"],
+  [role="radio"],
+  [role="tab"],
+  summary,
+  select:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 /* Burst of dots and a ring from a habit's completion circle when it is completed */
@@ -265,6 +275,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .celebrate-burst {
+    display: none;
+  }
+}
+
+/* Hides the scrollbar but keeps scrolling, so a modal's rounded corners stay clean */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
     display: none;
   }
 }

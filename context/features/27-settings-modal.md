@@ -4,7 +4,7 @@
 
 - Settings modal opened by a gear icon button in the top Navbar, next to the Clerk profile button (`components/shared/Navbar.tsx`), on every screen size
 - Account section using Clerk `<UserProfile />` for profile, email and sign-out
-- Theme setting (System / Light / Dark) using `useTheme()` from `next-themes`; the `ThemeProvider` is already in the root layout
+- Theme setting (Light / Dark) using `useTheme()` from `next-themes`; the `ThemeProvider` is already in the root layout. Until the user picks one, the app follows the OS and the matching button shows as selected
 - Timezone setting (stored on `User.timezone`), editable with a validated IANA name
 - AI switch: turns off the AI Weekly Report, morning motivation and habit suggestions, with a line saying what is sent to Gemini
 - Reminders: placeholder section only (disabled, "Coming soon"); no settings are stored yet

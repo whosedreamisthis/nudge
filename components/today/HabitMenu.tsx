@@ -76,7 +76,7 @@ export function HabitMenu({
         <Menu.Trigger
           aria-label={`Actions for ${habit.name}`}
           className={cn(
-            "flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-opacity",
+            "flex size-6 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none transition-opacity",
             "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring data-popup-open:opacity-100",
             "hover:bg-muted hover:text-foreground [@media(hover:none)]:opacity-100",
           )}

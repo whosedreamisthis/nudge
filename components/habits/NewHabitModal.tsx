@@ -160,7 +160,7 @@ function NewHabitForm({
         </div>
         <Dialog.Close
           aria-label="Close"
-          className="rounded-md p-1 text-muted-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-sm p-1 text-muted-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X aria-hidden className="size-4" />
         </Dialog.Close>
@@ -215,7 +215,7 @@ function NewHabitForm({
               aria-pressed={frequency === option}
               onClick={() => chooseFrequency(option)}
               className={cn(
-                "rounded-lg border px-3 py-2 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "rounded-sm border px-3 py-2 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 frequency === option
                   ? "border-primary bg-primary/10"
                   : "border-border",
@@ -237,7 +237,7 @@ function NewHabitForm({
               aria-pressed={days === n}
               onClick={() => chooseDays(n)}
               className={cn(
-                "rounded-lg border py-2 text-sm font-medium tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "rounded-sm border py-2 text-sm font-medium tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 days === n ? "border-primary bg-primary/10" : "border-border",
               )}
             >
@@ -307,7 +307,7 @@ function NewHabitForm({
               aria-pressed={icon === option}
               onClick={() => setIcon(option)}
               className={cn(
-                "flex aspect-square items-center justify-center rounded-md text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "flex aspect-square items-center justify-center rounded-sm text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 icon === option
                   ? cn("ring-2 ring-primary", habitTileClass(color))
                   : "hover:bg-muted",

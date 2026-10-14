@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 export type HabitsTab = "browse" | "archived";
 
 const TAB_CLASS =
-  "rounded-lg px-3 py-1.5 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "rounded-sm px-4 py-2 text-center text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export function HabitsTabs({
   active,
@@ -19,7 +19,11 @@ export function HabitsTabs({
   ] as const;
 
   return (
-    <nav aria-label="Habits views" className="flex gap-1">
+    // A segmented control: a shared track with the active tab raised on it
+    <nav
+      aria-label="Habits views"
+      className="grid w-full grid-cols-2 gap-1 rounded-md bg-muted p-1 ring-1 ring-border sm:max-w-xs"
+    >
       {tabs.map((tab) => (
         <Link
           key={tab.id}
@@ -28,8 +32,8 @@ export function HabitsTabs({
           className={cn(
             TAB_CLASS,
             active === tab.id
-              ? "bg-primary/10 text-foreground"
-              : "text-muted-foreground hover:bg-muted",
+              ? "bg-card text-foreground shadow-sm ring-1 ring-border"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {tab.label}
