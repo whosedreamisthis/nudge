@@ -6,7 +6,10 @@ import { CatalogList } from "@/components/habits/CatalogList";
 import { HabitsTabs } from "@/components/habits/HabitsTabs";
 import { NewHabitButton } from "@/components/habits/NewHabitButton";
 import { NewHabitModal } from "@/components/habits/NewHabitModal";
+import { SuggestHabitButton } from "@/components/habits/SuggestHabitButton";
+import { SuggestHabitWizard } from "@/components/habits/SuggestHabitWizard";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { getAiSettings } from "@/lib/ai-settings";
 import { parseCatalogParams } from "@/lib/catalog";
 import { prisma } from "@/lib/db";
 import { countArchivedHabits, getArchivedHabits } from "@/lib/db/archived";
@@ -30,6 +33,7 @@ export default async function HabitsPage({
   // No user row yet (webhook still pending) means nothing added and nothing archived
   const user = await getSessionUser();
   const userId = user?.id ?? "";
+  const suggestEnabled = user ? (await getAiSettings(user)).habitSuggestions : false;
 
   const [categories, archivedCount, archived, catalog] = await Promise.all([
     prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
@@ -42,7 +46,10 @@ export default async function HabitsPage({
     <>
       <div className="flex items-start justify-between gap-4">
         <PageHeader title="Habits" subtitle="Browse the catalog and manage your habits." />
-        <NewHabitButton />
+        <div className="flex flex-wrap justify-end gap-2">
+          {suggestEnabled && <SuggestHabitButton />}
+          <NewHabitButton />
+        </div>
       </div>
       <div className="mt-4 flex flex-col gap-4">
         <HabitsTabs active={archivedTab ? "archived" : "browse"} archivedCount={archivedCount} />
@@ -56,6 +63,7 @@ export default async function HabitsPage({
         )}
       </div>
       <NewHabitModal categories={categories} />
+      {suggestEnabled && <SuggestHabitWizard categories={categories} />}
     </>
   );
 }

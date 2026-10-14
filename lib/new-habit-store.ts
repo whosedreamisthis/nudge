@@ -16,6 +16,8 @@ export interface HabitPrefill {
   categoryId: string;
   frequency: "DAILY" | "WEEKLY";
   targetDaysPerWeek: number;
+  // Called once the habit has been saved (not when the modal is just closed)
+  onCreated?: () => void;
 }
 
 interface NewHabitModalState {
