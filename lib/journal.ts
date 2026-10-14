@@ -3,6 +3,8 @@ import { toDbDate, type DateKey } from "@/lib/dates";
 
 export const MAX_ENTRY_LENGTH = 20000;
 export const HISTORY_PAGE_SIZE = 30;
+// The most entries one History page loads; older ones are reached with the search and filters
+export const HISTORY_MAX_LIMIT = 300;
 const PREVIEW_LENGTH = 140;
 
 // Mood 1 (rough) to 5 (great); the picker shows these
@@ -64,7 +66,7 @@ export function parseHistoryParams(params: {
     mood: Number.isInteger(mood) && mood >= 1 && mood <= 5 ? mood : null,
     limit:
       Number.isInteger(limit) && limit > HISTORY_PAGE_SIZE
-        ? Math.min(limit, 300)
+        ? Math.min(limit, HISTORY_MAX_LIMIT)
         : HISTORY_PAGE_SIZE,
   };
 }
