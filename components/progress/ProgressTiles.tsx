@@ -1,34 +1,40 @@
-import { Activity, CircleCheck, Flame, Star } from "lucide-react";
-import { HabitChip, Tile } from "@/components/today/StatTiles";
+import { Activity, Flame, Star, Trophy } from "lucide-react";
+import { HabitChip, Tile } from "@/components/shared/StatTile";
+import type { TodayStats } from "@/lib/stats";
 import { formatStreak } from "@/lib/streaks";
 import type { GridRow } from "@/lib/week-grid";
 
 interface ProgressTilesProps {
-  // Today's counts, as on the Today page's ring
-  today: { done: number; total: number };
-  averageStreakDays: number;
+  activeStreaks: TodayStats["activeStreaks"];
+  bestStreak: TodayStats["bestStreak"];
   // Completions per day over the last 7 days
   weeklyAverage: number;
   // The habit with the most completed days in the shown week
   topHabit: GridRow | null;
 }
 
-export function ProgressTiles({ today, averageStreakDays, weeklyAverage, topHabit }: ProgressTilesProps) {
+export function ProgressTiles({ activeStreaks, bestStreak, weeklyAverage, topHabit }: ProgressTilesProps) {
   return (
     <dl aria-label="Your progress" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <Tile
-        label="Today"
-        tint="bg-tint-green"
-        badge={<CircleCheck className="size-5 text-complete" />}
-        value={`${today.done}/${today.total}`}
-        caption={today.total === 1 ? "habit done" : "habits done"}
+        label="Best streak"
+        tint="bg-tint-amber"
+        badge={<Trophy className="size-5 text-habit-amber" />}
+        value={bestStreak ? formatStreak({ unit: bestStreak.unit, current: bestStreak.best }) : "0"}
+        caption={
+          bestStreak ? (
+            <HabitChip icon={bestStreak.icon} name={bestStreak.name} />
+          ) : (
+            "Complete a habit to start one"
+          )
+        }
       />
       <Tile
-        label="Average streak"
+        label="Active streaks"
         tint="bg-tint-orange"
         badge={<Flame className="size-5 text-cat-fitness" />}
-        value={formatStreak({ unit: "day", current: averageStreakDays })}
-        caption="across your habits"
+        value={activeStreaks}
+        caption={activeStreaks === 1 ? "habit on a roll" : "habits on a roll"}
       />
       <Tile
         label="Weekly average"

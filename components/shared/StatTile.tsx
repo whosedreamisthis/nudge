@@ -1,7 +1,4 @@
-import { Flame, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
-import type { TodayStats } from "@/lib/stats";
-import { formatStreak } from "@/lib/streaks";
 
 export interface TileProps {
   label: string;
@@ -43,34 +40,5 @@ export function HabitChip({ icon, name }: { icon: string; name: string }) {
       </span>
       <span className="truncate">{name}</span>
     </span>
-  );
-}
-
-export function StatTiles({ stats }: { stats: TodayStats }) {
-  const { activeStreaks, bestStreak } = stats;
-
-  return (
-    <dl aria-label="Your stats" className="grid grid-cols-2 gap-3">
-      <Tile
-        label="Active streaks"
-        tint="bg-tint-orange"
-        badge={<Flame className="size-5 text-cat-fitness" />}
-        value={activeStreaks}
-        caption={activeStreaks === 1 ? "habit on a roll" : "habits on a roll"}
-      />
-      <Tile
-        label="Best streak"
-        tint="bg-tint-amber"
-        badge={<Trophy className="size-5 text-habit-amber" />}
-        value={bestStreak ? formatStreak({ unit: bestStreak.unit, current: bestStreak.best }) : "0"}
-        caption={
-          bestStreak ? (
-            <HabitChip icon={bestStreak.icon} name={bestStreak.name} />
-          ) : (
-            "Complete a habit to start one"
-          )
-        }
-      />
-    </dl>
   );
 }

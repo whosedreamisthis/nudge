@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { findMany } = vi.hoisted(() => ({ findMany: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { habit: { findMany } } }));
 
-import { getWeekGrid } from "./progress";
+import { getProgressStats, getWeekGrid } from "./progress";
 
 const day = (key: string) => new Date(`${key}T00:00:00.000Z`);
 const WEEK = "2026-10-12";
@@ -65,5 +65,42 @@ describe("getWeekGrid", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].days.every((d) => d.state === "before")).toBe(true);
     expect(rows[0].done).toBe(0);
+  });
+});
+
+describe("getProgressStats", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    findMany.mockResolvedValue([
+      habitRow({
+        completions: [
+          { date: day("2026-10-12"), amount: 1 },
+          { date: day("2026-10-13"), amount: 1 },
+          { date: day("2026-10-14"), amount: 1 },
+        ],
+      }),
+      habitRow({ id: "h2", name: "Read", icon: "📚", completions: [] }),
+    ]);
+  });
+
+  it("asks for the user's active habits with all their completions", async () => {
+    await getProgressStats("u1", TODAY);
+
+    const call = findMany.mock.calls[0][0];
+    expect(call.where).toEqual({ userId: "u1", archivedAt: null });
+    expect(call.select.completions.where).toBeUndefined();
+  });
+
+  it("counts running streaks and names the habit with the best one", async () => {
+    const stats = await getProgressStats("u1", TODAY);
+
+    expect(stats.activeStreaks).toBe(1);
+    expect(stats.bestStreak).toMatchObject({ name: "Morning run", icon: "🏃", unit: "day", best: 3 });
+  });
+
+  it("has no streaks for a user without habits", async () => {
+    findMany.mockResolvedValue([]);
+
+    expect(await getProgressStats("u1", TODAY)).toEqual({ activeStreaks: 0, bestStreak: null });
   });
 });

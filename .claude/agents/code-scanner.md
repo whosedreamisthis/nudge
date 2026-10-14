@@ -6,7 +6,7 @@ tools:
   - Glob
   - Grep
   - Ls
-model: sonnet
+model: haiku
 ---
 
 Scan this Next.js codebase for:

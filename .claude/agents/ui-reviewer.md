@@ -2,7 +2,7 @@
 name: ui-reviewer
 description: Reviews UI for visual issues, responsiveness, and accessibility
 tools: Read, Glob, Grep, mcp__playwright__*
-model: sonnet
+model: haiku
 ---
 
 You are a UI/UX reviewer. Use Playwright to view pages and evaluate:

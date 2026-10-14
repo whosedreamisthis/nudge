@@ -8,12 +8,10 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { todayKey, weekStart } from "@/lib/dates";
 import { getHeatmap } from "@/lib/db/consistency";
 import { getInsights } from "@/lib/db/insights";
-import { getWeekGrid } from "@/lib/db/progress";
-import { getToday } from "@/lib/db/today";
+import { getProgressStats, getWeekGrid } from "@/lib/db/progress";
 import { habitPerformance, weeklyAverage } from "@/lib/insights";
 import { getSessionUser } from "@/lib/session";
-import { getRingCounts } from "@/lib/week-goal";
-import { averageStreakDays, resolveWeek, topHabit } from "@/lib/week-grid";
+import { resolveWeek, topHabit } from "@/lib/week-grid";
 
 export default async function ProgressPage({
   searchParams,
@@ -35,8 +33,8 @@ export default async function ProgressPage({
   const week = resolveWeek(rawWeek, today);
 
   // The grid can show an earlier week; the charts below it are always about the current one
-  const [{ habits }, rows, heatmap, insights, currentRows] = await Promise.all([
-    getToday(user.id, today),
+  const [stats, rows, heatmap, insights, currentRows] = await Promise.all([
+    getProgressStats(user.id, today),
     getWeekGrid(user.id, user.timezone, week, today),
     getHeatmap(user.id, today),
     getInsights(user.id, today),
@@ -50,10 +48,8 @@ export default async function ProgressPage({
       <PageHeader title="Progress" subtitle="How your week is going." />
 
       <ProgressTiles
-        today={getRingCounts(habits)}
-        averageStreakDays={averageStreakDays(
-          habits.map((habit) => habit.streak),
-        )}
+        activeStreaks={stats.activeStreaks}
+        bestStreak={stats.bestStreak}
         weeklyAverage={weeklyAverage(heatmap, today)}
         topHabit={topHabit(rows)}
       />

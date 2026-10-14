@@ -4,24 +4,21 @@ import { useOptimistic, useState, useTransition, type ReactNode } from "react";
 import { advanceHabit } from "@/actions/habits";
 import { CompletionRing } from "@/components/today/CompletionRing";
 import { HabitRow } from "@/components/today/HabitRow";
-import { StatTiles } from "@/components/today/StatTiles";
 import { advanceProgress } from "@/lib/progress";
-import type { TodayStats } from "@/lib/stats";
 import { getRingCounts, splitOffDay } from "@/lib/week-goal";
 import type { TodayHabit } from "@/types/habits";
 
 interface TodayHabitsProps {
   habits: TodayHabit[];
-  stats: TodayStats;
   // The page header; it sits beside the completion ring, which needs the optimistic state
   header: ReactNode;
-  // Shown under the stat tiles in the side column on large screens, and after the list on phones
+  // Shown in the side column on large screens, and after the list on phones
   aside?: ReactNode;
   // Made-up habits are not in the database, so taps only change what is shown
   sample?: boolean;
 }
 
-export function TodayHabits({ habits, stats, header, aside, sample = false }: TodayHabitsProps) {
+export function TodayHabits({ habits, header, aside, sample = false }: TodayHabitsProps) {
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const [local, setLocal] = useState(habits);
@@ -88,7 +85,7 @@ export function TodayHabits({ habits, stats, header, aside, sample = false }: To
   ];
 
   // On phones everything stacks in this order. From xl the list takes the left column and the
-  // tiles and the aside (the consistency card) the right one, under a full-width header.
+  // aside (the consistency card) the right one, under a full-width header.
   return (
     <div className="flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-x-8">
       <div className="flex items-start justify-between gap-4 xl:col-span-2">
@@ -96,11 +93,7 @@ export function TodayHabits({ habits, stats, header, aside, sample = false }: To
         <CompletionRing done={done} total={total} />
       </div>
 
-      <div className="xl:col-start-2 xl:row-start-2">
-        <StatTiles stats={stats} />
-      </div>
-
-      <div className="mt-6 flex flex-col gap-3 xl:col-start-1 xl:row-start-2 xl:row-span-2 xl:mt-0">
+      <div className="flex flex-col gap-3 xl:col-start-1 xl:row-start-2">
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
@@ -112,7 +105,7 @@ export function TodayHabits({ habits, stats, header, aside, sample = false }: To
         </ul>
       </div>
 
-      {aside && <div className="xl:col-start-2 xl:row-start-3">{aside}</div>}
+      {aside && <div className="xl:col-start-2 xl:row-start-2">{aside}</div>}
     </div>
   );
 }
