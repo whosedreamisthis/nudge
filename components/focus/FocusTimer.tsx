@@ -74,7 +74,8 @@ export function FocusTimer({ testSeconds }: { testSeconds: number | null }) {
             onChange={(event) => setCustom(event.target.value)}
             className={FIELD_CLASS}
           />
-          <Button type="submit" size="lg" disabled={!customMinutes}>
+          {/* Grows to the height of the field beside it */}
+          <Button type="submit" size="lg" className="h-auto self-stretch" disabled={!customMinutes}>
             Start
           </Button>
         </form>
