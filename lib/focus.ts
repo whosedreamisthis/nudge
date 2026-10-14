@@ -14,7 +14,9 @@ export const timerStateSchema = z.object({
   durationMs: z.number().int().positive(),
   endsAt: z.number().nullable(),
   remainingMs: z.number().min(0),
+  // Set when the session was started from a habit; the name is kept so the finish card can show it
   habitId: z.string().min(1).optional(),
+  habitName: z.string().optional(),
 });
 
 export type TimerState = z.infer<typeof timerStateSchema>;
@@ -27,14 +29,19 @@ export function parseCustomMinutes(input: string): number | null {
   return minutes >= MIN_MINUTES && minutes <= MAX_MINUTES ? minutes : null;
 }
 
-export function startTimer(minutes: number, now: number, habitId?: string): TimerState {
+export interface HabitLink {
+  habitId: string;
+  habitName: string;
+}
+
+export function startTimer(minutes: number, now: number, link?: HabitLink): TimerState {
   const durationMs = minutes * MINUTE_MS;
   return {
     status: "running",
     durationMs,
     endsAt: now + durationMs,
     remainingMs: durationMs,
-    ...(habitId ? { habitId } : {}),
+    ...(link ? { habitId: link.habitId, habitName: link.habitName } : {}),
   };
 }
 
@@ -73,6 +80,24 @@ export function formatClock(ms: number): string {
   const seconds = totalSeconds % 60;
   const pair = (value: number) => String(value).padStart(2, "0");
   return hours > 0 ? `${hours}:${pair(minutes)}:${pair(seconds)}` : `${pair(minutes)}:${pair(seconds)}`;
+}
+
+// Habits that track time in minutes get the session added to the day
+export function isMinutesUnit(unit: string | null): boolean {
+  return unit !== null && /^(min|mins|minute|minutes)$/i.test(unit.trim());
+}
+
+// The day's amount after a finished session for a linked habit. Never lowers it, so counting twice
+// can't undo a habit: minutes habits add the session, other habits with a goal fill it, simple ones
+// are done.
+export function focusAmount(
+  current: number,
+  habit: { dailyGoal: number | null; unit: string | null },
+  minutes: number,
+): number {
+  if (habit.dailyGoal === null) return Math.max(current, 1);
+  if (isMinutesUnit(habit.unit)) return current + minutes;
+  return Math.max(current, habit.dailyGoal);
 }
 
 // Anything missing or malformed counts as no timer

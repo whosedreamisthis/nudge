@@ -1,7 +1,8 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import { Archive, Ellipsis, Hash, Pencil, Trash2, Undo2 } from "lucide-react";
+import { Archive, Ellipsis, Hash, Pencil, Timer, Trash2, Undo2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { archiveHabit, deleteHabit, undoHabit } from "@/actions/habits";
 import { DeleteHabitDialog } from "@/components/habits/DeleteHabitDialog";
@@ -27,6 +28,7 @@ export function HabitMenu({
   disabled = false,
   onError,
 }: HabitMenuProps) {
+  const router = useRouter();
   const openModal = useNewHabitModal((state) => state.openModal);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [settingAmount, setSettingAmount] = useState(false);
@@ -109,6 +111,14 @@ export function HabitMenu({
                   </Menu.Item>
                 </>
               )}
+              <Menu.Item
+                disabled={disabled}
+                onClick={() => router.push(`/focus?habit=${habit.id}`)}
+                className={ITEM_CLASS}
+              >
+                <Timer aria-hidden className="size-4" />
+                Start focus
+              </Menu.Item>
               <Menu.Item
                 disabled={disabled}
                 onClick={edit}

@@ -1,13 +1,16 @@
 "use client";
 
 import { Pause, Play, Square } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { completeHabitFromFocus } from "@/actions/habits";
 import { useFocusTimer } from "@/components/focus/useFocusTimer";
 import { Button } from "@/components/ui/button";
 import {
   PRESET_MINUTES,
   formatClock,
   getRemainingMs,
+  type HabitLink,
   parseCustomMinutes,
   pauseTimer,
   resumeTimer,
@@ -23,17 +26,51 @@ const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 const FIELD_CLASS =
   "w-24 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-// testSeconds comes from the TEMP_TIMER env var and adds a short timer for trying the finish
-export function FocusTimer({ testSeconds }: { testSeconds: number | null }) {
+interface FocusTimerProps {
+  // The habit from ?habit=, linked to any session started on this page
+  habit: HabitLink | null;
+  // From the TEMP_TIMER env var: adds a short timer for trying the finish
+  testSeconds: number | null;
+}
+
+export function FocusTimer({ habit, testSeconds }: FocusTimerProps) {
   // Finishing (storing it, the chime, the toast) is handled app-wide by FocusWatcher
   const { loaded, timer, now, status } = useFocusTimer();
 
   const [custom, setCustom] = useState("");
   const customMinutes = parseCustomMinutes(custom);
 
+  // On the finish card: count the session for its habit (on unless unticked)
+  const [counting, setCounting] = useState(true);
+  const [countError, setCountError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
   function start(minutes: number) {
     prepareAlerts();
-    writeTimer(startTimer(minutes, currentTime()));
+    setCounting(true);
+    writeTimer(startTimer(minutes, currentTime(), habit ?? undefined));
+  }
+
+  function finish() {
+    if (!timer?.habitId || !counting) {
+      writeTimer(null);
+      return;
+    }
+    const { habitId, habitName } = timer;
+    startTransition(async () => {
+      const result = await completeHabitFromFocus({
+        habitId,
+        // At least a minute, so the short test timer still validates
+        minutes: Math.max(1, Math.round(timer.durationMs / 60_000)),
+      });
+      if (result.success) {
+        writeTimer(null);
+        setCountError(null);
+        toast.success(`Counted for ${habitName}`);
+      } else {
+        setCountError(result.error);
+      }
+    });
   }
 
   if (!loaded) {
@@ -43,7 +80,10 @@ export function FocusTimer({ testSeconds }: { testSeconds: number | null }) {
   if (!timer || !status) {
     return (
       <section aria-label="Choose a duration" className="flex flex-col gap-5 rounded-xl bg-card p-5 ring-1 ring-border">
-        <p className="text-sm text-muted-foreground">How long do you want to focus?</p>
+        {/* Only shown while picking: a running timer shows its own habit */}
+        <p className="text-sm text-muted-foreground">
+          {habit ? `Session for ${habit.habitName}. How long do you want to focus?` : "How long do you want to focus?"}
+        </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {testSeconds && (
             <Button variant="outline" size="lg" onClick={() => start(testSeconds / 60)}>
@@ -121,10 +161,26 @@ export function FocusTimer({ testSeconds }: { testSeconds: number | null }) {
         </div>
       </div>
 
+      {timer.habitName && <p className="text-sm text-muted-foreground">For {timer.habitName}</p>}
+
       {status === "finished" ? (
-        <Button size="lg" onClick={() => writeTimer(null)}>
-          Done
-        </Button>
+        <div className="flex flex-col items-center gap-3">
+          {timer.habitId && (
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={counting}
+                onChange={(event) => setCounting(event.target.checked)}
+                className="size-4 accent-primary"
+              />
+              Count this session for {timer.habitName}
+            </label>
+          )}
+          {countError && <p className="text-xs text-destructive">{countError}</p>}
+          <Button size="lg" onClick={finish} disabled={pending}>
+            {pending ? "Saving…" : "Done"}
+          </Button>
+        </div>
       ) : (
         <div className="flex gap-2">
           {status === "running" ? (

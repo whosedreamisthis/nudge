@@ -12,6 +12,7 @@ import {
   type CreateHabitInput,
   type UpdateHabitInput,
 } from "@/lib/habit-form";
+import { focusAmount, MAX_MINUTES } from "@/lib/focus";
 import { planTargetChange } from "@/lib/targets";
 import { getSessionUser } from "@/lib/session";
 import { advanceAmount, undoAmount } from "@/lib/progress";
@@ -19,13 +20,18 @@ import type { ActionResult } from "@/types/actions";
 
 const habitIdSchema = z.object({ habitId: z.string().min(1) });
 
+const focusCompleteSchema = z.object({
+  habitId: z.string().min(1),
+  minutes: z.number().int().min(1).max(MAX_MINUTES),
+});
+
 // Loads the user's active habit and its completion for their local today, then saves the amount
 // `next` returns (0 removes the completion; null means the change does not apply to this habit)
 async function changeAmount(
   habitId: string,
   next: (
     current: number,
-    habit: { dailyGoal: number | null; stepSize: number | null },
+    habit: { dailyGoal: number | null; stepSize: number | null; unit: string | null },
   ) => number | null,
 ): Promise<ActionResult<{ amount: number }>> {
   const user = await getSessionUser();
@@ -33,7 +39,7 @@ async function changeAmount(
 
   const habit = await prisma.habit.findFirst({
     where: { id: habitId, userId: user.id, archivedAt: null },
-    select: { id: true, dailyGoal: true, stepSize: true },
+    select: { id: true, dailyGoal: true, stepSize: true, unit: true },
   });
   if (!habit) return { success: false, error: "Habit not found" };
 
@@ -102,6 +108,19 @@ export async function setHabitAmount(
 
   return changeAmount(parsed.data.habitId, (_, habit) =>
     habit.dailyGoal === null ? null : parsed.data.amount,
+  );
+}
+
+// A finished Focus session counts for its linked habit today. It only ever adds: a habit that is
+// already done stays done, so confirming twice is harmless.
+export async function completeHabitFromFocus(
+  input: z.input<typeof focusCompleteSchema>,
+): Promise<ActionResult<{ amount: number }>> {
+  const parsed = focusCompleteSchema.safeParse(input);
+  if (!parsed.success) return { success: false, error: "Invalid session" };
+
+  return changeAmount(parsed.data.habitId, (amount, habit) =>
+    focusAmount(amount, habit, parsed.data.minutes),
   );
 }
 

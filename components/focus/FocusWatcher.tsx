@@ -31,6 +31,7 @@ export function FocusWatcher() {
     alertFinished(Math.round(timer.durationMs / 60_000));
     if (!onFocusPage.current) {
       toast.success("Focus session complete", {
+        description: timer.habitName ? `Open Focus to count it for ${timer.habitName}` : undefined,
         action: { label: "View", onClick: () => router.push("/focus") },
       });
     }

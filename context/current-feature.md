@@ -1,18 +1,22 @@
-# Current Feature
-
-<!-- Feature name and short description -->
+# Current Feature: Focus: Link to a Habit
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Optionally link a Focus session to one of the user's habits
+- Completing the session marks that habit complete for today (or adds the minutes to a minutes-based daily goal)
+- Stopping early does not complete the habit
 
 ## Notes
 
-<!-- Any extra notes -->
+- Reuses the completion action; don't duplicate the logic.
+- Minutes: if the habit has a daily goal in minutes, finishing adds the session minutes to it; any other habit is simply marked complete.
+- Entry via `/focus?habit=<id>` or the Today habit menu ("Start focus"); the picker names the habit. On finish, a "Count this session for {habit}" checkbox (on by default) decides whether Done counts it.
+- The link (`habitId`, `habitName`) is stored in the localStorage timer state, so it survives reloads; a running timer keeps its own habit.
+- No session history: "focus minutes this week" on Insights is dropped, so there is no database model and the link only lives in the localStorage timer state.
 
 ## Completed Features
 
