@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { TryDemoButton } from "@/components/demo/TryDemoButton";
 import { Button } from "@/components/ui/button";
+
+// Creating a demo (Try demo, a Server Action on this page) takes a few seconds, so allow more than a host's default
+export const maxDuration = 60;
 
 export default async function Home() {
   const { isAuthenticated } = await auth();
@@ -15,11 +19,20 @@ export default async function Home() {
           A simple habit tracker with streaks and gentle nudges.
         </p>
       </div>
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="flex flex-wrap items-start justify-center gap-3">
+        <TryDemoButton
+          variant="outline"
+          className="bg-white text-neutral-900 hover:bg-white/90 dark:bg-white dark:text-neutral-900 dark:hover:bg-white/90"
+        />
         <Button nativeButton={false} render={<Link href="/register" />}>
           Get started
         </Button>
-        <Button variant="outline" nativeButton={false} render={<Link href="/sign-in" />}>
+        <Button
+          variant="secondary"
+          className="border-primary"
+          nativeButton={false}
+          render={<Link href="/sign-in" />}
+        >
           Sign in
         </Button>
       </div>

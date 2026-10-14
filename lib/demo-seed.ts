@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { addDays, toDbDate, todayKey, weekDays, weekStart, type DateKey } from "@/lib/dates";
 import type { HabitColor } from "@/types/habits";
@@ -187,10 +189,18 @@ export interface SeedDemoInput {
   seed?: number;
 }
 
-type SeedDb = Pick<typeof prisma, "habit" | "habitCompletion" | "journalEntry" | "systemHabit" | "category">;
+type SeedDb = Pick<
+  typeof prisma,
+  "habit" | "habitTarget" | "habitCompletion" | "journalEntry" | "systemHabit" | "category"
+>;
 
 // Writes the sample habits, about 14 weeks of completions and a few journal entries for a demo user.
 // The catalog has to be seeded first (npm run db:seed). If this throws, the caller deletes the user.
+//
+// A demo is created while the visitor waits, so this does as few round trips as it can: the habit ids
+// are made here instead of read back from the database, which lets every habit, target, completion and
+// journal entry go in with one bulk insert each, in two steps (the habits first, because the rest
+// point at them; the journal entries run alongside).
 export async function seedDemoUser(
   { userId, timezone, now = new Date(), seed = 1 }: SeedDemoInput,
   db: SeedDb = prisma,
@@ -210,51 +220,55 @@ export async function seedDemoUser(
   ]);
   const categoryIds = new Map(categories.map((category) => [category.name, category.id]));
 
+  const habits: Prisma.HabitCreateManyInput[] = [];
+  const targets: Prisma.HabitTargetCreateManyInput[] = [];
+  const completions: Prisma.HabitCompletionCreateManyInput[] = [];
   for (const spec of DEMO_HABITS) {
     const categoryId = categoryIds.get(spec.category);
     if (!categoryId) throw new Error(`Demo seed: category "${spec.category}" not found. Run npm run db:seed.`);
 
+    const id = randomUUID();
     const start = addDays(today, -spec.startDaysAgo);
-    const habit = await db.habit.create({
-      data: {
-        userId,
-        systemHabitId: spec.catalog ? systemHabits.find((system) => system.name === spec.name)?.id : undefined,
-        name: spec.name,
-        description: spec.description,
-        icon: spec.icon,
-        color: spec.color,
-        categoryId,
-        dailyGoal: spec.goal?.dailyGoal ?? null,
-        unit: spec.goal?.unit ?? null,
-        stepSize: spec.goal?.stepSize ?? null,
-        createdAt: toDbDate(start),
-        targets: {
-          create: {
-            frequency: spec.frequency,
-            targetDaysPerWeek: spec.targetDaysPerWeek,
-            effectiveFrom: toDbDate(weekStart(start)),
-          },
-        },
-      },
-      select: { id: true },
+    habits.push({
+      id,
+      userId,
+      systemHabitId: spec.catalog ? (systemHabits.find((system) => system.name === spec.name)?.id ?? null) : null,
+      name: spec.name,
+      description: spec.description,
+      icon: spec.icon,
+      color: spec.color,
+      categoryId,
+      dailyGoal: spec.goal?.dailyGoal ?? null,
+      unit: spec.goal?.unit ?? null,
+      stepSize: spec.goal?.stepSize ?? null,
+      createdAt: toDbDate(start),
     });
-
-    await db.habitCompletion.createMany({
-      data: planCompletions(spec, today, random).map(({ date, amount }) => ({
-        habitId: habit.id,
-        userId,
-        date: toDbDate(date),
-        amount,
-      })),
-      skipDuplicates: true,
+    targets.push({
+      habitId: id,
+      frequency: spec.frequency,
+      targetDaysPerWeek: spec.targetDaysPerWeek,
+      effectiveFrom: toDbDate(weekStart(start)),
     });
+    for (const { date, amount } of planCompletions(spec, today, random)) {
+      completions.push({ habitId: id, userId, date: toDbDate(date), amount });
+    }
   }
 
-  await db.journalEntry.createMany({
-    data: DEMO_JOURNAL_ENTRIES.map(({ daysAgo, mood, content }) => {
-      const date = addDays(today, -daysAgo);
-      // Evening by the UTC clock; close enough for sample entries
-      return { userId, date: toDbDate(date), mood, content, createdAt: new Date(`${date}T20:15:00.000Z`) };
-    }),
+  const journalEntries = DEMO_JOURNAL_ENTRIES.map(({ daysAgo, mood, content }) => {
+    const date = addDays(today, -daysAgo);
+    // Evening by the UTC clock; close enough for sample entries
+    return { userId, date: toDbDate(date), mood, content, createdAt: new Date(`${date}T20:15:00.000Z`) };
   });
+
+  await Promise.all([
+    db.journalEntry.createMany({ data: journalEntries }),
+    db.habit
+      .createMany({ data: habits })
+      .then(() =>
+        Promise.all([
+          db.habitTarget.createMany({ data: targets }),
+          db.habitCompletion.createMany({ data: completions, skipDuplicates: true }),
+        ]),
+      ),
+  ]);
 }
