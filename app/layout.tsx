@@ -13,7 +13,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Nudge",
-  description: "A simple, colourful habit tracker.",
+  description: "A simple habit tracker.",
 };
 
 // Clerk's forms read our theme variables, so they switch with the light/dark class
