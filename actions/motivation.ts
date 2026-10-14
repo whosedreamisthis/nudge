@@ -13,6 +13,7 @@ import {
   motivationResponseSchema,
   type StoredMotivation,
 } from "@/lib/motivation";
+import { getAiSettings } from "@/lib/ai-settings";
 import { getSessionUser } from "@/lib/session";
 import type { ActionResult } from "@/types/actions";
 
@@ -21,7 +22,7 @@ import type { ActionResult } from "@/types/actions";
 export async function generateMotivation(): Promise<ActionResult<StoredMotivation | null>> {
   const user = await getSessionUser();
   if (!user) return { success: false, error: "Not signed in" };
-  if (!user.aiEnabled) return { success: false, error: "AI features are turned off in Settings" };
+  if (!(await getAiSettings(user)).motivation) return { success: false, error: "AI features are turned off in Settings" };
 
   const today = todayKey(user.timezone);
 

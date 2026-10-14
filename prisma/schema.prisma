@@ -21,7 +21,10 @@ model User {
   id             String   @id @default(cuid())
   clerkId        String   @unique
   timezone       String   @default("UTC")
-  aiEnabled      Boolean  @default(true)
+  // One switch per AI feature
+  aiWeeklyReport     Boolean  @default(true)
+  aiMotivation       Boolean  @default(true)
+  aiHabitSuggestions Boolean  @default(true)
   isDemo         Boolean  @default(false)
   demoExpiresAt  DateTime?
   createdAt      DateTime @default(now())

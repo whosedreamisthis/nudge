@@ -1,18 +1,25 @@
-# Current Feature
+# Current Feature: AI Feature Toggles
 
-<!-- Feature name and short description -->
+Settings gets a switch for each AI feature, so each can be turned off on its own.
 
 ## Status
 
-Completed
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Settings > AI features lists a toggle for the weekly report and one for morning motivation, under the existing master switch
+- The master switch stays: when off, every AI feature is off and the per-feature toggles are disabled
+- A feature that is off is hidden (Today card, Progress card) and its action refuses with "AI features are turned off in Settings"
+- Each toggle saves immediately, rolls back on error, and is unavailable in the demo
+- New `User` columns `aiWeeklyReport` and `aiMotivation` (default true) with a migration
+- Unit tests cover the new action and the per-feature checks
 
 ## Notes
 
-<!-- Any extra notes -->
+- Habit suggestions (spec 22) isn't built yet; its toggle is added when that feature ships
+- Files: `prisma/schema.prisma`, `actions/user.ts`, `actions/ai-report.ts`, `actions/motivation.ts`, `components/shared/SettingsButton.tsx`, `components/shared/Navbar.tsx`, `app/(app)/today/page.tsx`, `app/(app)/progress/page.tsx`
+- `components/shared/SettingsButton.tsx` has an uncommitted change (the Reminders placeholder removed); it is left as is
 
 ## Completed Features
 

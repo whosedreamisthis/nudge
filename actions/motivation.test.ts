@@ -24,7 +24,7 @@ const stored = { message: "Keep it up", dismissed: false };
 describe("generateMotivation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getSessionUser.mockResolvedValue({ id: "u1", timezone: "UTC", aiEnabled: true });
+    getSessionUser.mockResolvedValue({ id: "u1", timezone: "UTC", aiMotivation: true });
     getMotivation.mockResolvedValue(null);
     getRecentHistory.mockResolvedValue([{ name: "Read", done: 4 }]);
     generateJson.mockResolvedValue({ message: "Keep it up" });
@@ -35,7 +35,7 @@ describe("generateMotivation", () => {
     getSessionUser.mockResolvedValueOnce(null);
     expect((await generateMotivation()).success).toBe(false);
 
-    getSessionUser.mockResolvedValueOnce({ id: "u1", timezone: "UTC", aiEnabled: false });
+    getSessionUser.mockResolvedValueOnce({ id: "u1", timezone: "UTC", aiMotivation: false });
     expect((await generateMotivation()).success).toBe(false);
     expect(generateJson).not.toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe("generateMotivation", () => {
 describe("dismissMotivation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getSessionUser.mockResolvedValue({ id: "u1", timezone: "UTC", aiEnabled: true });
+    getSessionUser.mockResolvedValue({ id: "u1", timezone: "UTC", aiMotivation: true });
     getMotivation.mockResolvedValue(stored);
   });
 

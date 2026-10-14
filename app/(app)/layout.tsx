@@ -1,4 +1,5 @@
 import { FocusWatcher } from "@/components/focus/FocusWatcher";
+import { ScrollToTop } from "@/components/shared/ScrollToTop";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 
@@ -13,6 +14,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </main>
       <BottomNav />
       <FocusWatcher />
+      <ScrollToTop />
     </div>
   );
 }

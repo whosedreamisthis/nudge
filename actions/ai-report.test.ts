@@ -25,7 +25,7 @@ const report = { summary: "Good week", insights: ["a", "b", "c"] };
 describe("generateWeeklyReport", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getSessionUser.mockResolvedValue({ id: "u1", timezone: "UTC", aiEnabled: true });
+    getSessionUser.mockResolvedValue({ id: "u1", timezone: "UTC", aiWeeklyReport: true });
     getWeeklyReport.mockResolvedValue(null);
     getWeekGrid.mockResolvedValue([{ id: "h1", name: "Read", days: [], done: 0, target: 7 }]);
     getProgressStats.mockResolvedValue({ activeStreaks: 1, bestStreak: null });
@@ -37,7 +37,7 @@ describe("generateWeeklyReport", () => {
     getSessionUser.mockResolvedValueOnce(null);
     expect((await generateWeeklyReport({ regenerate: false })).success).toBe(false);
 
-    getSessionUser.mockResolvedValueOnce({ id: "u1", timezone: "UTC", aiEnabled: false });
+    getSessionUser.mockResolvedValueOnce({ id: "u1", timezone: "UTC", aiWeeklyReport: false });
     const off = await generateWeeklyReport({ regenerate: false });
     expect(off.success).toBe(false);
     expect(generateJson).not.toHaveBeenCalled();

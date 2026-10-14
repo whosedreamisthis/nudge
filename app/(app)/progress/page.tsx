@@ -12,6 +12,7 @@ import { getHeatmap } from "@/lib/db/consistency";
 import { getInsights } from "@/lib/db/insights";
 import { getProgressStats, getWeekGrid } from "@/lib/db/progress";
 import { habitPerformance, weeklyAverage } from "@/lib/insights";
+import { getAiSettings } from "@/lib/ai-settings";
 import { getSessionUser } from "@/lib/session";
 import { resolveWeek, topHabit } from "@/lib/week-grid";
 
@@ -29,6 +30,7 @@ export default async function ProgressPage({
   const [user, params] = await Promise.all([getSessionUser(), searchParams]);
   if (!user) return null;
 
+  const ai = await getAiSettings(user);
   const today = todayKey(user.timezone);
   const thisWeek = weekStart(today);
   const rawWeek = Array.isArray(params.week) ? params.week[0] : params.week;
@@ -43,7 +45,8 @@ export default async function ProgressPage({
     week === thisWeek
       ? null
       : getWeekGrid(user.id, user.timezone, thisWeek, today),
-    user.aiEnabled ? getWeeklyReport(user.id, thisWeek) : null,
+    // Fetched even while the report is switched off, so it is still there when it is switched back on
+    getWeeklyReport(user.id, thisWeek),
   ]);
 
   return (
@@ -60,7 +63,7 @@ export default async function ProgressPage({
       <AiWeeklyReport
         initial={report}
         timezone={user.timezone}
-        aiEnabled={user.aiEnabled}
+        aiEnabled={ai.weeklyReport}
         hasHabits={(currentRows ?? rows).length > 0}
       />
 

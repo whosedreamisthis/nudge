@@ -14,6 +14,7 @@ import { todayKey, toDbDate, weekStart } from "@/lib/dates";
 import { getWeeklyReport, type StoredReport } from "@/lib/db/ai-report";
 import { getProgressStats, getWeekGrid } from "@/lib/db/progress";
 import { generateJson, isAiDisabled } from "@/lib/gemini";
+import { getAiSettings } from "@/lib/ai-settings";
 import { getSessionUser } from "@/lib/session";
 import type { ActionResult } from "@/types/actions";
 
@@ -26,7 +27,7 @@ export async function generateWeeklyReport(input: {
 }): Promise<ActionResult<StoredReport>> {
   const user = await getSessionUser();
   if (!user) return { success: false, error: "Not signed in" };
-  if (!user.aiEnabled) return { success: false, error: "AI features are turned off in Settings" };
+  if (!(await getAiSettings(user)).weeklyReport) return { success: false, error: "AI features are turned off in Settings" };
 
   const parsed = inputSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: "Invalid request" };

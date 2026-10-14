@@ -21,3 +21,16 @@ export const DELETE_PHRASE = "delete my account";
 export function isDeleteConfirmed(input: string) {
   return input.trim().toLowerCase() === DELETE_PHRASE;
 }
+
+export const AI_FEATURES = ["weeklyReport", "motivation", "habitSuggestions"] as const;
+
+export type AiFeature = (typeof AI_FEATURES)[number];
+
+export type AiSettings = Record<AiFeature, boolean>;
+
+// A demo has no stored preference, so its switched-off features live in this cookie (comma-separated)
+export const AI_OFF_COOKIE = "nudge_ai_off";
+
+export function parseAiOff(value: string | undefined): AiFeature[] {
+  return AI_FEATURES.filter((feature) => value?.split(",").includes(feature));
+}
