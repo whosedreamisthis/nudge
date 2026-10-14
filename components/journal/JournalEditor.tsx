@@ -12,16 +12,18 @@ type SaveState = "saved" | "saving" | "error";
 interface JournalEditorProps {
   initialContent: string;
   initialMood: number | null;
+  // The day being edited; today when left out
+  date?: string;
   // Courier Prime's class, set by the page
   fontClassName: string;
 }
 
 // Today's entry: changes are saved on their own shortly after you stop typing
-export function JournalEditor({ initialContent, initialMood, fontClassName }: JournalEditorProps) {
+export function JournalEditor({ initialContent, initialMood, date, fontClassName }: JournalEditorProps) {
   const [content, setContent] = useState(initialContent);
   const [mood, setMood] = useState<number | null>(initialMood);
   const [status, setStatus] = useState<SaveState>("saved");
-  const latest = useRef({ content: initialContent, mood: initialMood });
+  const latest = useRef({ content: initialContent, mood: initialMood, date });
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const dirty = useRef(false);
 
@@ -37,7 +39,7 @@ export function JournalEditor({ initialContent, initialMood, fontClassName }: Jo
   }
 
   function change(next: { content: string; mood: number | null }) {
-    latest.current = next;
+    latest.current = { ...next, date };
     dirty.current = true;
     setStatus("saving");
     clearTimeout(timer.current);
@@ -58,33 +60,36 @@ export function JournalEditor({ initialContent, initialMood, fontClassName }: Jo
 
   return (
     <div className="flex flex-col gap-4">
-      <div role="radiogroup" aria-label="Mood" className="flex items-center gap-2">
-        <span className="mr-1 text-sm text-muted-foreground">How are you feeling?</span>
-        {MOODS.map((m) => {
-          const selected = mood === m.value;
-          return (
-            <button
-              key={m.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              aria-label={m.label}
-              title={m.label}
-              onClick={() => {
-                // Tapping the chosen mood again clears it
-                const next = selected ? null : m.value;
-                setMood(next);
-                change({ content, mood: next });
-              }}
-              className={cn(
-                "flex size-10 items-center justify-center rounded-full text-xl ring-1 ring-border transition",
-                selected ? "bg-primary/15 ring-2 ring-primary" : "opacity-60 hover:opacity-100",
-              )}
-            >
-              {m.emoji}
-            </button>
-          );
-        })}
+      {/* The label sits above the faces on phones and beside them from sm up */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <span className="text-sm text-muted-foreground">How are you feeling?</span>
+        <div role="radiogroup" aria-label="Mood" className="flex items-center gap-2">
+          {MOODS.map((m) => {
+            const selected = mood === m.value;
+            return (
+              <button
+                key={m.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={m.label}
+                title={m.label}
+                onClick={() => {
+                  // Tapping the chosen mood again clears it
+                  const next = selected ? null : m.value;
+                  setMood(next);
+                  change({ content, mood: next });
+                }}
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-full text-xl ring-1 ring-border transition",
+                  selected ? "bg-primary/15 ring-2 ring-primary" : "opacity-60 hover:opacity-100",
+                )}
+              >
+                {m.emoji}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <textarea
@@ -95,7 +100,7 @@ export function JournalEditor({ initialContent, initialMood, fontClassName }: Jo
         }}
         maxLength={MAX_ENTRY_LENGTH}
         placeholder="What's on your mind today?"
-        aria-label="Today's journal entry"
+        aria-label="Journal entry"
         className={cn(
           "min-h-80 w-full resize-y rounded-2xl bg-card p-4 text-base leading-relaxed ring-1 ring-border outline-none focus-visible:ring-2 focus-visible:ring-ring",
           fontClassName,
