@@ -1,19 +1,18 @@
-# Current Feature: Consistency Heatmap
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- "Consistency" card on Today with the last 14 weeks of completions as a grid of dots
-- 5-step colour scale (grey → dark orange) with a Less → More legend
-- Caption with the total completions in the period
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Count completions per day across all habits; bucket into the 5 steps.
-- One grouped query rather than one per day.
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -34,3 +33,4 @@ In Progress
 - **Habit Actions Menu:** Today row menu with Edit (reuses the modal, new target from this week), Archive, and Delete with confirmation for custom habits only (`components/today/HabitMenu.tsx`, `actions/habits.ts`, `lib/targets.ts`).
 - **Archived Habits:** Archived tab on `/habits` with a count, Restore (also clears today's completion) and Delete for custom habits; Browse offers Restore for archived catalog habits (`components/habits/Archived*.tsx`, `lib/db/archived.ts`, `actions/habits.ts`).
 - **Multi-Step Habits:** Optional daily goal, unit and amount per tap in the New Habit and Edit forms, plus Undo and Set amount in the Today menu (`actions/habits.ts`, `lib/habit-form.ts`, `components/today/SetAmountDialog.tsx`).
+- **Consistency Heatmap:** Today card showing the last 14 weeks of completed habits per day as dots on a five-step grey-to-orange scale, with legend and total (`components/today/ConsistencyCard.tsx`, `lib/consistency.ts`, `lib/db/consistency.ts`).
