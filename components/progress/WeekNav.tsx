@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsRight } from "lucide-react";
 import Link from "next/link";
 import { addDays, type DateKey } from "@/lib/dates";
 import { weekRangeLabel } from "@/lib/week-grid";
@@ -27,24 +27,47 @@ export function WeekNav({ week, thisWeek }: { week: DateKey; thisWeek: DateKey }
         {weekRangeLabel(week)}
         {isCurrent && <span className="ml-2 text-muted-foreground">This week</span>}
       </p>
-      {isCurrent ? (
-        <span
-          aria-disabled="true"
-          aria-label="Next week (not available)"
-          className={cn(ARROW_CLASS, "text-muted-foreground opacity-40")}
-        >
-          <ChevronRight aria-hidden className="size-5" />
-        </span>
-      ) : (
-        <Link
-          href={href(addDays(week, 7))}
-          scroll={false}
-          aria-label="Next week"
-          className={cn(ARROW_CLASS, "hover:bg-muted")}
-        >
-          <ChevronRight aria-hidden className="size-5" />
-        </Link>
-      )}
+      <div className="flex items-center">
+        {isCurrent ? (
+          <>
+            <span
+              aria-disabled="true"
+              aria-label="Next week (not available)"
+              className={cn(ARROW_CLASS, "text-muted-foreground opacity-40")}
+            >
+              <ChevronRight aria-hidden className="size-5" />
+            </span>
+            <span
+              aria-disabled="true"
+              aria-label="Latest week (you are here)"
+              className={cn(ARROW_CLASS, "text-muted-foreground opacity-40")}
+            >
+              <ChevronsRight aria-hidden className="size-5" />
+            </span>
+          </>
+        ) : (
+          <>
+            <Link
+              href={href(addDays(week, 7))}
+              scroll={false}
+              aria-label="Next week"
+              className={cn(ARROW_CLASS, "hover:bg-muted")}
+            >
+              <ChevronRight aria-hidden className="size-5" />
+            </Link>
+            {/* Back to the latest week in one go, however far back you have gone */}
+            <Link
+              href={href(thisWeek)}
+              scroll={false}
+              aria-label="Latest week"
+              title="Latest week"
+              className={cn(ARROW_CLASS, "hover:bg-muted")}
+            >
+              <ChevronsRight aria-hidden className="size-5" />
+            </Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }
