@@ -1,20 +1,18 @@
-# Current Feature: Progress Insights Tab
+# Current Feature
+
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 
-- Insights tab with one tile: completions in the last 30 days, with the change vs the 30 days before
-- Weekly average (last 7 days) replaces the best-streak tile on the Overview tab (best streak is already on Today)
-- "This week vs last week" bar chart of completions per day
-- Habit performance: one progress bar per habit for the week (e.g. 2/7 · 29%), capped at 100%
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Deliberately small; see the "left out" list in `context/project-overview.md` section 3.2.
-- Pick a lightweight chart approach (plain CSS bars are fine).
+<!-- Any extra notes -->
 
 ## Completed Features
 
@@ -37,3 +35,4 @@ In Progress
 - **Multi-Step Habits:** Optional daily goal, unit and amount per tap in the New Habit and Edit forms, plus Undo and Set amount in the Today menu (`actions/habits.ts`, `lib/habit-form.ts`, `components/today/SetAmountDialog.tsx`).
 - **Consistency Heatmap:** Today card showing the last 14 weeks of completed habits per day as dots on a five-step grey-to-orange scale, with legend and total (`components/today/ConsistencyCard.tsx`, `lib/consistency.ts`, `lib/db/consistency.ts`).
 - **Progress Weekly Grid:** `/progress` with four summary tiles and a habits-by-days weekly grid with previous/next week arrows (`app/(app)/progress/`, `components/progress/`, `lib/week-grid.ts`, `lib/db/progress.ts`).
+- **Progress Insights Tab:** `/progress` Overview/Insights tabs; Insights has a 30-day tile with change, this-week-vs-last-week bars and habit performance bars (`components/progress/`, `lib/insights.ts`, `lib/db/insights.ts`).
